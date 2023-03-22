@@ -17,7 +17,14 @@ def index(request, _):
     """
 
     return render(request, 'index.html')
+def index2(request, _):
+    """
+    获取主页
 
+     `` request `` 请求对象
+    """
+    echostr = request.GET.get('echostr')
+    return HttpResponse(echostr)
 
 def counter(request, _):
     """
