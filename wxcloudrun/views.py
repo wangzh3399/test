@@ -4,7 +4,7 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import render
 from wxcloudrun.models import Counters
-
+from django.http import HttpResponse
 
 logger = logging.getLogger('log')
 
