@@ -13,6 +13,7 @@ RUN apk add gcc g++
 RUN apk add python3-dev
 RUN apk add libffi-dev
 RUN apk add openssl-dev
+RUN apk add git
 # 选用国内镜像源以提高下载速度
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
 RUN apk add --update --no-cache python3 py3-pip \
