@@ -5,6 +5,10 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from wxcloudrun.models import Counters
 from django.http import HttpResponse
+from wechatpy.utils import check_signature
+from wechatpy.exceptions import InvalidSignatureException
+from wechatpy.replies import TextReply
+
 
 logger = logging.getLogger('log')
 
@@ -17,14 +21,26 @@ def index(request, _):
     """
 
     return render(request, 'index.html')
-def index2(request, _):
-    """
-    获取主页
-
-     `` request `` 请求对象
-    """
-    echostr = request.GET.get('echostr')
-    return HttpResponse(echostr)
+def wxapi(request, _):
+    token = "test"
+    if request.method == 'GET':
+        signature = request.GET.get('signature')
+        timestamp = request.GET.get('timestamp')
+        nonce = request.GET.get('nonce')
+        try:
+            res = check_signature(token, signature, timestamp, nonce)
+            logger.info(res)
+        except InvalidSignatureException:
+        # 处理异常情况或忽略
+            logger.error(InvalidSignatureException)
+        #echostr = request.GET.get('echostr')
+        return HttpResponse(request.GET.get('echostr'))
+    else:
+        msg = request.Body
+        logger.info(msg)
+        reply = TextReply(content='text reply', message=msg)
+        xml = reply.render()
+        return HttpResponse(xml)
 
 def counter(request, _):
     """
