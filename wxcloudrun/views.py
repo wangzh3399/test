@@ -37,7 +37,7 @@ def wxapi(request, _):
         #echostr = request.GET.get('echostr')
         return HttpResponse(request.GET.get('echostr'))
     else:
-        reqbody = request.Body
+        reqbody = request.body
         msg = parse_message(reqbody)
         logger.info(msg)
         reply = TextReply(content='text reply', message=msg)
