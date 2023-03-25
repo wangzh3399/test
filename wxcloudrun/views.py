@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.replies import TextReply
+from wechatpy import parse_message
 
 
 logger = logging.getLogger('log')
@@ -36,10 +37,12 @@ def wxapi(request, _):
         #echostr = request.GET.get('echostr')
         return HttpResponse(request.GET.get('echostr'))
     else:
-        msg = request.Body
+        reqbody = request.Body
+        msg = parse_message(reqbody)
         logger.info(msg)
         reply = TextReply(content='text reply', message=msg)
         xml = reply.render()
+        logger.info(msg)
         return HttpResponse(xml)
 
 def counter(request, _):
