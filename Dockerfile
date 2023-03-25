@@ -5,10 +5,12 @@ FROM alpine:3.13
 
 # 容器默认时区为UTC，如需使用上海时间请启用以下时区设置命令
 # RUN apk add tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 
 # 使用 HTTPS 协议访问容器云调用证书安装
 RUN apk add ca-certificates
-
+RUN apk add gcc
+RUN apk add python3-dev
 # 选用国内镜像源以提高下载速度
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
 && apk add --update --no-cache python3 py3-pip \
@@ -26,7 +28,7 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip config set global.trusted-host mirrors.cloud.tencent.com \
 && pip install --upgrade pip \
 # pip install scipy 等数学包失败，可使用 apk add py3-scipy 进行， 参考安装 https://pkgs.alpinelinux.org/packages?name=py3-scipy&branch=v3.13
-&& pip install --user -r requirements.txt
+&& pip install --user -r requirements.txt\
 && pip install https://github.com/jxtech/wechatpy/archive/master.zip
 # 暴露端口
 # 此处端口必须与「服务设置」-「流水线」以及「手动上传代码包」部署时填写的端口一致，否则会部署失败。
