@@ -18,7 +18,7 @@ logger.setLevel(logging.ERROR)
 
 
 
-def checkDB():
+def getDBCursor():
     globalconfig = configparser.ConfigParser()
     globalconfig.read('./globalconfig.ini', encoding=None)
     globalconfig.sections() 
@@ -34,17 +34,16 @@ def checkDB():
         user = globalconfig.get('devmysqldb', 'user')
         passwd = globalconfig.get('devmysqldb', 'passwd')
         database = globalconfig.get('devmysqldb', 'database')
-    logger.info(f'Current environment is {globalconfig.get("env", "env")},do checkDB')
     try:
         db = pymysql.connect(host=host,
                             user=user,
                             password=passwd,
                             database=database)
-        db.close()
     except:
-        logger.error(f'Check DB failed,see the error:\r\n{traceback.format_exc()}')
-        return 0
-    return 1
+        logger.error('get db cursor fail')
+        logger.error(traceback.format_exc())
+        return None
+    return db.cursor()
 def checkData():
     logger.info('checkData')
 

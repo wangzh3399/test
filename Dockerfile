@@ -16,6 +16,7 @@ RUN apk add openssl-dev
 RUN apk add git
 RUN apk add --no-cache openssh-server
 RUN apk add --no-cache openssh-client
+RUN apk add nodejs
 # 选用国内镜像源以提高下载速度
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
 RUN apk add --update --no-cache python3 py3-pip \
@@ -36,7 +37,17 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install --user -r requirements.txt\
 && pip install wechatpy\
 && pip install cryptography\
-&& pip install akshare
+&& pip uninsatll -y xlrd\
+&& pip install xlrd==1.2.0\
+&& pip install importlib
+
+RUN tar zxvf akshare-release-v1.9.36.tar.gz
+WORKDIR /app/akshare-release-v1.9.36
+RUN python3 setup.py install
+
+
+WORKDIR /app
+
 #开发环境替换为生产环境
 RUN sed -i 's/Env = dev/Env = prd/g' globalconfig.ini
 # 暴露端口

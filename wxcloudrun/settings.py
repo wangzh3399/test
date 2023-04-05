@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import time
-
+import configparser
 CUR_PATH = os.path.dirname(os.path.realpath(__file__))  
 LOG_PATH = os.path.join(os.path.dirname(CUR_PATH), 'logs') # LOG_PATH是存放日志的路径
 if not os.path.exists(LOG_PATH): os.mkdir(LOG_PATH)  # 如果不存在这个logs文件夹，就自动创建一个
@@ -64,15 +64,31 @@ WSGI_APPLICATION = 'wxcloudrun.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
+globalconfig = configparser.ConfigParser()
+globalconfig.read('./globalconfig.ini', encoding=None)
+globalconfig.sections() 
+if globalconfig.get('env', 'env') == 'prd':
+    #生产环境
+    host = globalconfig.get('prdmysqldb', 'host')
+    user = globalconfig.get('prdmysqldb', 'user')
+    passwd = globalconfig.get('prdmysqldb', 'passwd')
+    database = globalconfig.get('prdmysqldb', 'database')
+    port = globalconfig.get('prdmysqldb', 'port')
+else:
+    #开发环境
+    host = globalconfig.get('devmysqldb', 'host')
+    user = globalconfig.get('devmysqldb', 'user')
+    passwd = globalconfig.get('devmysqldb', 'passwd')
+    database = globalconfig.get('devmysqldb', 'database')
+    port = globalconfig.get('devmysqldb', 'port')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get("MYSQL_DATABASE", 'django_demo'),
-        'USER': os.environ.get("MYSQL_USERNAME"),
-        'HOST': os.environ.get("MYSQL_ADDRESS").split(':')[0],
-        'PORT': os.environ.get("MYSQL_ADDRESS").split(':')[1],
-        'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+        'NAME': database,
+        'USER': user,
+        'HOST': host,
+        'PORT': port,
+        'PASSWORD': passwd,
         'OPTIONS': {'charset': 'utf8mb4'},
     }
 }

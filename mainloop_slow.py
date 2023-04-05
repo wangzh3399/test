@@ -8,6 +8,7 @@ import datetime
 import time
 import akshare as ak
 import decimal
+from  basicfunc import *
 
 logger = logging.getLogger()
 fh = logging.FileHandler('./stockSpider.log', encoding='utf-8', mode='a')
@@ -17,53 +18,9 @@ logger.addHandler(fh)
 logger.setLevel(logging.ERROR)
 
 
-
-def checkDBisErr():
-    globalconfig = configparser.ConfigParser()
-    globalconfig.read('./globalconfig.ini', encoding=None)
-    globalconfig.sections() 
-    if globalconfig.get('env', 'env') == 'prd':
-        #生产环境
-        host = globalconfig.get('prdmysqldb', 'host')
-        user = globalconfig.get('prdmysqldb', 'user')
-        passwd = globalconfig.get('prdmysqldb', 'passwd')
-        database = globalconfig.get('prdmysqldb', 'database')
-    else:
-        #开发环境
-        host = globalconfig.get('devmysqldb', 'host')
-        user = globalconfig.get('devmysqldb', 'user')
-        passwd = globalconfig.get('devmysqldb', 'passwd')
-        database = globalconfig.get('devmysqldb', 'database')
-    logger.info(f'Current environment is {globalconfig.get("env", "env")},do checkDB')
-    try:
-        db = pymysql.connect(host=host,
-                            user=user,
-                            password=passwd,
-                            database=database)
-    except:
-        logger.error(f'Check DB failed,see the error:\r\n{traceback.format_exc()}')
-        return None
-    return db.cursor()
-def buildStockStaticData(dbCursor):
-    #不check表是否存在，默认环境已经生成表。这里默认先使用基础表添加股票信息，再由updateStockListPerDay来负责增量更新。
-    stockFile = open('./stocklist.txt','r')
-    for stock in stockFile:
-        
-def initEnv():
-    #更新股票list，每个周六定时执行。
-    logger.info('init envir')
-    #启动时检查数据库完整性、表结构完整性，不完整则退出
-    dbCursor = checkDBisErr()
-    if dbCursor == None:
-        exit(0)
-    if buildStockStaticData(dbCursor) == None:
-        exit(0)
-    logger.info('init envir successfully')
-    return 0
-
-def updateStockListPerDay():
+def updateStockListPerDay(dbCursor):
     #每天凌晨更新股票列表，写数据库。退市的保留，只增不删。 启动时判断，如果股票静态信息表如果为空则默认写一次，否则不写。
-
+    
     logger.info('update stock list')
 
 def dataFormat(data,n):#取小数点后n位
@@ -109,8 +66,8 @@ def updateSingleStockData(stockcode,dbCursor):
     dealDuplicate = []
     dateInDBList = []
     try:
-        cmd_select = 'select date from '+stockcode+';'
-        dbCursor.execute(cmd_select)
+        selectCmd = 'select date from '+stockcode+';'
+        dbCursor.execute(selectCmd)
         selectRes = dbCursor.fetchall()
         if selectRes != None:
             for date in selectRes:
@@ -181,55 +138,37 @@ def updateSingleStockData(stockcode,dbCursor):
             cmd = "insert into "+stockcode+" (date,open_cq,high_cq,low_cq,close_cq,open_hfq,high_hfq,low_hfq,close_hfq,volume,turnover,amplitude,change_rate,turnover_rate) VALUE (\""\
                 +date+"\","+open_cq+","+high_cq+","+low_cq+","+close_cq+","+open_hfq+","+high_hfq+","+low_hfq+","+close_hfq+","+volume+","+turnover+","+amplitude+","+change_rate+","+turnover_rate+");"
             logger.debug("SQL:"+cmd)
-            dbcursor.execute(cmd)
+            dbCursor.execute(cmd)
         except Exception:
             logger.error(traceback.format_exc())
             break
     return 
-def getDBCursor():
-    globalconfig = configparser.ConfigParser()
-    globalconfig.read('./globalconfig.ini', encoding=None)
-    globalconfig.sections() 
-    if globalconfig.get('env', 'env') == 'prd':
-        #生产环境
-        host = globalconfig.get('prdmysqldb', 'host')
-        user = globalconfig.get('prdmysqldb', 'user')
-        passwd = globalconfig.get('prdmysqldb', 'passwd')
-        database = globalconfig.get('prdmysqldb', 'database')
-    else:
-        #开发环境
-        host = globalconfig.get('devmysqldb', 'host')
-        user = globalconfig.get('devmysqldb', 'user')
-        passwd = globalconfig.get('devmysqldb', 'passwd')
-        database = globalconfig.get('devmysqldb', 'database')
-    try:
-        db = pymysql.connect(host=host,
-                            user=user,
-                            password=passwd,
-                            database=database)
-    except:
-        logger.error('get db cursor fail')
-        logger.error(traceback.format_exc())
-        return None
-    cursor = db.cursor()
-    return cursor
 def slowloop(mem):
     #采集股票全量信息，维护近三年的股票数据。2020年后。
     while True:
         
-        dbcursor = getDBCursor()
-        if  dbcursor == None:
+        dbConn = getDBConn()
+        if  dbConn == None:
             exit(0)
-        stockList = open('./stockList_rundata.txt','r')
-        for stockcode in stockList:
-            updateSingleStockData(stockcode,dbcursor)
+        selectStockCmd = 'select stockcode from wxcloudrun_stockstaticdata';
+        dbCursor = dbConn.cursor()
+        dbCursor.exec(selectStockCmd)
+        selectRes = dbCursor.fetchall()
+        dbConn.close()
+        if selectRes == None:
+            logger.error('wxcloudrun_stockstaticdata empty,pls run initenv.py first!')
+            exit(0)
+        for res in selectRes:
+            stockCode = res[0]
+            dbConn = getDBConn()
+            dbCursor = dbConn.cursor()
+            updateSingleStockData(stockCode,dbCursor)
+            dbConn.close()
         logger.info('do slow loop')
         time.sleep(1)  #避免故障场景循环过快
     pass
 
 if __name__ == '__main__':
-    if not initEnv():
-        exit(0)
     slowloop()
     
     

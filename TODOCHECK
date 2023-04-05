@@ -1,1 +1,3 @@
 上线前修改mysql生产环境的密码
+
+create database app_relation character set utf8; 
