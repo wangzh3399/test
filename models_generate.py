@@ -54,9 +54,9 @@ stockStaticDataFields = [
 ]
 #每次重新激活策略要重新创建一条记录。
 strategyConfigFields = [
-    ('stockname' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
+    ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
     ('stockcode' , models.CharField(max_length=8,blank=False,verbose_name="股票id")),
-    ('monitorscheme' , models.CharField(max_length=8,blank=False,verbose_name="监控策略")),   #这里区分快策略和慢策略。
+    ('monitorStrategy' , models.CharField(max_length=8,blank=False,verbose_name="监控策略")),   #这里区分快策略和慢策略。
     ('valid' , models.BooleanField(null=True,verbose_name="生效状态")),
     ('validtime' , models.CharField(max_length=20,blank=False,verbose_name="截止有效时间")),
     ('invalidtime' , models.CharField(max_length=20,blank=False,verbose_name="失效时间"))

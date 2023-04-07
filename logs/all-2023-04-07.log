@@ -1,0 +1,196 @@
+[2023-04-07 16:10:29,951] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:13:00,072] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:13:24,278] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:13:24,518] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:13:47,167] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:14:01,022] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:15:00,442] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/urls.py changed, reloading.
+[2023-04-07 16:15:00,732] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:15:20,302] [log.py:241] [log:log_response] [WARNING]- Not Found: /xxxx
+[2023-04-07 16:15:20,302] [basehttp.py:212] [basehttp:log_message] [WARNING]- "GET /xxxx HTTP/1.1" 404 2315
+[2023-04-07 16:15:20,350] [log.py:241] [log:log_response] [WARNING]- Not Found: /favicon.ico
+[2023-04-07 16:15:20,351] [basehttp.py:212] [basehttp:log_message] [WARNING]- "GET /favicon.ico HTTP/1.1" 404 2336
+[2023-04-07 16:15:34,182] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/urls.py changed, reloading.
+[2023-04-07 16:15:34,444] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:15:37,068] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+TypeError: default() missing 1 required positional argument: '_'
+[2023-04-07 16:15:37,069] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx HTTP/1.1" 500 57956
+[2023-04-07 16:16:07,990] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+TypeError: default() missing 1 required positional argument: '_'
+[2023-04-07 16:16:07,991] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1 HTTP/1.1" 500 58127
+[2023-04-07 16:17:24,322] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:17:24,602] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:17:28,446] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+TypeError: default() missing 1 required positional argument: '_'
+[2023-04-07 16:17:28,448] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1 HTTP/1.1" 500 58264
+[2023-04-07 16:17:41,941] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:17:42,214] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:17:55,489] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:17:55,777] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:17:56,653] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+TypeError: default() missing 1 required positional argument: '_'
+[2023-04-07 16:17:56,654] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1 HTTP/1.1" 500 58264
+[2023-04-07 16:20:22,811] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:20:23,096] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:20:26,189] [basehttp.py:212] [basehttp:log_message] [INFO]- "GET /xxxx?id=1 HTTP/1.1" 200 680
+[2023-04-07 16:21:16,657] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:21:16,932] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:21:17,993] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:21:18,252] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:21:20,305] [basehttp.py:212] [basehttp:log_message] [INFO]- "GET /xxxx?id=1 HTTP/1.1" 200 3556
+[2023-04-07 16:22:30,910] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:31,179] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:22:34,242] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:34,507] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:22:36,564] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:36,843] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:22:37,900] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:38,155] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:22:48,246] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:48,519] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:22:57,769] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:22:58,055] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:02,128] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:02,392] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:05,453] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:05,706] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:07,763] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:08,025] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:10,232] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:10,506] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:22,607] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:22,866] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:27,937] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:28,201] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:33,273] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:33,537] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:36,599] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:36,860] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:45,094] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:23:45,401] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:23:51,692] [basehttp.py:212] [basehttp:log_message] [INFO]- "GET /xxxx?id=1 HTTP/1.1" 200 640
+[2023-04-07 16:24:13,802] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:24:14,074] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:24:17,286] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:24:17,593] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:24:19,476] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 26, in default
+    url = request.url
+AttributeError: 'WSGIRequest' object has no attribute 'url'
+[2023-04-07 16:24:19,477] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1 HTTP/1.1" 500 61808
+[2023-04-07 16:24:23,859] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:24:24,141] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:24:24,474] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 26, in default
+    url = request.urls
+AttributeError: 'WSGIRequest' object has no attribute 'urls'
+[2023-04-07 16:24:24,475] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1 HTTP/1.1" 500 61815
+[2023-04-07 16:25:08,594] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:25:08,869] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:25:11,076] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:25:11,352] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:25:13,576] [basehttp.py:212] [basehttp:log_message] [INFO]- "GET /xxxx?id=1 HTTP/1.1" 200 5
+[2023-04-07 16:27:23,329] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:27:23,606] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:27:30,692] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:27:30,973] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:27:35,190] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:27:35,467] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:27:40,689] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:27:40,984] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:27,746] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/basicfunc.py changed, reloading.
+[2023-04-07 16:33:28,020] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:31,084] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/basicfunc.py changed, reloading.
+[2023-04-07 16:33:31,354] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:34,562] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/basicfunc.py changed, reloading.
+[2023-04-07 16:33:34,830] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:37,038] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/basicfunc.py changed, reloading.
+[2023-04-07 16:33:37,322] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:40,537] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/basicfunc.py changed, reloading.
+[2023-04-07 16:33:40,804] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:33:49,214] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 34, in default
+    body = requst.body
+NameError: name 'requst' is not defined
+[2023-04-07 16:33:49,215] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1asdf HTTP/1.1" 500 63241
+[2023-04-07 16:35:23,638] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:35:23,928] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:35:25,132] [autoreload.py:266] [autoreload:trigger_reload] [INFO]- /root/project/wx/test/wxcloudrun/views.py changed, reloading.
+[2023-04-07 16:35:25,400] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:35:28,168] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 34, in default
+    body = request.body
+NameError: name 'requst' is not defined
+[2023-04-07 16:35:28,169] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1asdf HTTP/1.1" 500 63243
+[2023-04-07 16:35:32,807] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 34, in default
+    body = request.body
+NameError: name 'requst' is not defined
+[2023-04-07 16:35:32,807] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1asdf HTTP/1.1" 500 63243
+[2023-04-07 16:35:53,383] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 34, in default
+    body = request.body
+NameError: name 'requst' is not defined
+[2023-04-07 16:35:53,385] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1asdf HTTP/1.1" 500 63243
+[2023-04-07 16:35:55,181] [log.py:241] [log:log_response] [ERROR]- Internal Server Error: /xxxx
+Traceback (most recent call last):
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/python3/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/project/wx/test/wxcloudrun/views.py", line 34, in default
+    body = request.body
+NameError: name 'requst' is not defined
+[2023-04-07 16:35:55,182] [basehttp.py:212] [basehttp:log_message] [ERROR]- "GET /xxxx?id=1asdf HTTP/1.1" 500 63243
+[2023-04-07 16:35:58,929] [autoreload.py:668] [autoreload:run_with_reloader] [INFO]- Watching for file changes with StatReloader
+[2023-04-07 16:36:00,568] [basehttp.py:212] [basehttp:log_message] [INFO]- "GET /xxxx?id=1asdf HTTP/1.1" 200 7

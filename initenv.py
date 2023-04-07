@@ -14,7 +14,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import basicfunc
-import models_generate
+from models_generate import *
+from updateStockLIist import *
 
 #这个脚本手动执行，执行清理环境并重构环境。
 
@@ -46,4 +47,5 @@ if __name__ == '__main__':
     #不论如何，执行这个脚本时，尝试删除Stock数据库并重建。
     os.system('mariadb -h localhost -proot -A -e "drop database Stock"')
     os.system('mariadb -h localhost -proot -A -e "create database Stock  character set utf8"')
-    models_generate.create_table()
+    create_table()
+    updateStockListPerDay()

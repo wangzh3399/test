@@ -1,9 +1,5 @@
-import multiprocessing as mp
 import logging
-import pymysql
-import configparser
 import traceback
-from multiprocessing.managers import SharedMemoryManager
 import datetime
 import time
 import akshare as ak
@@ -17,11 +13,6 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.setLevel(logging.ERROR)
 
-
-def updateStockListPerDay(dbCursor):
-    #每天凌晨更新股票列表，写数据库。退市的保留，只增不删。 启动时判断，如果股票静态信息表如果为空则默认写一次，否则不写。
-    
-    logger.info('update stock list')
 
 def dataFormat(data,n):#取小数点后n位
     if n > 8:
@@ -43,17 +34,7 @@ def dataFormat(data,n):#取小数点后n位
     except :
         logger.error('data dealling with point occured error and exit')
         exit(0)
-def getLastTradeDate():
-    #获取最后一个交易日
-    t = datetime.datetime.now()
-    timestamp = t.timestamp()
-    weekday = t.isoweekday()
-    if weekday == 7:
-        return datetime.datetime.utcfromtimestamp(timestamp - (86400 * 2))
-    elif weekday == 6:
-        return datetime.datetime.utcfromtimestamp(timestamp - 86400)
-    else:
-        return t
+
 
 def updateSingleStockData(stockcode,dbCursor):
     #维护近三年的股票数据. stockcode 默认带sz sh等前缀

@@ -2,6 +2,7 @@ import logging
 import pymysql
 import configparser
 import traceback
+import datetime
 
 logger = logging.getLogger()
 fh = logging.FileHandler('./stockSpider.log', encoding='utf-8', mode='a')
@@ -38,7 +39,28 @@ def getDBConn():
         logger.error(traceback.format_exc())
         return None
     return db
-def getlogger():
-    return logger
+
+def getLastTradeDate():
+    #获取最后一个交易日
+    t = datetime.datetime.now()
+    timestamp = t.timestamp()
+    weekday = t.isoweekday()
+    if weekday == 7:
+        return datetime.datetime.utcfromtimestamp(timestamp - (86400 * 2))
+    elif weekday == 6:
+        return datetime.datetime.utcfromtimestamp(timestamp - 86400)
+    else:
+        return t
+
+def getlogger(logname = 'stockSpider.log'):
+    newlogger = logging.getLogger()
+    path = './'+logname
+    print(path)
+    fh = logging.FileHandler(path, encoding='utf-8', mode='a')
+    formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
+    fh.setFormatter(formatter)
+    newlogger.addHandler(fh)
+    newlogger.setLevel(logging.DEBUG)
+    return newlogger
 if __name__ == '__main__':
     print('do nothing')

@@ -1,9 +1,8 @@
 import json
-import logging
+from basicfunc import *
 
 from django.http import JsonResponse
 from django.shortcuts import render
-from wxcloudrun.models import Counters
 from django.http import HttpResponse
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
@@ -11,7 +10,7 @@ from wechatpy.replies import TextReply
 from wechatpy import parse_message
 
 
-logger = logging.getLogger('log')
+logger = getlogger('djangoserver.log')
 
 
 def index(request, _):
@@ -22,6 +21,20 @@ def index(request, _):
     """
 
     return render(request, 'index.html')
+def default(request):
+    method = request.method
+    logger.debug('request method:'+method)
+    url = request.path
+    logger.debug('request url:'+url)
+    header = {}
+    for i in request.META:
+        if i.startswith('HTTP'):
+            header[i] = request.META[i]
+    logger.debug('request header:\r\n'+str(header))
+    body = request.body
+    logger.debug('request header:\r\n'+str(body))
+    return HttpResponse('nothing')
+
 def wxapi(request, _):
     token = "test"
     if request.method == 'GET':

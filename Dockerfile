@@ -39,14 +39,14 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install cryptography\
 && pip uninsatll -y xlrd\
 && pip install xlrd==1.2.0\
-&& pip install importlib
-
-RUN tar zxvf akshare-release-v1.9.36.tar.gz
-WORKDIR /app/akshare-release-v1.9.36
-RUN python3 setup.py install
-
-
-WORKDIR /app
+&& pip install importlib\
+&& pip install cpython\
+&& pip install akshare
+#akshare要安装很久
+#RUN tar zxvf akshare-release-v1.9.36.tar.gz
+#WORKDIR /app/akshare-release-v1.9.36
+#RUN python3 setup.py install
+#WORKDIR /app
 
 #开发环境替换为生产环境
 RUN sed -i 's/Env = dev/Env = prd/g' globalconfig.ini

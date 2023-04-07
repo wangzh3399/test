@@ -16,50 +16,10 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.setLevel(logging.ERROR)
 
+from basicfunc import *
 
 
-def getDBCursor():
-    globalconfig = configparser.ConfigParser()
-    globalconfig.read('./globalconfig.ini', encoding=None)
-    globalconfig.sections() 
-    if globalconfig.get('env', 'env') == 'prd':
-        #生产环境
-        host = globalconfig.get('prdmysqldb', 'host')
-        user = globalconfig.get('prdmysqldb', 'user')
-        passwd = globalconfig.get('prdmysqldb', 'passwd')
-        database = globalconfig.get('prdmysqldb', 'database')
-    else:
-        #开发环境
-        host = globalconfig.get('devmysqldb', 'host')
-        user = globalconfig.get('devmysqldb', 'user')
-        passwd = globalconfig.get('devmysqldb', 'passwd')
-        database = globalconfig.get('devmysqldb', 'database')
-    try:
-        db = pymysql.connect(host=host,
-                            user=user,
-                            password=passwd,
-                            database=database)
-    except:
-        logger.error('get db cursor fail')
-        logger.error(traceback.format_exc())
-        return None
-    return db.cursor()
-def checkData():
-    logger.info('checkData')
-
-
-def initEnv():
-    #更新股票list，每个周六定时执行。
-    logger.info('init envir')
-    #启动时检查数据库完整性、表结构完整性
-    if not checkDB():
-        exit(0)
-    logger.info('init envir successfully')
-    return 0
-
-def updateStockListPerDay():
-    #每天凌晨更新股票列表，写文件到./stockList_rundata.txt
-    logger.info('update stock list')
+#盯盘：1）板块盯盘   2）制定股票列表盯盘。   可以后续打通前一天的策略选股导入
 
 def buildShareMem():
     x = SharedMemoryManager().ShareableList(list(range(30),name = 'quickloop'))
@@ -84,23 +44,25 @@ def dataFormat(data,n):#取小数点后n位
     except :
         logger.error('data dealling with point occured error and exit')
         exit(0)
-def getLastTradeDate():
-    #获取最后一个交易日
-    t = datetime.datetime.now()
-    timestamp = t.timestamp()
-    weekday = t.isoweekday()
-    if weekday == 7:
-        return datetime.datetime.utcfromtimestamp(timestamp - (86400 * 2))
-    elif weekday == 6:
-        return datetime.datetime.utcfromtimestamp(timestamp - 86400)
-    else:
-        return t
-
+def monitorStock(monitorObj):  #monitorObj: 每一个策略obj，独立一个策略类的对象，包含类的存储数据
+    
 def quickloop():
     #采集股票基础信息,分时信息监控，先放内存里吧，不入库
     while True:
-        logger.info('do quick loop'+str(mem))
-        time.sleep(5)
+        
+        dbConn = getDBConn()
+        if  dbConn == None:
+            exit(0)
+        selectStockCmd = 'select stockcode from wxcloudrun_strategyConfig where monitorStrategy="quick"';  #快策略股票
+        dbCursor = dbConn.cursor()
+        dbCursor.exec(selectStockCmd)
+        selectRes = dbCursor.fetchall()
+        dbConn.close()
+        if selectRes == None:
+            logger.error('wxcloudrun_strategyConfig empty,pls build strategy first!')
+            exit(0)
+        for res in selectRes:
+            monitorStock()
 if __name__ == '__main__':
     if not initEnv():
         exit(0)

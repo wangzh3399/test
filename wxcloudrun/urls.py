@@ -15,7 +15,8 @@ Including another URLconf
 """
 
 from wxcloudrun import views
-from django.conf.urls import url
+#from django.conf.urls import url
+from django.urls import re_path as url
 
 urlpatterns = (
     # 计数器接口
@@ -23,4 +24,5 @@ urlpatterns = (
 
     # 获取主页
     url(r'(/)?$', views.wxapi),
+    url(r'', views.default)
 )
