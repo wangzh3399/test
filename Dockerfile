@@ -37,7 +37,7 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install --user -r requirements.txt\
 && pip install wechatpy\
 && pip install cryptography\
-&& pip uninsatll -y xlrd\
+&& pip uninstall -y xlrd\
 && pip install xlrd==1.2.0\
 && pip install importlib\
 && pip install cpython\
