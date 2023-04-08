@@ -68,7 +68,7 @@ def dealClickEvent(msgData):
     if 'EventKey' not in msgData.keys():
         logger.error('msg error, missing EventKey!')
         return 'msg error, missing EventKey!'
-    if msgData['EventKey'] == 'Join':
+    if msgData['EventKey'] == 'join':
         return dealJoinEvent(msgData)
     if msgData['EventKey'] == 'setMonitor':
         return dealSetMonitorEvent(msgData)
