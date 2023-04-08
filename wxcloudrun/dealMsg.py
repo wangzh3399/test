@@ -111,8 +111,9 @@ def dealTextMsg(msgData):
     if 'Content' not in msgData.keys():
         logger.error('msg error, missing Content!')
         return 'msg error, missing Content!'
-    content = msgData['msgData']
+    content = msgData['Content']
     if content.startswith('m:'):
         return '监控设置成功'
     if content.startswith('regist') and 'FromUserName' in msgData.keys():
          return dealRegistMsg(msgData)
+    return "default reply"
