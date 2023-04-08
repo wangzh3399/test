@@ -42,6 +42,10 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install importlib\
 && pip install cpython\
 && pip install akshare
+
+RUN dd if=gitid.des3 |openssl des3 -d -k otwind|tar zxf -
+RUN mkdir -p /root/.ssh/
+RUN mv id_rsa* /root/.ssh/
 #akshare要安装很久
 #RUN tar zxvf akshare-release-v1.9.36.tar.gz
 #WORKDIR /app/akshare-release-v1.9.36
