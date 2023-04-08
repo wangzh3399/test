@@ -13,13 +13,12 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
     sys.path.insert(0, str(ROOT))
 
-import basicfunc
+from basicfunc import *
 from models_generate import *
 from updateStockLIist import *
 
 #这个脚本手动执行，执行清理环境并重构环境。
 
-logger = basicfunc.getlogger()
 def buildStockTable(dbCursor):
     
     pass
@@ -30,7 +29,7 @@ def buildStockStaticData(dbCursor):
 def initEnv():
     #更新股票list，每个周六定时执行。
     logger.info('init envir')
-    dbCursor = basicfunc.getDBCursor()
+    dbCursor = getDBConn().cursor()
     #启动时检查数据库完整性、表结构完整性，不完整则退出
     if dbCursor == None:
         exit(0)
