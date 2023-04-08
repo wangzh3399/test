@@ -1,2 +1,4 @@
-testEm.log
-testSina.log
+*.log
+TODOCHECK
+logs
+*.pyc

@@ -9,12 +9,6 @@ import time
 import akshare as ak
 import decimal
 
-logger = logging.getLogger()
-fh = logging.FileHandler('./stockSpider.log', encoding='utf-8', mode='a')
-formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-logger.setLevel(logging.ERROR)
 
 from basicfunc import *
 
@@ -45,8 +39,8 @@ def dataFormat(data,n):#取小数点后n位
         logger.error('data dealling with point occured error and exit')
         exit(0)
 def monitorStock(monitorObj):  #monitorObj: 每一个策略obj，独立一个策略类的对象，包含类的存储数据
-    
-def quickloop():
+    pass
+def runMonitor():
     #采集股票基础信息,分时信息监控，先放内存里吧，不入库
     while True:
         
@@ -68,7 +62,7 @@ if __name__ == '__main__':
         exit(0)
     #mem = buildShareMem()
     #quick依赖slow的数据库表更新，可以一起拉起，但如果数据库表信息为空，则等待。
-    quickloop()
+    runMonitor()
     
     
     

@@ -6,13 +6,6 @@ import akshare as ak
 import decimal
 from  basicfunc import *
 
-logger = logging.getLogger()
-fh = logging.FileHandler('./stockSpider.log', encoding='utf-8', mode='a')
-formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-logger.setLevel(logging.ERROR)
-
 
 def dataFormat(data,n):#取小数点后n位
     if n > 8:
@@ -52,7 +45,7 @@ def updateSingleStockData(stockcode,dbCursor):
         selectRes = dbCursor.fetchall()
         if selectRes != None:
             for date in selectRes:
-                dateInDBList.append(date)       
+                dateInDBList.append(date[0])       
     except Exception:
             logger.error("error occured\r\n"+traceback.format_exc())
             return

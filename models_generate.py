@@ -68,8 +68,8 @@ usermanagerFields = [
     ('user_account' , models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名")),
     ('username' , models.CharField(max_length=32,blank=False,verbose_name="微信昵称")), 
     ('registtime' , models.CharField(max_length=20,blank=False,verbose_name="注册时间")),
-    ('uuid' , models.CharField(max_length=32,blank=False,verbose_name="用户标识")),
-    ('level' , models.CharField(max_length=8,blank=False,verbose_name="用户等级")),
+    ('uuid' , models.CharField(max_length=32,blank=False,verbose_name="用户标识")),   #忘记要干嘛用的了
+    ('level' , models.CharField(max_length=8,blank=False,verbose_name="用户等级")),  #level 999 管理员 
     ('valid' , models.BooleanField(null=True,verbose_name="生效状态")),
     ('validtime' , models.CharField(max_length=20,blank=False,verbose_name="截止有效时间")),
     ('cashflow' , models.IntegerField(blank=False,null=True,verbose_name="流水"))

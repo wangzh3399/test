@@ -4,12 +4,13 @@ import configparser
 import traceback
 import datetime
 
+
 logger = logging.getLogger()
-fh = logging.FileHandler('./stockSpider.log', encoding='utf-8', mode='a')
+fh = logging.FileHandler('./logs/djangoserver.log', encoding='utf-8', mode='a')
 formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 
 
@@ -51,16 +52,5 @@ def getLastTradeDate():
         return datetime.datetime.utcfromtimestamp(timestamp - 86400)
     else:
         return t
-
-def getlogger(logname = 'stockSpider.log'):
-    newlogger = logging.getLogger()
-    path = './'+logname
-    print(path)
-    fh = logging.FileHandler(path, encoding='utf-8', mode='a')
-    formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
-    fh.setFormatter(formatter)
-    newlogger.addHandler(fh)
-    newlogger.setLevel(logging.DEBUG)
-    return newlogger
 if __name__ == '__main__':
     print('do nothing')

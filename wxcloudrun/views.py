@@ -1,5 +1,5 @@
 import json
-from basicfunc import *
+from basicfunc import *   #这里就有logger了
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -8,9 +8,10 @@ from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.replies import TextReply
 from wechatpy import parse_message
+from wxcloudrun.dealMsg import *
+import sys
 
-
-logger = getlogger('djangoserver.log')
+#logger = getlogger()
 
 
 def index(request, _):
@@ -47,13 +48,27 @@ def wxapi(request, _):
         except InvalidSignatureException:
         # 处理异常情况或忽略
             logger.error(InvalidSignatureException)
-        #echostr = request.GET.get('echostr')
         return HttpResponse(request.GET.get('echostr'))
     else:
         reqbody = request.body
         msg = parse_message(reqbody)
-        logger.info(msg)
-        reply = TextReply(content='text reply', message=msg)
+        if 'MsgType' not in msg._data.keys():
+            logger.info('msg error, missing Event!')
+            return HttpResponse('服务器内部错误,错误码'+str(sys._getframe().f_lineno)+',请联系管理员！')
+        if msg._data['MsgType']=='event' and msg._data['Event']=='CLICK':
+            logger.info('deal CLICK event')
+            #处理event
+            replyContent = dealClickEvent(msg._data)
+        elif msg._data['MsgType']=='text':
+            #处理通用消息
+            logger.info('deal text msg')
+            replyContent = dealTextMsg(msg._data)
+        else:
+            replyContent = '努力coding中，别急'
+        logger.info(replyContent)
+        replyContent = filterReply(msg,replyContent)  #隐藏一些内部错误。
+
+        reply = TextReply(content=replyContent, message=msg)
         xml = reply.render()
         logger.info(msg)
         return HttpResponse(xml)
