@@ -39,13 +39,14 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install cryptography\
 && pip uninstall -y xlrd\
 && pip install xlrd==1.2.0\
-&& pip install importlib\
 && pip install cpython\
-&& pip install akshare
+&& pip install /app/whl/numpy-1.24.2-cp38-cp38-linux_x86_64.whl\
+&& pip install /app/whl/pandas-2.0.0-cp38-cp38-linux_x86_64.whl\
+&& pip install /app/whl/akshare-1.9.43-py3-none-any.whl
 
-RUN dd if=gitid.des3 |openssl des3 -d -k otwind|tar zxf -
-RUN mkdir -p /root/.ssh/
-RUN mv id_rsa* /root/.ssh/
+#RUN dd if=gitid.des3 |openssl des3 -d -k otwind|tar zxf -
+#RUN mkdir -p /root/.ssh/
+#RUN mv id_rsa* /root/.ssh/
 #akshare要安装很久
 #RUN tar zxvf akshare-release-v1.9.36.tar.gz
 #WORKDIR /app/akshare-release-v1.9.36
@@ -53,7 +54,7 @@ RUN mv id_rsa* /root/.ssh/
 #WORKDIR /app
 
 #开发环境替换为生产环境
-RUN sed -i 's/Env = dev/Env = prd/g' globalconfig.ini
+RUN sed -i 's/env = dev/env = prd/g' globalconfig.ini
 # 暴露端口
 # 此处端口必须与「服务设置」-「流水线」以及「手动上传代码包」部署时填写的端口一致，否则会部署失败。
 EXPOSE 80
