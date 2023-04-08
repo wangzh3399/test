@@ -1,9 +1,0 @@
-上线前修改mysql生产环境的密码
-
-create database app_relation character set utf8; 
-
-
-tar zcvf  - id* |openssl des3 -salt -k otwind | dd of=gitid.des3
-
-
-dd if=gitid.des3 |openssl des3 -d -k otwind|tar zxf -
