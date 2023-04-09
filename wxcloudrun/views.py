@@ -52,6 +52,7 @@ def wxapi(request, _):
     else:
         reqbody = request.body
         msg = parse_message(reqbody)
+        logger.debug("msg")
         if 'MsgType' not in msg._data.keys():
             logger.info('msg error, missing Event!')
             return HttpResponse('服务器内部错误,错误码'+str(sys._getframe().f_lineno)+',请联系管理员！')
