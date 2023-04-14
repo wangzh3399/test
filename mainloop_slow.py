@@ -5,7 +5,9 @@ import time
 import akshare as ak
 import decimal
 from  basicfunc import *
-
+from models_generate import *
+from django.apps import apps
+from updateStockLIist import *
 
 def dataFormat(data,n):#取小数点后n位
     if n > 8:
@@ -28,34 +30,68 @@ def dataFormat(data,n):#取小数点后n位
         logger.error('data dealling with point occured error and exit')
         exit(0)
 
+def getDMA(df,curIndex,ma):  #算ma时，要包含当天的数据。
+    if curIndex - ma + 1 <0:   # 当取第5天数据时index为4，偏移5，则4-5+1 要>=0
+        return 0
+    sum = 0
+    while ma > 0 :
+        sum = sum + df['收盘'][curIndex-ma+1]
+        ma = ma - 1
+    return sum/ma
+def getWMA(df,curIndex,ma):  #算ma时，要包含当天的数据。   有节假日要考虑，这个方法不行。
+    curDate = df['date'][curIndex]
+    dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
+    shift1 = dt.isoweekday() + 2   #weeday这里没有周六或者周日。如果是周五，那上一周偏移是7 ，周四，则偏移是6
+    shift2 = shift1 + 5
+    shift3 = shift2 + 5 
+    shift4 = shift3 + 5
+    if curIndex < shift1 + shift2 + shift3 + shift4:
+        return 0 
+    if curIndex - shiftday + 1 <0:   # 当取第5天数据时index为4，偏移5，则4-5+1 要>=0
+        return 0
+    sum = 0
+    while shiftday > 0 :
+        sum = sum + df['收盘'][curIndex-shiftday+1]
+        shiftday = shiftday - 1
+    return sum/shiftday
+def getMMA(df,dffield,curIndex,shiftday):  #算ma时，要包含当天的数据。
+    if curIndex - shiftday + 1 <0:   # 当取第5天数据时index为4，偏移5，则4-5+1 要>=0
+        return 0
+    sum = 0
+    while shiftday > 0 :
+        sum = sum + df[dffield][curIndex-shiftday+1]
+        shiftday = shiftday - 1
+    return sum/shiftday
 
-def updateSingleStockData(stockcode,dbCursor):
+def updateSingleStockData(stockcode):
     #维护近三年的股票数据. stockcode 默认带sz sh等前缀
     t = datetime.datetime.now()
     month = '0' + str(t.month)
     day = '0' + str(t.day)
     startdate = str(t.year-3)+month[len(month)-2:]+day[len(day)-2:]
     enddate = str(t.year)+month[len(month)-2:]+day[len(day)-2:]
-    lastTradeDate = getLastTradeDate()
+    #lastTradeDate = getLastTradeDate()
     dealDuplicate = []
-    dateInDBList = []
+    #if not table_exists('wxcloudrun_stockdata_'+stockcode):   这个方法担心会有性能问题，用getModel判断异常    后面再看下https://www.cnblogs.com/hunterxiong/p/17262727.html
+    #有三种思路：1) 使用exists   2）查询出来一个queryset然后判断是否在queryset中   3）使用try: get except:插入   根据chatgpt给的结论，使用主键冲突更能   4）get_or_create，get_or_create 是原子的，也就是说只要判断的数据使用 unique=True 定义模型节课避免重复插入 
     try:
-        selectCmd = 'select date from '+stockcode+';'
-        dbCursor.execute(selectCmd)
-        selectRes = dbCursor.fetchall()
-        if selectRes != None:
-            for date in selectRes:
-                dateInDBList.append(date[0])       
-    except Exception:
-            logger.error("error occured\r\n"+traceback.format_exc())
-            return
-    if lastTradeDate in dateInDBList:
-        #判断最近一个交易日是否在list里面，如果在则不查询，提高性能。
-        logger.debug("stock:"+stockcode+" data is already at :"+lastTradeDate)
-        return 
-    df_cq =  ak.stock_zh_a_hist(symbol=stockcode[2:], adjust='',start_date=startdate,end_date=enddate)
-    df_hfq = ak.stock_zh_a_hist(symbol=stockcode[2:], adjust='hfq',start_date=startdate,end_date=enddate)
+        #获取不到则说明没有建表
+        stockModel = getModel(tableName='wxcloudrun_stockdata_'+stockcode,appLabel='wxcloudrun')
+    except:    
+        create_table()
+    stockModel = getModel(tableName='wxcloudrun_stockdata_'+stockcode,appLabel='wxcloudrun')
+    #queryUserList = stockModel.objects.all()
+
+    df_cq =  ak.stock_zh_a_hist(symbol=stockcode, adjust='',start_date=startdate,end_date=enddate)
+    df_hfq = ak.stock_zh_a_hist(symbol=stockcode, adjust='hfq',start_date=startdate,end_date=enddate)
     '''
+    if len(queryUserList) > 0 :
+        logger.info('lastTradeData'+lastTradeDate+' is already in DBTable')
+        return
+
+    #stockcode默认无前缀     这里日期如何插入还需要考虑下，去重等场景。
+
+    
         日期        开盘   收盘   最高   最低    成交量       成交额   振幅 涨跌幅 涨跌额 换手率
 0     1991-04-03  -0.97  -0.97  -0.97  -0.97        1  5.000000e+03  0.00  4.90  0.05  0.00
 1     1991-04-04  -0.97  -0.97  -0.97  -0.97        3  1.500000e+04  0.00  0.00  0.00  0.00
@@ -69,78 +105,149 @@ def updateSingleStockData(stockcode,dbCursor):
 7624  2023-03-09  13.54  13.20  13.58  13.13  1736065  2.305766e+09  3.33 -2.44 -0.33  0.89
 7625  2023-03-10  13.00  13.14  13.27  13.00   856996  1.128558e+09  2.05 -0.45 -0.06  0.44
     '''
-    logger.debug(df_cq.to_string)
-    logger.debug(df_hfq.to_string)
     if len(df_cq) != len(df_hfq):
         #两个长度不一致返回异常，下面for循环使用同一个索引
         logger.error('the stock:'+str(stockcode)+',df_cq length:'+str(len(df_cq))+' and df_hfq length:'+str(len(df_hfq))+',not same and return')
+    weekPriceList = []   #用于存储当周最后一日date
+    monthPriceList = []   #用于存储当月最后一日date
     for i in range(0,len(df_cq.index)):
         date = df_cq['日期'][i]
-        if date in dateInDBList:
-            logger.debug("date:"+date+" is in db and continue")
-            continue
+        dealDuplicate.append(date) 
         if date in dealDuplicate:
             #ak数据会有同一天的重复数据，去重,这里对两个df进行遍历，理论上len一致，重复的时候应该两个df都重复
             logger.info('df data has duplicate date and ignore')
             continue
-        dealDuplicate.append(date) 
-        
-        open_cq = dataFormat(df_cq['开盘'][i],2)
-        close_cq = dataFormat(df_cq['收盘'][i],2)
-        high_cq = dataFormat(df_cq['最高'][i],2)
-        low_cq = dataFormat(df_cq['最低'][i],2)
+        if len(dataFormat(df_cq['开盘'][i],2)) > 7 or len(dataFormat(df_hfq['开盘'][i],2)) > 9:
+            #我大A，应该不至于有这么高的价格。。
+            logger.error('length of open exceed and exit,value:'+str(dataFormat(df_cq['开盘'][i],2))+' '+str(dataFormat(df_hfq['开盘'][i],2)))
+        #判断周几，如果小于上一个日期的周几，则判定为上周结束了。有一个情况就是过年或其他特殊情况，跨超过1周的休假。那么要判断上下周日期只差不大于5
+        if i != 0:
+            datePrevious = df_cq['日期'][i-1]
 
-        open_hfq = dataFormat(df_hfq['开盘'][i],2)
-        close_hfq = dataFormat(df_hfq['收盘'][i],2)
-        high_hfq = dataFormat(df_hfq['最高'][i],2)
-        low_hfq = dataFormat(df_hfq['最低'][i],2)        
+            #判断月份
+            if date.split('-')[1] != datePrevious.split('-')[1]:
+                monthPriceList.append(float(df_cq['收盘'][i-1]))
+
+            dt = datetime.datetime.strptime(date, '%Y-%m-%d')
+            dtPrevious = datetime.datetime.strptime(datePrevious, '%Y-%m-%d')
+            if dt.timestamp() - dtPrevious.timestamp() > 6:  
+                #特殊情况就是过年或其他特殊情况，跨超过1周的休假。1 2 3 4 5 [6] [7] 1 2 3 4 5  上下间隔超过6天，即≥7天即可认为上一个date是上周的最后一天。拿时间戳算是按7天。
+                
+                weekPriceList.append(float(df_cq['收盘'][i-1]))
+            elif dt.isoweekday() < dtPrevious.isoweekday():
+                #间隔小于一周，不会出现后一天的weekday大于前一天，且跨周。所以当后一天小于前一天，说明到下一周了,把上一周入list
+                weekPriceList.append(float(df_cq['收盘'][i-1]))
+            else:
+                #当周还未结束，do nothing
+                pass
 
 
-        volume = str(df_cq['成交量'][i])   #这个获取方法的成交量为手
-        turnover = dataFormat(df_cq['成交额'][i],2)
-        amplitude = dataFormat(df_cq['振幅'][i],2) 
-        change_rate = dataFormat(df_cq['涨跌幅'][i],2)
-        turnover_rate = dataFormat(df_cq['换手率'][i],2) #这个换手率是百分数
-        logger.debug('开盘(cq):'+open_cq+',收盘(cq):'+close_cq+',最高(cq):'+high_cq+',最低(cq):'
-            +low_cq+',开盘(hfq):'+open_hfq+',收盘(hfq):'+close_hfq+',最高(hfq):'+high_hfq+',最低(hfq):'
-            +low_hfq+',成交量:'+volume+',成交额:'+turnover+',振幅:'+amplitude+',涨跌幅:'+change_rate+',换手率:'+turnover_rate)
-        if len(open_cq) > 7 or len(open_hfq) > 9:
-            logger.error('length of open exceed and exit,value:'+str(open_cq)+' '+str(open_hfq))
-        
+        wma5,wma10,wma20,wma30,mma5,mma10,mma20,mma30 = 0,0,0,0,0,0,0,0
+        #周均线
+        if len(weekPriceList) >= 4:
+            #当前先按除权计算均线，后面如果有问题再说。研究了半天，发现实际使用的均线基本还是按照这个来参考的。
+            wma5 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
+        if len(weekPriceList) >= 9:
+            wma10 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9] + float(dataFormat(df_cq['收盘'][i],2)))/10
+        if len(weekPriceList) >= 19:
+            wma20 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]    
+                 + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
+                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20      
+        if len(weekPriceList) >= 29:
+            wma30 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]    
+                 + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
+                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]    
+                 + weekPriceList[-20] + weekPriceList[-21] + weekPriceList[-22] + weekPriceList[-23] + weekPriceList[-24]                 
+                 + weekPriceList[-25] + weekPriceList[-26] + weekPriceList[-27] + weekPriceList[-28] + weekPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30   
+        #月均线       
+        if len(monthPriceList) >= 4:
+            #当前先按除权计算均线，后面如果有问题再说。研究了半天，发现实际使用的均线基本还是按照这个来参考的。
+            mma5 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
+        if len(monthPriceList) >= 9:
+            mma10 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9] + float(dataFormat(df_cq['收盘'][i],2)))/10
+        if len(monthPriceList) >= 19:
+            mma20 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                 + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                 + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                 + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20      
+        if len(monthPriceList) >= 29:
+            mma30 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                 + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                 + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                 + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]    
+                 + monthPriceList[-20] + monthPriceList[-21] + monthPriceList[-22] + monthPriceList[-23] + monthPriceList[-24]                 
+                 + monthPriceList[-25] + monthPriceList[-26] + monthPriceList[-27] + monthPriceList[-28] + monthPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30                 
+
         try:
-            #后面要扩展数据库表，扩展后直接清表，扩展这里的sql语句，重新跑即可。
-            cmd = "insert into "+stockcode+" (date,open_cq,high_cq,low_cq,close_cq,open_hfq,high_hfq,low_hfq,close_hfq,volume,turnover,amplitude,change_rate,turnover_rate) VALUE (\""\
-                +date+"\","+open_cq+","+high_cq+","+low_cq+","+close_cq+","+open_hfq+","+high_hfq+","+low_hfq+","+close_hfq+","+volume+","+turnover+","+amplitude+","+change_rate+","+turnover_rate+");"
-            logger.debug("SQL:"+cmd)
-            dbCursor.execute(cmd)
+            stock_data, created = stockModel.objects.get_or_create(date=date, defaults={
+            'open_cq': dataFormat(df_cq['开盘'][i],2),
+            'high_cq': dataFormat(df_cq['最高'][i],2),
+            'low_cq': dataFormat(df_cq['最低'][i],2),
+            'close_cq': dataFormat(df_cq['收盘'][i],2),
+            'open_hfq': dataFormat(df_hfq['开盘'][i],2),
+            'high_hfq': dataFormat(df_hfq['最高'][i],2),
+            'low_hfq': dataFormat(df_hfq['最低'][i],2),
+            'close_hfq': dataFormat(df_hfq['收盘'][i],2),
+            'dma5': dataFormat(getDMA(df_cq,i,4),2),    #这里设计错了，quickloop中，希望获取的是截止最后一天，MA4的sum，然后再加上当天的分时数据，算最新的MA5，所以这里要改成sum4d  艹，明天再改
+            'dma10': dataFormat(getDMA(df_cq,i,10),2),
+            'dma20': dataFormat(getDMA(df_cq,i,20),2),
+            'dma30': dataFormat(getDMA(df_cq,i,30),2), 
+            'wma5': wma5, 
+            'wma10': wma10,
+            'wma20': wma20,
+            'wma30': wma30,
+            'mma5': mma5,
+            'mma10': mma10,
+            'mma20': mma20,
+            'mma30': mma30,
+            'volume': str(df_cq['成交量'][i]),   #这个获取方法的成交量为手
+            'turnover': dataFormat(df_cq['成交额'][i],2),
+            'amplitude': dataFormat(df_cq['振幅'][i],2), 
+            'change_rate': dataFormat(df_cq['涨跌幅'][i],2),
+            'turnover_rate': dataFormat(df_cq['换手率'][i],2) #这个换手率是百分数
+        })
+            if created:
+                logger.debug("Successfully inserted record for date:", date)
+            else:
+                logger.debug("Record for date:", date, "already exists in the database")
         except Exception:
             logger.error(traceback.format_exc())
             break
     return 
-def slowloop(mem):
+def slowloop():
     #采集股票全量信息，维护近三年的股票数据。2020年后。
+    previousRunDay = 0  #同一天只执行1轮
+    loopMonitor = 0   #用于监控异常处理，如果已经处理过一次异常，第二次就不再处理了直接退出。
     while True:
-        
-        dbConn = getDBConn()
-        if  dbConn == None:
-            exit(0)
-        selectStockCmd = 'select stockcode from wxcloudrun_stockstaticdata';
-        dbCursor = dbConn.cursor()
-        dbCursor.exec(selectStockCmd)
-        selectRes = dbCursor.fetchall()
-        dbConn.close()
-        if selectRes == None:
+        if datetime.datetime.now().day == previousRunDay:
+            time.sleep(60)
+            continue
+        else:
+            previousRunDay = datetime.datetime.now().day
+            updateStockListPerDay()  #每天更新一次数据库stock
+        try:
+            stockModel = getModel(tableName='wxcloudrun_stockstaticdata',appLabel='wxcloudrun')
+        except:
+            #这里抛异常应该是没有创建静态数据表，调用updateStockList来创建数据表并生成股票列表数据
+            logger.error(traceback.format_exc())
+            if loopMonitor > 0 :
+                break
+            else:
+                updateStockListPerDay()  
+                loopMonitor = loopMonitor + 1
+        stocks = stockModel.objects.all()
+        if len(stocks) == 0:
             logger.error('wxcloudrun_stockstaticdata empty,pls run initenv.py first!')
-            exit(0)
-        for res in selectRes:
-            stockCode = res[0]
-            dbConn = getDBConn()
-            dbCursor = dbConn.cursor()
-            updateSingleStockData(stockCode,dbCursor)
-            dbConn.close()
-        logger.info('do slow loop')
-        time.sleep(1)  #避免故障场景循环过快
-    pass
+            updateStockListPerDay()
+            stocks = stockModel.objects.all()
+        for stock in stocks:
+            updateSingleStockData(stock)
+            logger.info('do slow loop')
+            time.sleep(1)  #避免故障场景循环过快
 
 if __name__ == '__main__':
     slowloop()

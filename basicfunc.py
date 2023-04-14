@@ -4,6 +4,8 @@ import configparser
 import traceback
 import datetime
 import re
+from django.db import connection
+
 
 logger = logging.getLogger()
 fh = logging.FileHandler('./logs/djangoserver.log', encoding='utf-8', mode='a')
@@ -12,7 +14,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.setLevel(logging.DEBUG)
 
-
+def table_exists(table_name):
+    return table_name in connection.introspection.table_names()
 
 def getDBConn():
     globalconfig = configparser.ConfigParser()
@@ -75,6 +78,15 @@ def getLastTradeDate():
         return datetime.datetime.fromtimestamp (timestamp - 86400).strftime("%Y-%m-%d")
     else:
         return t.strftime("%Y-%m-%d")
+def getLastWeekLastTradeDate(curDate):
+    #获取上一周周五
+    dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
+    weekday = dt.isoweekday()
+    timestamp = dt.timestamp()
+    return datetime.datetime.fromtimestamp (timestamp - (86400 * (weekday+2))).strftime("%Y-%m-%d")
+def getLastMonthLastTradeDate(curDate):
+    dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
+    monday = curDate.isoweekday()
 if __name__ == '__main__':
     print('do nothing')
     print(getLastTradeDate())

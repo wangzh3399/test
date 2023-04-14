@@ -5,10 +5,10 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.contrib import admin
 from django.db import models
 import os
-
+import re
 from django.db import connection, migrations, models
 from django.db.migrations.executor import MigrationExecutor
- 
+from django.apps import apps
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wxcloudrun.settings')
 django.setup()
 def getFields(tablename,datatype): #创建或查询时，根据表明返回field，dataype指定返回格式是list还是dic
@@ -27,6 +27,18 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
         ('high_hfq' , models.DecimalField(max_digits=9,decimal_places=2,blank=False,null=True,verbose_name="后复权最高价")),
         ('low_hfq' , models.DecimalField(max_digits=9,decimal_places=2,blank=False,null=True,verbose_name="后复权最低价")),
         ('close_hfq' , models.DecimalField(max_digits=9,decimal_places=2,blank=False,null=True,verbose_name="后复权收盘价")),
+        ('dma5' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="5日线")),
+        ('dma10' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="10日线")),
+        ('dma20' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="20日线")),
+        ('dma30' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="30日线")),
+        ('wma5' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="5周线")),
+        ('wma10' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="10周线")),
+        ('wma20' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="20周线")),
+        ('wma30' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="30周线")),
+        ('mma5' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="5月线")),
+        ('mma10' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="10月线")),
+        ('mma20' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="20月线")),
+        ('mma30' , models.DecimalField(max_digits=7,decimal_places=2,blank=False,null=True,verbose_name="30月线")),
         ('volume' , models.DecimalField(max_digits=20,decimal_places=2,blank=False,null=True,verbose_name="成交量")),
         ('turnover' , models.DecimalField(max_digits=20,decimal_places=2,blank=False,null=True,verbose_name="成交额")),
         ('turnover_rate' , models.DecimalField(max_digits=7,decimal_places=6,blank=False,null=True,verbose_name="换手率")),
@@ -89,17 +101,17 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
     #后面改一下，分基础数据表和全量数据表
     stockStaticDataFieldsList = [
         ('stockcode' , models.CharField(max_length=8,blank=False,primary_key=True,verbose_name="股票id")),
-        ('stockName' , models.CharField(max_length=32,blank=False,verbose_name="股票名称"))
+        ('stockname' , models.CharField(max_length=32,blank=False,verbose_name="股票名称"))
     ]
     stockStaticDataFieldsDic = {
         'stockcode' : models.CharField(max_length=8,blank=False,primary_key=True,verbose_name="股票id"),
-        'stockName' : models.CharField(max_length=32,blank=False,verbose_name="股票名称")
+        'stockname' : models.CharField(max_length=32,blank=False,verbose_name="股票名称")
     }
     #每次重新激活策略要重新创建一条记录。
     strategyConfigFieldsList = [
         ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
         ('stockcode' , models.CharField(max_length=8,blank=False,verbose_name="股票id")),
-        ('monitorStrategy' , models.CharField(max_length=8,blank=False,verbose_name="监控策略")),   #这里区分快策略和慢策略。
+        ('monitorstrategy' , models.CharField(max_length=8,blank=False,verbose_name="监控策略")),   #这里区分快策略和慢策略。
         ('valid' , models.BooleanField(null=True,verbose_name="生效状态")),
         ('validtime' , models.CharField(max_length=20,blank=False,verbose_name="截止有效时间")),
         ('invalidtime' , models.CharField(max_length=20,blank=False,verbose_name="失效时间"))
@@ -107,7 +119,7 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
     strategyConfigFieldsDic = {
         'userid' : models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id"),
         'stockcode' : models.CharField(max_length=8,blank=False,verbose_name="股票id"),
-        'monitorStrategy' : models.CharField(max_length=8,blank=False,verbose_name="监控策略"),   #这里区分快策略和慢策略。
+        'monitorstrategy' : models.CharField(max_length=8,blank=False,verbose_name="监控策略"),   #这里区分快策略和慢策略。
         'valid' : models.BooleanField(null=True,verbose_name="生效状态"),
         'validtime' : models.CharField(max_length=20,blank=False,verbose_name="截止有效时间"),
         'invalidtime' : models.CharField(max_length=20,blank=False,verbose_name="失效时间")
@@ -115,7 +127,7 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
 
     usermanagerFieldsList = [
         ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
-        ('user_account' , models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名")),
+        ('useraccount' , models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名")),
         ('username' , models.CharField(max_length=32,blank=False,verbose_name="微信昵称")), 
         ('registtime' , models.CharField(max_length=20,blank=False,verbose_name="注册时间")),
         ('uuid' , models.CharField(max_length=32,blank=False,verbose_name="用户标识")),   #忘记要干嘛用的了
@@ -127,7 +139,7 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
 
     usermanagerFieldsDic = {
         'userid' : models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id"),
-        'user_account' : models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名"),
+        'useraccount' : models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名"),
         'username' : models.CharField(max_length=32,blank=False,verbose_name="微信昵称"), 
         'registtime' : models.CharField(max_length=20,blank=False,verbose_name="注册时间"),
         'uuid' : models.CharField(max_length=32,blank=False,verbose_name="用户标识"),   #忘记要干嘛用的了
@@ -138,14 +150,14 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
         }
     listMap = {
         'wxcloudrun_stockdata':stockDataFieldsList,
-        'wxcloudrun_stockStaticData':stockStaticDataFieldsList,
-        'wxcloudrun_strategyConfig':strategyConfigFieldsList,
+        'wxcloudrun_stockstaticdata':stockStaticDataFieldsList,
+        'wxcloudrun_strategyconfig':strategyConfigFieldsList,
         'wxcloudrun_usermanager':usermanagerFieldsList
     }
     dicMap = {
         'wxcloudrun_stockdata':stockDataFieldsDic,
-        'wxcloudrun_stockStaticData':stockStaticDataFieldsDic,
-        'wxcloudrun_strategyConfig':strategyConfigFieldsDic,
+        'wxcloudrun_stockstaticdata':stockStaticDataFieldsDic,
+        'wxcloudrun_strategyconfig':strategyConfigFieldsDic,
         'wxcloudrun_usermanager':usermanagerFieldsDic
     }
     if datatype == 'list':
@@ -182,11 +194,15 @@ def doMigrate(table_name, app_label, model_fields = None):
     with connection.schema_editor(atomic=True) as schema_editor:
         migration.apply(executor._create_project_state(), schema_editor)
  
-def create_table():
-    doMigrate('stockdata','wxcloudrun',getFields('stockdata','list'))
-    doMigrate('stockstaticdata','wxcloudrun',getFields('stockstaticdata','list'))
-    doMigrate('strategyconfig','wxcloudrun',getFields('strategyconfig','list'))
-    doMigrate('usermanager','wxcloudrun',getFields('usermanager','list'))
+def create_table(tableName,applabel):  #这里的tablename不带前缀applabel,或者传入stockcode
+    if len(re.findall('\d\d\d\d\d\d',tableName)) != 0:
+        doMigrate('stockdata_'+tableName,applabel,getFields('stockdata','list'))
+        return
+    #这里最好判断下是否创建成功。这里不能调用getModel判断，否则外层调用getModel，会死循环。
+    doMigrate(tableName,applabel,getFields(tableName,'list'))
+    #doMigrate('stockstaticdata','wxcloudrun',getFields('stockstaticdata','list'))
+    #doMigrate('strategyconfig','wxcloudrun',getFields('strategyconfig','list'))
+    #doMigrate('usermanager','wxcloudrun',getFields('usermanager','list'))
     #doMigrate('stockData',stockCQinfoFields)
 
 
@@ -206,6 +222,7 @@ def create_model(name, fields=None, app_label='', module='', options=None, admin
 
 
 def getModel(tableName,appLabel):
+    #getModel如果还抛出异常，可能是表没创建？需要验证下，或者下面也可以建表
     """
     动态创建数据模型
     :param tableName: 表名
@@ -213,7 +230,11 @@ def getModel(tableName,appLabel):
     :return: 返回模型类
     """
     options = {'ordering': [], 'db_table': tableName, }
-    custom_model = create_model(tableName, getFields(tableName,'dic'), options=options, app_label=appLabel, module='wxcloudrun.models')
+    try:
+        #如果存在已注册的model，则不需要了。
+        custom_model = apps.get_model(app_label = appLabel,model_name = tableName)
+    except:
+        custom_model = create_model(tableName, getFields(tableName,'dic'), options=options, app_label=appLabel, module='wxcloudrun.models')
     return custom_model
 
 def tests(requests):

@@ -1,6 +1,15 @@
 import pandas as pd
 import akshare as ak
 from basicfunc import *
+#import django
+from django.apps import apps
+from models_generate import *
+##from django.db import connection, migrations, models
+#from django.db.migrations.executor import MigrationExecutor
+#import os
+ 
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wxcloudrun.settings')
+#django.setup()
 #http://www.360doc.com/content/22/0120/16/35291147_1014183755.shtml  策略可以参考这个.
 #策略思路1：选TOP1行业，选龙头，做多.  有些策略需要结合前一天或几天的数据
 class monitorStrategy(): #定义一个基础类
@@ -50,17 +59,21 @@ class monitorY1C4XStrategy(monitorStrategy):
         self.MA20 = (self.sum19 + self.curPrice)/20
         self.MA30 = (self.sum29 + self.curPrice)/30
     def updateMAdate(self):
-        #每天需要调用执行一遍，外面进程处理，这里只提供方法。理论上数据库表应该有前一天的入库信息，这里断言一下，如果最近交易日的数据缺失，这个策略无法运行。
+        #每天需要调用执行一遍，外面进程处理，这里只提供方法。理论上数据库表应该有前一天的入库信息，这里断言一下，如果最近交易日的数据缺失，这个策略无法运行。   slow重构时也写入MA数据，这里可以用作当数据没有时，这里可以重试。
         nowDate = datetime.datetime.now().strftime('%Y-%m-%d')
         tradeDate = getLastTradeDate()
         if nowDate != tradeDate: #非交易日不更新，没影响  #slow每天更新数据库时，写入SUM4、SUM9、SUM19、SUM29等数据，便于提高计算效率，不过当前暂时先不考虑，每天更新可以接受
-            return
+            return False
         yesterday = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp() - 86400).strftime("%Y-%m-%d")
-        if 'wxcloudrun_strategyconfig' in modelsPoolDic.keys():   #slow暂时不修改，不使用model，那么这里可以使用stock的model。  slow里面具体stock的表还没有，需要在initenv中创建。这里可能还是要使用model，那么必须要解决model的锁的问题。
-            strategyModel = modelsPoolDic['wxcloudrun_strategyconfig']
-        else:
-            strategyModel = getModel(tableName='wxcloudrun_strategyconfig',appLabel='wxcloudrun')
-        modelsPoolDic['wxcloudrun_strategyconfig'] = strategyModel  
+        try:
+            #如果存在已注册的model，则不需要了，但是这里对股票数据表操作要加锁，包括slow进程也需要加锁。
+            stockModel = apps.get_model('wxcloudrun', 'wxcloudrun_stock_'+self.stockCode)
+        except:
+            stockModel = getModel(tableName='wxcloudrun_stock_'+self.stockCode,appLabel='wxcloudrun')
+        #查询股票库中是否包含前一天的数据库，这里要晚于slow每日更新，所以时间上设定要晚于slow执行。也要判断没有则返回失败，外层处理等待。
+        queryUserList = stockModel.objects.filter(date=yesterday)
+        if len(queryUserList) == 0 :
+            return 
     def brustStrategyUpdate():
         #stock_zh_a_minute  #分时数据-新浪描述: 新浪财经-沪深京 A 股股票或者指数的分时数据，目前可以获取 1, 5, 15, 30, 60 分钟的数据频率, 可以指定是否复权.限量: 单次返回指定股票或指数的指定频率的最近交易日的历史分时行情数据目标地址: http://finance.sina.com.cn/realstock/company/sh600519/nc.shtml
         '''

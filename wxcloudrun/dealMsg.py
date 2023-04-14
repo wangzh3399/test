@@ -5,7 +5,7 @@ import datetime
 import sys
 from models_generate import *
 import re
-modelsPoolDic = {}
+from django.apps import apps
 
 strategyList = ['1YC4X','fltp']  #1YC4X 一阳穿四线    fltp：放量突破
 
@@ -39,21 +39,13 @@ def filterReply(msg,content):
         return content
 
 def checkUserValid(userid):  #检查用户id有效性
-    if 'wxcloudrun_usermanager' in modelsPoolDic.keys():
-        userModel = modelsPoolDic['wxcloudrun_usermanager']
-    else:
-        userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
-        modelsPoolDic['wxcloudrun_usermanager'] = userModel
+    userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
     queryUserList = userModel.objects.filter(userid=userid)
     if len(queryUserList) > 0 and queryUserList.valid:
         return True
     return False
 def checkStockcodeValid(stockcode): #检查股票代码有效性
-    if 'wxcloudrun_stockstaticdata' in modelsPoolDic.keys():
-        stockStaticModel = modelsPoolDic['wxcloudrun_stockstaticdata']
-    else:
-        stockStaticModel = getModel(tableName='wxcloudrun_stockstaticdata',appLabel='wxcloudrun')
-        modelsPoolDic['wxcloudrun_stockstaticdata'] = stockStaticModel
+    stockStaticModel = getModel(tableName='wxcloudrun_stockstaticdata',appLabel='wxcloudrun')
     queryUserList = stockStaticModel.objects.filter(stockcode=stockcode)
     if len(queryUserList) > 0:
         return True
@@ -76,13 +68,9 @@ def dealSetMonitorText(msgData):
         return False,'设置格式错误，未匹配到stock代码'
     if content.find('策略') == -1:
         return False,'设置格式错误，未匹配到策略关键字'
-    if 'wxcloudrun_strategyconfig' in modelsPoolDic.keys():
-        strategyModel = modelsPoolDic['wxcloudrun_strategyconfig']
-    else:
-        strategyModel = getModel(tableName='wxcloudrun_strategyconfig',appLabel='wxcloudrun')
-        modelsPoolDic['wxcloudrun_strategyconfig'] = strategyModel    
+    strategyModel = getModel(tableName='wxcloudrun_strategyconfig',appLabel='wxcloudrun') 
     for stockcode in stockcodeMatch:
-        if stockcode.
+        #if stockcode.
         if not checkStockcodeValid(stockcode):
             logger.error('stockcode error,not in stockDB')
             continue
@@ -121,15 +109,19 @@ def dealRegistMsg(msgData):
     userid = msgData['FromUserName']
     curTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     #userModel = get_model('wxcloudrun_usermanager',app_label='wxcloudrun')
+    userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
+    '''
     if 'wxcloudrun_usermanager' in modelsPoolDic.keys():
         userModel = modelsPoolDic['wxcloudrun_usermanager']
     else:
         userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
-        modelsPoolDic['wxcloudrun_usermanager'] = userModel   #这里通过pool避免单进程的重复注册，但是未来大并发下，仍旧可能存在问题。比如多个进程操作同一个model，可能会冲突？同样还有个坑，几千个表的model操作不知道要占用多少内存。
+        modelsPoolDic['wxcloudrun_usermanager'] = userModel   #几千个表的model操作不知道要占用多少内存。
+    '''
     queryUserList = userModel.objects.filter(userid=userid)
+    
     if len(queryUserList) > 0:
         return '该用户已注册'
-    userModel.objects.create(userid=userid,user_account = '',username='',registtime=curTime,uuid='',level=0,valid=False,validtime='',cashflow=0)
+    userModel.objects.create(userid=userid,useraccount = '',username='',registtime=curTime,uuid='',level=0,valid=False,validtime='',cashflow=0)
     logger.info('try regist')
     #userModel.objects.bulk_create([userModel(userid=userid,user_account = '',username='',registtime=curTime,uuid='',level=0,valid=False,validtime='',cashflow=0)])
 
