@@ -112,7 +112,8 @@ def updateSingleStockData(stockcode):
     monthPriceList = []   #用于存储当月最后一日date
     for i in range(0,len(df_cq.index)):
         date = df_cq['日期'][i]
-        dealDuplicate.append(date) 
+        dealDuplicate.append(date)
+        isTailOfMonth = False
         if date in dealDuplicate:
             #ak数据会有同一天的重复数据，去重,这里对两个df进行遍历，理论上len一致，重复的时候应该两个df都重复
             logger.info('df data has duplicate date and ignore')
@@ -121,67 +122,141 @@ def updateSingleStockData(stockcode):
             #我大A，应该不至于有这么高的价格。。
             logger.error('length of open exceed and exit,value:'+str(dataFormat(df_cq['开盘'][i],2))+' '+str(dataFormat(df_hfq['开盘'][i],2)))
         #判断周几，如果小于上一个日期的周几，则判定为上周结束了。有一个情况就是过年或其他特殊情况，跨超过1周的休假。那么要判断上下周日期只差不大于5
-        if i != 0:
-            datePrevious = df_cq['日期'][i-1]
+        if i < len(df_cq.index) - 1:
+            nextdate = df_cq['日期'][i+1]
 
             #判断月份
-            if date.split('-')[1] != datePrevious.split('-')[1]:
-                monthPriceList.append(float(df_cq['收盘'][i-1]))
-
+            if date.split('-')[1] != nextdate.split('-')[1]:
+                monthPriceList.append(float(df_cq['收盘'][i]))
+                isTailOfMonth = True
             dt = datetime.datetime.strptime(date, '%Y-%m-%d')
-            dtPrevious = datetime.datetime.strptime(datePrevious, '%Y-%m-%d')
-            if dt.timestamp() - dtPrevious.timestamp() > 6:  
+            dtnext = datetime.datetime.strptime(nextdate, '%Y-%m-%d')
+            if dtnext.timestamp() - dt.timestamp() > 6:  
                 #特殊情况就是过年或其他特殊情况，跨超过1周的休假。1 2 3 4 5 [6] [7] 1 2 3 4 5  上下间隔超过6天，即≥7天即可认为上一个date是上周的最后一天。拿时间戳算是按7天。
                 
-                weekPriceList.append(float(df_cq['收盘'][i-1]))
-            elif dt.isoweekday() < dtPrevious.isoweekday():
+                weekPriceList.append(float(df_cq['收盘'][i]))
+            elif dtnext.isoweekday() < dt.isoweekday():
                 #间隔小于一周，不会出现后一天的weekday大于前一天，且跨周。所以当后一天小于前一天，说明到下一周了,把上一周入list
-                weekPriceList.append(float(df_cq['收盘'][i-1]))
+                weekPriceList.append(float(df_cq['收盘'][i]))
             else:
                 #当周还未结束，do nothing
                 pass
 
 
-        wma5,wma10,wma20,wma30,mma5,mma10,mma20,mma30 = 0,0,0,0,0,0,0,0
+        wsum4,wsum9,wsum19,wsum29,msum4,msum9,msum19,msum29,wma5,wma10,wma20,wma30,mma5,mma10,mma20,mma30 = 0,0,0,0,0,0,0,0,0,0,0,0
         #周均线
         if len(weekPriceList) >= 4:
             #当前先按除权计算均线，后面如果有问题再说。研究了半天，发现实际使用的均线基本还是按照这个来参考的。
-            wma5 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
+            #如果当前记录是周五，wsum4刚好算今天，上面weekPriceList已经append了。wma5
+            wsum4 = weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+            if dt.isoweekday() != 5:
+                wma5 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
+        if len(weekPriceList) >= 5 and dt.isoweekday() == 5:
+            #如果是周五，则wma5，直接取近5个数据平均。否则去近4个+当天求平均
+            wma5 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4] + weekPriceList[-5])/5
+            
         if len(weekPriceList) >= 9:
+            wsum9 = weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]\
+                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]
+            if dt.isoweekday() != 5:
+                wma10 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                    + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9] + float(dataFormat(df_cq['收盘'][i],2)))/10
+        if len(weekPriceList) >= 10 and dt.isoweekday() == 5:
             wma10 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
-                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9] + float(dataFormat(df_cq['收盘'][i],2)))/10
-        if len(weekPriceList) >= 19:
+                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9] + + weekPriceList[-10])/10
+
+        if len(weekPriceList) >= 19 :
+            wsum19 = weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]\
+                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]\
+                 + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]\
+                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]
+            if dt.isoweekday() != 5 :
+                wma20 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                    + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]
+                    + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
+                    + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20
+        if len(weekPriceList) >= 20 and dt.isoweekday() == 5 :
             wma20 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
-                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]    
+                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]
                  + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
-                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20      
-        if len(weekPriceList) >= 29:
+                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19] + weekPriceList[-20] )/20
+        if len(weekPriceList) >= 29 :
+            wsum29 = weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]\
+                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]\
+                + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]\
+                + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]\
+                + weekPriceList[-20] + weekPriceList[-21] + weekPriceList[-22] + weekPriceList[-23] + weekPriceList[-24]\
+                + weekPriceList[-25] + weekPriceList[-26] + weekPriceList[-27] + weekPriceList[-28] + weekPriceList[-29]
+            if dt.isoweekday() != 5:
+                wma30 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
+                    + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]
+                    + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
+                    + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]
+                    + weekPriceList[-20] + weekPriceList[-21] + weekPriceList[-22] + weekPriceList[-23] + weekPriceList[-24]
+                    + weekPriceList[-25] + weekPriceList[-26] + weekPriceList[-27] + weekPriceList[-28] + weekPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30
+        if len(weekPriceList) >= 30 and dt.isoweekday() == 5 :
             wma30 = (weekPriceList[-1] + weekPriceList[-2] + weekPriceList[-3] + weekPriceList[-4]
-                 + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]    
-                 + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
-                 + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]    
-                 + weekPriceList[-20] + weekPriceList[-21] + weekPriceList[-22] + weekPriceList[-23] + weekPriceList[-24]                 
-                 + weekPriceList[-25] + weekPriceList[-26] + weekPriceList[-27] + weekPriceList[-28] + weekPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30   
+                + weekPriceList[-5] + weekPriceList[-6] + weekPriceList[-7] + weekPriceList[-8] + weekPriceList[-9]
+                + weekPriceList[-10] + weekPriceList[-11] + weekPriceList[-12] + weekPriceList[-13] + weekPriceList[-14]
+                + weekPriceList[-15] + weekPriceList[-16] + weekPriceList[-17] + weekPriceList[-18] + weekPriceList[-19]
+                + weekPriceList[-20] + weekPriceList[-21] + weekPriceList[-22] + weekPriceList[-23] + weekPriceList[-24]
+                + weekPriceList[-25] + weekPriceList[-26] + weekPriceList[-27] + weekPriceList[-28] + weekPriceList[-29] + weekPriceList[-30] )/30
         #月均线       
         if len(monthPriceList) >= 4:
-            #当前先按除权计算均线，后面如果有问题再说。研究了半天，发现实际使用的均线基本还是按照这个来参考的。
-            mma5 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
-        if len(monthPriceList) >= 9:
-            mma10 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
-                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9] + float(dataFormat(df_cq['收盘'][i],2)))/10
-        if len(monthPriceList) >= 19:
-            mma20 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
-                 + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
-                 + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
-                 + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20      
-        if len(monthPriceList) >= 29:
-            mma30 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
-                 + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
-                 + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
-                 + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]    
-                 + monthPriceList[-20] + monthPriceList[-21] + monthPriceList[-22] + monthPriceList[-23] + monthPriceList[-24]                 
-                 + monthPriceList[-25] + monthPriceList[-26] + monthPriceList[-27] + monthPriceList[-28] + monthPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30                 
+            #当前先按除权计算均线，后面如果有问题再说。研究了半天，发现实际使用的均线基本还是按照这个来参考的.
+            msum4 = monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+            if not isTailOfMonth :
+                mma5 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4] + float(dataFormat(df_cq['收盘'][i],2)))/5
+        if len(monthPriceList) >= 5 and isTailOfMonth:
+            mma5 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4] + monthPriceList[-5])/5
 
+        if len(monthPriceList) >= 9:
+            msum9 = monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]\
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]
+            if  not isTailOfMonth :
+                mma10 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                    + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]+ float(dataFormat(df_cq['收盘'][i],2)))/10
+        if len(monthPriceList) >= 10 and isTailOfMonth:
+            mma10 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]+ monthPriceList[-10])/10
+
+        if len(monthPriceList) >= 19:
+            msum19 = monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]\
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]\
+                + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]\
+                + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]
+            if not isTailOfMonth :
+                mma20 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                    + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                    + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                    + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19] + float(dataFormat(df_cq['收盘'][i],2)))/20
+        if len(monthPriceList) >= 20 and isTailOfMonth: 
+            mma20 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]+ monthPriceList[-20])/20
+
+        if len(monthPriceList) >= 29:
+            msum29 = monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]\
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]\
+                + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]\
+                + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]\
+                + monthPriceList[-20] + monthPriceList[-21] + monthPriceList[-22] + monthPriceList[-23] + monthPriceList[-24]\
+                + monthPriceList[-25] + monthPriceList[-26] + monthPriceList[-27] + monthPriceList[-28] + monthPriceList[-29]
+            if not isTailOfMonth :
+                mma30 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                    + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                    + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                    + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]    
+                    + monthPriceList[-20] + monthPriceList[-21] + monthPriceList[-22] + monthPriceList[-23] + monthPriceList[-24]                 
+                    + monthPriceList[-25] + monthPriceList[-26] + monthPriceList[-27] + monthPriceList[-28] + monthPriceList[-29] + float(dataFormat(df_cq['收盘'][i],2)))/30
+        if len(monthPriceList) >= 30 and isTailOfMonth:
+            mma30 = (monthPriceList[-1] + monthPriceList[-2] + monthPriceList[-3] + monthPriceList[-4]
+                + monthPriceList[-5] + monthPriceList[-6] + monthPriceList[-7] + monthPriceList[-8] + monthPriceList[-9]    
+                + monthPriceList[-10] + monthPriceList[-11] + monthPriceList[-12] + monthPriceList[-13] + monthPriceList[-14]
+                + monthPriceList[-15] + monthPriceList[-16] + monthPriceList[-17] + monthPriceList[-18] + monthPriceList[-19]    
+                + monthPriceList[-20] + monthPriceList[-21] + monthPriceList[-22] + monthPriceList[-23] + monthPriceList[-24]                 
+                + monthPriceList[-25] + monthPriceList[-26] + monthPriceList[-27] + monthPriceList[-28] + monthPriceList[-29]+ monthPriceList[-30])/30
         try:
             stock_data, created = stockModel.objects.get_or_create(date=date, defaults={
             'open_cq': dataFormat(df_cq['开盘'][i],2),
@@ -192,7 +267,19 @@ def updateSingleStockData(stockcode):
             'high_hfq': dataFormat(df_hfq['最高'][i],2),
             'low_hfq': dataFormat(df_hfq['最低'][i],2),
             'close_hfq': dataFormat(df_hfq['收盘'][i],2),
-            'dma5': dataFormat(getDMA(df_cq,i,4),2),    #这里设计错了，quickloop中，希望获取的是截止最后一天，MA4的sum，然后再加上当天的分时数据，算最新的MA5，所以这里要改成sum4d  艹，明天再改
+            'dsum4': dataFormat(getDMA(df_cq,i,4),2),   
+            'dsum9': dataFormat(getDMA(df_cq,i,9),2),
+            'dsum19': dataFormat(getDMA(df_cq,i,19),2),
+            'dsum29': dataFormat(getDMA(df_cq,i,29),2), 
+            'wsum4': wsum4, 
+            'wsum9': wsum9,
+            'wsum19': wsum19,
+            'wsum29': wsum29,
+            'msum4': msum4,
+            'msum9': msum9,
+            'msum19': msum19,
+            'msum29': msum29,
+            'dma5': dataFormat(getDMA(df_cq,i,5),2),  
             'dma10': dataFormat(getDMA(df_cq,i,10),2),
             'dma20': dataFormat(getDMA(df_cq,i,20),2),
             'dma30': dataFormat(getDMA(df_cq,i,30),2), 

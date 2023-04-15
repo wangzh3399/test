@@ -5,7 +5,8 @@ import traceback
 import datetime
 import re
 from django.db import connection
-
+from wechatpy import messages
+from wechatpy.client.api import customservice
 
 logger = logging.getLogger()
 fh = logging.FileHandler('./logs/djangoserver.log', encoding='utf-8', mode='a')
@@ -87,6 +88,10 @@ def getLastWeekLastTradeDate(curDate):
 def getLastMonthLastTradeDate(curDate):
     dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
     monday = curDate.isoweekday()
+def sendTextMessage(userid,text):
+    customservice.add
+    txMsg = messages.TextMessage(userid=userid)
+    txMsg.
 if __name__ == '__main__':
     print('do nothing')
     print(getLastTradeDate())

@@ -124,12 +124,14 @@ def dealRegistMsg(msgData):
     userModel.objects.create(userid=userid,useraccount = '',username='',registtime=curTime,uuid='',level=0,valid=False,validtime='',cashflow=0)
     logger.info('try regist')
     #userModel.objects.bulk_create([userModel(userid=userid,user_account = '',username='',registtime=curTime,uuid='',level=0,valid=False,validtime='',cashflow=0)])
-
-    user = userModel.objects.get(userid=userid)
-    if user.userid == userid :
+    try:
+        user = userModel.objects.get(userid=userid)
+    except:
+        user = None
+    if user != None and user.userid == userid:
         return '注册成功'
     else:
-        return '注册失败，联系管理员'    
+        return '注册失败，请联系管理员！'    
 def dealTextMsg(msgData):
     if 'FromUserName' not in msgData.keys():  #只在第一层判断，后续函数默认正常
         logger.error('msg error, missing FromUserName!')

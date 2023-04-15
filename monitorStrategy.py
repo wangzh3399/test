@@ -4,6 +4,8 @@ from basicfunc import *
 #import django
 from django.apps import apps
 from models_generate import *
+import time
+import wxFrontEnd
 ##from django.db import connection, migrations, models
 #from django.db.migrations.executor import MigrationExecutor
 #import os
@@ -18,33 +20,54 @@ class monitorStrategy(): #定义一个基础类
         self.userlist = []
         self.strategyAbbrName = ''   #abbreviation
         self.strategyName = ''
-        self.open = 0   #开盘价
-        self.high = 0   #盘中最高
-        self.low = 0    #盘中最低
-        self.sum4 = 0    #前4天数据
-        self.MA5 = 0    #MA5，当天结合股价动态更新
-        self.sum9 = 0    #前9天数据
-        self.MA10 = 0   #MA10，当天结合股价动态更新
-        self.sum19 = 0    #前19天数据
-        self.MA20 = 0    #MA5，当天结合股价动态更新
-        self.sum29 = 0    #前9天数据
-        self.MA30 = 0   #MA10，当天结合股价动态更新
-
+        self.curPrice = 0
+        #交易日当天价格
+        self.open = 0
+        self.low = 0
+        self.high = 0
+        self.dma5 = 0    #MA5，当天结合股价动态更新
+        self.dma10 = 0   #MA10，当天结合股价动态更新
+        self.dma20 = 0    #MA5，当天结合股价动态更新
+        self.dma30 = 0   #MA10，当天结合股价动态更新
+        #交易日前一天数据  pre1
+        self.pre1open = 0   #前一个交易日开盘价
+        self.pre1high = 0   #前一个交易日盘中最高
+        self.pre1low = 0    #前一个交易日盘中最低
+        self.pre1close = 0    #前一个交易日收盘
+        self.pre1dsum4 = 0    #前1天统计的前4天收盘价和
+        self.pre1dma5 = 0  #前一天统计的dma5
+        self.pre1dsum9 = 0    #前一天统计的前9天收盘价和
+        self.pre1dma10 = 0 #前一天统计的dma10
+        self.pre1dsum19 = 0    #前一天统计的前19天收盘价和
+        self.pre1dma20 = 0 #前一天统计的dma20
+        self.pre1dsum29 = 0    #前一天统计的前29天收盘价和
+        self.pre1dma30 = 0    #前一天统计的dma20
+        #交易日前两天数据  pre2
+        self.pre2dsum4 = 0
+        self.pre2dsum9 = 0
+        self.pre2dsum19 = 0
+        self.pre2dsum29 = 0
+        
 class monitorY1C4XStrategy(monitorStrategy):
     #需要一个参考backtrader做回测
     def __init__(self,stockCode):
-        self.strategyAbbrName = 'Y1C4X'   #abbreviation
-        self.strategyName = '一阳穿四线'
+        self.strategyAbbrName = 'Y1C4X01'   #abbreviation
+        self.strategyName = '一阳穿四线01'
         self.stockCode = stockcodeDelPrefix(stockCode)
         self.stockdf = pd.DataFrame(columns=['time','number'])  #暂时定义为分钟级
-    def updateMinData(self):
-        tradeDate = getLastTradeDate()
-        nowDate = datetime.datetime.now().strftime('%Y-%m-%d')
-        nowhour = int(datetime.datetime.now().strftime('%H'))
-        if tradeDate != nowDate or nowhour <9 or (nowhour > 12 and nowhour < 13) or nowhour > 14:  #非交易时间不采集。
-            logger.info('not trade time and do nothing')   
-            return
-        df = ak.stock_zh_a_hist_min_em(symbol=self.stockCode, start_date=tradeDate+' 09:15:00', end_date=tradeDate+' 15:30:00', period='1', adjust='')
+        self.dateofMonitor = datetime.datetime.now().strftime('%Y-%m-%d')
+        self.stockModel = getModel('wxcloudrun_stockdata_'+self.stockCode,'wxcloudrun')
+        #self.stockQuerySet = self.stockModel.objects.filter()
+        self.dsum4 = self.stockCode
+        self.tradeList = ak.tool_trade_date_hist_sina()['trade_date'].tolist()
+        self.tradeDate = datetime.datetime.now().strftime('%Y-%m-%d')
+        self.isTradeDay = True if self.tradeDate in self.tradeList else False
+
+        #交易条件
+        self.conditionHighPriceCrossMa5Ma10 = 0  #前一天最高价上穿MA5  MA10
+    def judgeCondition(self):
+        #当天上穿后回落，第二天开盘价MA5上穿MA10
+        df = ak.stock_zh_a_hist_min_em(symbol=self.stockCode, start_date=self.tradeDate+' 09:15:00', end_date=self.tradeDate+' 15:30:00', period='1', adjust='')
         '''
                  时间     开盘   收盘   最高   最低  成交量    成交额    最新价
 0   2023-04-06 09:30:00  35.44  35.44  35.44  35.44  16479   58401576.0  35.440
@@ -53,151 +76,71 @@ class monitorY1C4XStrategy(monitorStrategy):
 3   2023-04-06 09:33:00  35.37  35.65  35.65  35.37  16852   59789351.0  35.464
 4   2023-04-06 09:34:00  35.65  35.70  35.75  35.58   9911   35354874.0  35.486
         '''
-        self.curPrice = df[-1]['最新价']
-        self.MA5 = (self.sum4 + self.curPrice)/5
-        self.MA10 = (self.sum9 + self.curPrice)/10
-        self.MA20 = (self.sum19 + self.curPrice)/20
-        self.MA30 = (self.sum29 + self.curPrice)/30
-    def updateMAdate(self):
-        #每天需要调用执行一遍，外面进程处理，这里只提供方法。理论上数据库表应该有前一天的入库信息，这里断言一下，如果最近交易日的数据缺失，这个策略无法运行。   slow重构时也写入MA数据，这里可以用作当数据没有时，这里可以重试。
-        nowDate = datetime.datetime.now().strftime('%Y-%m-%d')
-        tradeDate = getLastTradeDate()
-        if nowDate != tradeDate: #非交易日不更新，没影响  #slow每天更新数据库时，写入SUM4、SUM9、SUM19、SUM29等数据，便于提高计算效率，不过当前暂时先不考虑，每天更新可以接受
-            return False
-        yesterday = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp() - 86400).strftime("%Y-%m-%d")
-        try:
-            #如果存在已注册的model，则不需要了，但是这里对股票数据表操作要加锁，包括slow进程也需要加锁。
-            stockModel = apps.get_model('wxcloudrun', 'wxcloudrun_stock_'+self.stockCode)
-        except:
-            stockModel = getModel(tableName='wxcloudrun_stock_'+self.stockCode,appLabel='wxcloudrun')
-        #查询股票库中是否包含前一天的数据库，这里要晚于slow每日更新，所以时间上设定要晚于slow执行。也要判断没有则返回失败，外层处理等待。
-        queryUserList = stockModel.objects.filter(date=yesterday)
-        if len(queryUserList) == 0 :
-            return 
-    def brustStrategyUpdate():
-        #stock_zh_a_minute  #分时数据-新浪描述: 新浪财经-沪深京 A 股股票或者指数的分时数据，目前可以获取 1, 5, 15, 30, 60 分钟的数据频率, 可以指定是否复权.限量: 单次返回指定股票或指数的指定频率的最近交易日的历史分时行情数据目标地址: http://finance.sina.com.cn/realstock/company/sh600519/nc.shtml
-        '''
-                       day  open  high   low  close  volume
-0      2020-06-17 14:49:00  3.05  3.05  3.04   3.04  133200
-1      2020-06-17 14:50:00  3.05  3.05  3.04   3.04  131900
-2      2020-06-17 14:51:00  3.04  3.05  3.04   3.04  332700
-3      2020-06-17 14:52:00  3.05  3.05  3.04   3.04   71100
-4      2020-06-17 14:53:00  3.04  3.05  3.04   3.04   49200
-                    ...   ...   ...   ...    ...     ...
-19995  2020-10-23 14:54:00  3.52  3.52  3.51   3.52  234900
-19996  2020-10-23 14:55:00  3.51  3.52  3.51   3.52  337300
-19997  2020-10-23 14:56:00  3.52  3.53  3.51   3.52  198067
-19998  2020-10-23 14:57:00  3.53  3.53  3.52   3.53  225800
-19999  2020-10-23 15:00:00  3.52  3.52  3.52   3.52  259123
-        '''
-        #stock_zh_a_spot #实时行情数据-新浪，新浪财经-沪深京 A 股数据, 重复运行本函数会被新浪暂时封 IP, 建议增加时间间隔, 这个返回整个股票列表的数据，必要可以看下自己封装下URL。https://vip.stock.finance.sina.com.cn/mkt/#hs_a
-        '''
-        代码       名称    最新价   涨跌额  ... 最高     最低        成交量      成交额
-0     bj430047  诺思兰德  16.95 -1.13  ...  21.68  16.22   9792284.0  178722467.0
-1     bj430090  同辉信息   8.15 -1.55  ...  10.27   7.94  17337157.0  153067422.0
-2     bj430198  微创光电  11.32 -0.55  ...  12.45  11.32   4346109.0   51586066.0
-3     bj430418  苏轴股份  16.21 -1.77  ...  19.20  16.21   2371783.0   41796314.0
-4     bj430489  佳先股份  17.55 -0.96  ...  20.87  17.15   2545238.0   47749607.0
-        ...   ...    ...   ...  ...    ...    ...         ...          ...
-4615  sz301129  瑞纳智能  74.95  6.37  ...  77.00  69.80   6891592.0  501929197.0
-4616  sz301149   C隆华  27.71  0.80  ...  31.14  24.81  35539728.0  993956229.0
-4617  sz301169  零点有数  46.25 -0.02  ...  47.88  45.02   6943221.0  321091268.0
-4618  sz301178  C天亿马  83.01  4.11  ...  83.83  74.88   6631398.0  535890089.0
-4619  sz301188   C力诺  29.18  1.23  ...  31.00  27.51  27838347.0  811742915.0
-        '''
-        #stock_kc_a_spot_em/stock_zh_a_spot_em(沪深京 A 股)  #目标地址: http://quote.eastmoney.com/center/gridlist.html#kcb_board  描述: 东方财富网-科创板-实时行情限量: 单次返回所有科创板的实时行情数据
-
-        '''
-      序号 代码    名称     最新价  ...   涨速  5分钟涨跌  60日涨跌幅  年初至今涨跌幅
-0      1  688155  先惠技术  110.40  ...  0.00   0.00   -2.64    -3.16
-1      2  688707  振华新材   73.00  ...  0.00   0.97   19.28    45.62
-2      3  688121  卓然股份   22.60  ...  0.58   0.44   -9.35   -41.22
-3      4  688711  宏微科技   71.23  ... -0.04   0.03  -14.77   -19.39
-4      5  688005  容百科技  125.32  ... -0.17  -0.12   -8.12     8.62
-..   ...     ...   ...     ...  ...   ...    ...     ...      ...
-428  429  688119  中钢洛耐    8.73  ...  0.00  -0.23   72.53    72.53
-429  430  688189  南新制药   19.92  ...  0.00   0.10   -7.78   -43.44
-430  431  688229  博睿数据   42.00  ... -0.52  -0.59  -13.22   -23.77
-431  432  688793   倍轻松   54.41  ... -0.24  -0.49   -1.96   -47.63
-432  433  688173   希荻微   30.51  ... -0.07  -0.03   15.13    -9.12
-        '''
-        #stock_zh_a_hist_min_em  #目标地址: http://quote.eastmoney.com/concept/sh603777.html?from=classic  描述: 东方财富网-行情首页-沪深京 A 股-每日分时行情; 该接口只能获取近期的分时数据，注意时间周期的设置限量: 单次返回指定股票、频率、复权调整和时间区间的分时数据, 其中 1 分钟数据只返回近 5 个交易日数据且不复权
-        '''
-                 时间       开盘    收盘  ...    成交量  成交额    最新价
-0     2021-08-31 09:30:00   0.00  17.72  ...   5905  10463660.0  17.720
-1     2021-08-31 09:31:00   0.00  17.65  ...  18454  32576004.0  17.669
-2     2021-08-31 09:32:00   0.00  17.70  ...  14085  24864945.0  17.663
-3     2021-08-31 09:33:00   0.00  17.68  ...  11138  19719604.0  17.673
-4     2021-08-31 09:34:00   0.00  17.77  ...  14392  25513573.0  17.685
-                   ...    ...    ...  ...    ...         ...     ...
-1200  2021-09-06 14:56:00  18.46  18.46  ...   4564   8424252.0  18.348
-1201  2021-09-06 14:57:00  18.45  18.45  ...   7414  13681401.0  18.348
-1202  2021-09-06 14:58:00  18.45  18.45  ...     69    127274.0  18.348
-1203  2021-09-06 14:59:00  18.45  18.45  ...      0         0.0  18.348
-1204  2021-09-06 15:00:00  18.45  18.45  ...  11541  21293052.0  18.349
-        '''
+        self.curPrice = df['收盘'][-1]
+        self.open = df['开盘'][0]
+        self.opendma5 = (self.pre1dsum4 + self.open) / 5
+        self.dma5 = (self.pre1dsum4 + self.curPrice) / 5
+        self.opendma10 = (self.pre1dsum9 + self.open) / 10
+        self.dma10 = (self.pre1dsum9 + self.curPrice) / 10
+        if self.opendma5 > self.opendma10
+            self.noticeUser('[Strategy notices]:'+self.stockCode +' is time to buy in for openMA5['+str(self.opendma5)+'] cross up openMA10['+str(self.opendma10)+']')
+        if self.dma5 > self.dma10:
+            self.noticeUser('[Strategy notices]:'+self.stockCode +' is time to buy in for MA5['+str(self.dma5)+'] cross up MA10['+str(self.dma10)+']')
+    def noticeUser(self,msg):
+        for userid in self.userlist:
+            wxFrontEnd.messageSend.sendmsg(userid,msg)
         pass
-    def brustStrategyRun():
-        #考虑不同策略的更新数据也不一样，所以更新动作和策略放一起，每分钟先更新，再跑策略。
-        pass
+    def getPreTradeDate(self,date):
+        preTradeDay = datetime.datetime.fromtimestamp (date.timestamp() - 86400).strftime('%Y-%m-%d')
+        while preTradeDay not in self.tradeList:
+            preTradeDay = datetime.datetime.fromtimestamp (preTradeDay.timestamp() - 86400).strftime('%Y-%m-%d')
+        return  preTradeDay    
+    def monitorLoop(self):
+        while True:
+            nowdate = datetime.datetime.now()
+            if nowdate.hour in [9,10,11,13,14]:
+                if self.judgeCondition():
+                    self.noticeUser()
+                else:
+                    time.sleep(60)   #这里间隔如果太短可能会被封，后面要考虑优化请求间隔。
+            else:
+                #每天8点,更新基础数据
+                if nowdate.hour == 8:
+                    
+                    #判断当天是否交易日
+                    self.isTradeDay = True if datetime.datetime.now().strftime('%Y-%m-%d') in self.tradeList else False
 
-    def testSinaInterface(symbol='sh600751', period='1', adjust=""):
-        logger = getlogger('testSina.log')
-        logger.info("startSina")
-        df = ak.stock_zh_a_minute(symbol='sh600751', period='1', adjust="")
-        logger.info(df)
+                    #获取上一个交易日
+                    pre1TradeDay = self.getPreTradeDate(nowdate)
+                    try:
+                        pre1stockQuerySet = self.stockModel.objects.get(date=pre1TradeDay)
+                    except:
+                        pre1stockQuerySet = None
+                    if pre1stockQuerySet == None:
+                        logger.error('pre1TradeDay stockdata not exists:'+pre1TradeDay)
+                        self.alarmManager('pre1TradeDay stockdata not exists:'+pre1TradeDay)
+                        exit(0)
+                    self.pre1dsum4 = pre1stockQuerySet.dsum4
+                    self.pre1dsum9 = pre1stockQuerySet.dsum9
+                    self.pre1dsum19 = pre1stockQuerySet.dsum19
+                    self.pre1dsum29 = pre1stockQuerySet.dsum29
+                    self.pre1open = pre1stockQuerySet.open_cq
+                    self.pre1high = pre1stockQuerySet.high_cq
+                    self.pre1low = pre1stockQuerySet.low_cq
+                    self.pre1close = pre1stockQuerySet.close_cq
 
-        '''
-        2023-04-06 09:35:04,529 monitorStrategy.py [line:84] INFO                       
-                        day   open   high   low  close  volume
-0      2022-08-15 11:20:00  2.630  2.630  2.620  2.630    4300
-1      2022-08-15 11:21:00  2.630  2.630  2.620  2.630    6700
-2      2022-08-15 11:22:00  2.630  2.630  2.620  2.630    4700
-3      2022-08-15 11:23:00  2.630  2.630  2.620  2.630   18400
-4      2022-08-15 11:24:00  2.630  2.630  2.620  2.630   10400
-...                    ...    ...    ...    ...    ...     ...
-36575  2023-04-06 09:31:00  2.810  2.810  2.790  2.790  340200
-36576  2023-04-06 09:32:00  2.790  2.800  2.790  2.800  168100
-36577  2023-04-06 09:33:00  2.790  2.800  2.780  2.780  357800
-36578  2023-04-06 09:34:00  2.780  2.800  2.780  2.800  361800
-36579  2023-04-06 09:35:00  2.800  2.800  2.790  2.800  146700
-
-[36580 rows x 6 columns]
-        '''
-    
-    def testEmInterface(symbol='sh600751', period='1', adjust=""):
-        logger = getlogger('testEm.log')
-        logger.info("startEM")
-        df = ak.stock_kc_a_spot_em()
-        df2 = ak.stock_zh_a_hist_min_em(symbol="000977", start_date="2023-04-06 09:15:00", end_date="2023-04-06 15:30:00", period='1', adjust='')
-        logger.info(df)
-        '''
-        2023-04-06 09:35:02,221 monitorStrategy.py [line:91] INFO       
-     序号   代码      名称     最新价 涨跌幅  涨跌额   成交量    成交额     振幅     最高   最低    今开     昨收   量比  换手率 市盈率-动态 市净率  总市值         流通市值  涨速  5分钟涨跌 60日涨跌幅  年初至今涨跌幅
-0      1  688498    源杰科技  240.00  15.66  32.50   7205.0  160438946.0  16.71  246.00  211.33  211.40  207.50  14.40   5.69   145.03  6.82  1.454376e+10  3.040884e+09  5.89  13.53   88.44   100.79
-1      2  688049    炬芯科技   47.78  13.52   5.69  28799.0  131755053.0   9.50   48.10   44.10   44.10   42.09  28.53   3.21   112.57  3.30  5.829160e+09  4.284213e+09  2.31   8.34   71.81    76.64
-2      3  688608    恒玄科技  173.71  11.84  18.39  13461.0  229139700.0   5.60  174.70  166.00  166.00  155.32  31.31   1.70   170.28  3.50  2.084520e+10  1.378559e+10  2.18   4.64   53.59    52.38
-3      4  688475    萤石网络   43.50  10.49   4.13  14240.0   60235318.0  15.24   45.00   39.00   39.00   39.37  18.14   1.70    73.46  5.04  2.446875e+10  3.644149e+09  4.69  11.54   56.03    67.76
-4      5  688332    中科蓝讯   74.00  10.23   6.87   9003.0   64310548.0   8.04   74.00   68.60   70.00   67.13  33.23   3.09    62.49  2.50  8.880000e+09  2.153400e+09  3.14   5.71   43.36    44.47
-..   ...     ...     ...     ...    ...    ...      ...          ...    ...     ...     ...     ...     ...    ...    ...      ...   ...           ...           ...   ...    ...     ...      ...
-514  515  688191    智洋创新   18.37  -6.08  -1.19   8350.0   15406131.0   3.99   18.88   18.10   18.88   19.56   5.15   1.17   100.97  3.40  2.820025e+09  1.308890e+09 -0.60  -2.70   39.91    44.87
-515  516  688095    福昕软件  112.60  -6.13  -7.35   3512.0   40038958.0   5.24  118.28  112.00  113.00  119.95   4.97   0.88 -3854.19  2.80  7.454379e+09  4.490747e+09 -1.22  -0.35   69.65    81.09
-516  517  688316  青云科技-U   67.45  -6.45  -4.65   5492.0   37895097.0   5.05   70.99   67.35   69.40   72.10   5.13   1.54   -13.06  9.63  3.201324e+09  2.401672e+09 -1.13  -2.81  118.71   138.85
-517  518  688229    博睿数据   63.54  -6.55  -4.45   2385.0   15246333.0   3.18   65.17   63.01   64.80   67.99   7.82   1.13   -32.59  4.34  2.821176e+09  1.338332e+09 -0.09  -1.94   71.13    86.61
-518  519  688535     C华海   57.72  -7.87  -4.93  16935.0   99148842.0   4.41   59.99   57.23   59.99   62.65   6.59  10.31   112.98  4.60  4.657799e+09  9.485178e+08 -0.91  -3.78   64.91    64.91
-
-[519 rows x 23 columns]
-        '''
-
-        logger.info(df2)
-        '''
-        2023-04-06 09:35:02,835 monitorStrategy.py [line:92] INFO                     
-                时间     开盘   收盘    最高   最低   成交量  成交额     最新价
-0  2023-04-06 09:30:00  35.44  35.44  35.44  35.44  16479   58401576.0  35.440
-1  2023-04-06 09:31:00  35.40  35.59  35.59  35.30  37001  131121097.0  35.438
-2  2023-04-06 09:32:00  35.60  35.40  35.68  35.36  16976   60323698.0  35.461
-3  2023-04-06 09:33:00  35.37  35.65  35.65  35.37  16852   59789351.0  35.464
-4  2023-04-06 09:34:00  35.65  35.70  35.75  35.58   9911   35354874.0  35.486
-5  2023-04-06 09:35:00  35.79  35.91  35.95  35.77  12373   44339373.0  35.525
-6  2023-04-06 09:36:00  35.95  35.95  35.95  35.95    688    2473222.0  35.528
-        '''
+                    pre2TradeDay = self.getPreTradeDate(pre1TradeDay)
+                    try:
+                        pre2stockQuerySet = self.stockModel.objects.get(date=pre2TradeDay)
+                    except:
+                        pre2stockQuerySet = None
+                    if pre2stockQuerySet == None:
+                        logger.error('pre2TradeDay stockdata not exists:'+pre2TradeDay)
+                        self.alarmManager('pre2TradeDay stockdata not exists:'+pre2TradeDay)
+                        exit(0)
+                    self.pre2dsum4 = pre2stockQuerySet.dsum4
+                    self.pre2dsum9 = pre2stockQuerySet.dsum9
+                    self.pre2dsum19 = pre2stockQuerySet.dsum19
+                    self.pre2dsum29 = pre2stockQuerySet.dsum29
+                    self.conditionHighPriceCrossMa5Ma10 = True if (self.pre2dsum4 + self.pre1high)/5 > (self.pre2dsum9 + self.pre1high)/10 else False
+            datetime.datetime.now()
