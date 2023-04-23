@@ -7,8 +7,12 @@ LOG_PATH = os.path.join(os.path.dirname(CUR_PATH), 'logs') # LOG_PATH是存放�
 if not os.path.exists(LOG_PATH): os.mkdir(LOG_PATH)  # 如果不存在这个logs文件夹，就自动创建一个
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+#BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#DJANGO_INDEX_ALLOW_INDEXING = 'true'  
+  
+# 允许在 /media 目录下创建文件  
+#DJANGO_INDEX_ALLOW_FILES = 'true'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -19,6 +23,40 @@ SECRET_KEY = 'django-insecure-_&03zc)d*3)w-(0grs-+t-0jjxktn7k%$3y6$9=x_n_ibg4js6
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+globalconfig = configparser.ConfigParser()
+globalconfig.read('./globalconfig.ini', encoding=None)
+globalconfig.sections() 
+if globalconfig.get('env', 'env') == 'prd':
+    #生产环境
+    host = globalconfig.get('prd', 'host')
+    user = globalconfig.get('prd', 'user')
+    passwd = globalconfig.get('prd', 'passwd')
+    database = globalconfig.get('prd', 'database')
+    port = globalconfig.get('prd', 'port')
+    WECHAT_REDIRECT_URL = globalconfig.get('prd', 'WECHAT_REDIRECT_URL')
+else:
+    #开发环境
+    host = globalconfig.get('dev', 'host')
+    user = globalconfig.get('dev', 'user')
+    passwd = globalconfig.get('dev', 'passwd')
+    database = globalconfig.get('dev', 'database')
+    port = globalconfig.get('dev', 'port')
+    WECHAT_REDIRECT_URL = globalconfig.get('dev', 'WECHAT_REDIRECT_URL')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': database,
+        'USER': user,
+        'HOST': host,
+        'PORT': port,
+        'PASSWORD': passwd,
+        'OPTIONS': {'charset': 'utf8mb4'},
+    }
+}
+
 
 # Application definition
 
@@ -62,37 +100,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wxcloudrun.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-globalconfig = configparser.ConfigParser()
-globalconfig.read('./globalconfig.ini', encoding=None)
-globalconfig.sections() 
-if globalconfig.get('env', 'env') == 'prd':
-    #生产环境
-    host = globalconfig.get('prdmysqldb', 'host')
-    user = globalconfig.get('prdmysqldb', 'user')
-    passwd = globalconfig.get('prdmysqldb', 'passwd')
-    database = globalconfig.get('prdmysqldb', 'database')
-    port = globalconfig.get('prdmysqldb', 'port')
-else:
-    #开发环境
-    host = globalconfig.get('devmysqldb', 'host')
-    user = globalconfig.get('devmysqldb', 'user')
-    passwd = globalconfig.get('devmysqldb', 'passwd')
-    database = globalconfig.get('devmysqldb', 'database')
-    port = globalconfig.get('devmysqldb', 'port')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': database,
-        'USER': user,
-        'HOST': host,
-        'PORT': port,
-        'PASSWORD': passwd,
-        'OPTIONS': {'charset': 'utf8mb4'},
-    }
-}
 
+#微信公众号
+WECHAT_APPID = 'wx6fc3f28176fda15a'
+WECHAT_SECRET = 'b0af5ff4cdebc26e72ebf38bd3f92696'
+
+
+
+
+
+'''
+CACHES = {
+ 'default': {
+  'BACKEND': 'django.core.cache.backends.db.DatabaseCache',  # 指定缓存使用的引擎
+  'LOCATION': 'cache',          # 数据库表    
+  'OPTIONS':{
+   'MAX_ENTRIES': 300,           # 最大缓存记录的数量（默认300）
+   'CULL_FREQUENCY': 3,          # 缓存到达最大个数之后，剔除缓存个数的比例，即：1/CULL_FREQUENCY（默认3）
+  }  
+ }
+}
+'''
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -199,10 +227,28 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGS_DIR = '/data/logs/'
+
+#STATIC_URL ='/static/'
+
+#ADMIN_MEDIA_PREFIX = '/media/'
+
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+#MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
+
+#STATIC_ROOT = os.path.join(BASE_DIR,STATIC_URL)
+MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_JQUERY_URL = '/static/script/jquery2.1.4.min.js'
+
+
+

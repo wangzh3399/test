@@ -24,16 +24,16 @@ def getDBConn():
     globalconfig.sections() 
     if globalconfig.get('env', 'env') == 'prd':
         #生产环境
-        host = globalconfig.get('prdmysqldb', 'host')
-        user = globalconfig.get('prdmysqldb', 'user')
-        passwd = globalconfig.get('prdmysqldb', 'passwd')
-        database = globalconfig.get('prdmysqldb', 'database')
+        host = globalconfig.get('prd', 'host')
+        user = globalconfig.get('prd', 'user')
+        passwd = globalconfig.get('prd', 'passwd')
+        database = globalconfig.get('prd', 'database')
     else:
         #开发环境
-        host = globalconfig.get('devmysqldb', 'host')
-        user = globalconfig.get('devmysqldb', 'user')
-        passwd = globalconfig.get('devmysqldb', 'passwd')
-        database = globalconfig.get('devmysqldb', 'database')
+        host = globalconfig.get('dev', 'host')
+        user = globalconfig.get('dev', 'user')
+        passwd = globalconfig.get('dev', 'passwd')
+        database = globalconfig.get('dev', 'database')
     try:
         db = pymysql.connect(host=host,
                             user=user,
@@ -88,10 +88,6 @@ def getLastWeekLastTradeDate(curDate):
 def getLastMonthLastTradeDate(curDate):
     dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
     monday = curDate.isoweekday()
-def sendTextMessage(userid,text):
-    customservice.add
-    txMsg = messages.TextMessage(userid=userid)
-    txMsg.
 if __name__ == '__main__':
     print('do nothing')
     print(getLastTradeDate())

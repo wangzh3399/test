@@ -9,6 +9,7 @@ import re
 from django.db import connection, migrations, models
 from django.db.migrations.executor import MigrationExecutor
 from django.apps import apps
+from basicfunc import *
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wxcloudrun.settings')
 django.setup()
 def getFields(tablename,datatype): #创建或查询时，根据表明返回field，dataype指定返回格式是list还是dic
@@ -207,11 +208,12 @@ def doMigrate(table_name, app_label, model_fields = None):
         migration.apply(executor._create_project_state(), schema_editor)
  
 def create_table(tableName,applabel):  #这里的tablename不带前缀applabel,或者传入stockcode
+    assert tableName.find(applabel) == -1
     if len(re.findall('\d\d\d\d\d\d',tableName)) != 0:
         doMigrate('stockdata_'+tableName,applabel,getFields('stockdata','list'))
         return
     #这里最好判断下是否创建成功。这里不能调用getModel判断，否则外层调用getModel，会死循环。
-    doMigrate(tableName,applabel,getFields(tableName,'list'))
+    doMigrate(tableName,applabel,getFields(applabel+'_'+tableName,'list'))
     #doMigrate('stockstaticdata','wxcloudrun',getFields('stockstaticdata','list'))
     #doMigrate('strategyconfig','wxcloudrun',getFields('strategyconfig','list'))
     #doMigrate('usermanager','wxcloudrun',getFields('usermanager','list'))
@@ -231,7 +233,19 @@ def create_model(name, fields=None, app_label='', module='', options=None, admin
         attrs.update(fields)
     # 继承models.Model
     return type(name, (models.Model,), attrs)
-
+'''
+def getModel(tableName,appLabel):
+    try:
+        logger.info('do getModel_inner')
+        model = getModel_inner(tableName,appLabel)
+    except:
+        tableName = tableName.split("_")[-1]
+        logger.info('create table:'+tableName)
+        create_table(tableName,appLabel)
+        logger.info('create table finished')
+        model =  getModel_inner(tableName,appLabel)
+    return model
+'''       
 
 def getModel(tableName,appLabel):
     #getModel如果还抛出异常，可能是表没创建？需要验证下，或者下面也可以建表
@@ -242,11 +256,21 @@ def getModel(tableName,appLabel):
     :return: 返回模型类
     """
     options = {'ordering': [], 'db_table': tableName, }
+    
     try:
-        #如果存在已注册的model，则不需要了。
-        custom_model = apps.get_model(app_label = appLabel,model_name = tableName)
+        #如果存在已注册的model，则不需要。
+        #
+        create_table(tableName.split("_")[-1],appLabel)
+        logger.info('create table'+tableName)
+        custom_model = create_model(tableName, getFields(tableName,'dic'), options=options, app_label=appLabel, module='wxcloudrun.models')  
     except:
-        custom_model = create_model(tableName, getFields(tableName,'dic'), options=options, app_label=appLabel, module='wxcloudrun.models')
+        #logger.info(traceback.format_exc())
+        try:
+            custom_model = apps.get_model(app_label = appLabel,model_name = tableName)
+            logger.info('model already registed and use directly')
+        except:
+            custom_model = create_model(tableName, getFields(tableName,'dic'), options=options, app_label=appLabel, module='wxcloudrun.models')  
+    
     return custom_model
 
 def tests(requests):
