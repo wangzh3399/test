@@ -33,7 +33,7 @@ def oauth(method):
             try:
                 wechatoauth.fetch_access_token(code)
                 user_info = wechatoauth.get_user_info()
-                logger.info('user   _info:'+str(user_info))
+                logger.info('user_info:'+str(user_info))
             except:
                 logger.error(traceback.format_exc())
             else:
@@ -74,7 +74,7 @@ def getUser(request):
 
 @oauth
 def index(request,_):
-    code = request.GET.get('code','')
+    #code = request.GET.get('code','')
     categorys = ['1','2','3']
     slider = [{'url':'xxx','image':'active/car.png'},{'url':'ooo','image':'active/guo1.jpeg'}]
     page = ['7','8','9']
@@ -82,19 +82,42 @@ def index(request,_):
 	    'categorys':categorys,
 	    'slider':slider,
 	    'page':page,
-        'code':code
+        #'code':code
 	}
-    return render(request,'index/prvsIndex.html',context)
+    return render(request,'prvsHome/index.html',context)
 def myself(request):
 
 	user={'name':'大猪','get_rank_display':'1','avator_url':'media/products/girl4.jpeg',}
 	return render(request,'myself/myself.html',{'user':user})
 
-@oauth
 def personal(request):
     user=getUser(request)
-    user={'name':user.username,'get_rank_display':'1','avator_url':'media/products/girl4.jpeg',}
-    return render(request,'myself/myself.html',{'user':user})
+    if user == None:
+        return render(request,'refuse.html')
+    userinfo={'name':user.username,'get_rank_display':'1','avator_url':'media/products/girl4.jpeg'}
+    return render(request,'prvsPerson/person.html',{'user':userinfo})
+
+def strategy(request): 
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
+    models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
+    return render(request,'prvsStrategy/strategyHome.html',{'models':models})
+def strategynew(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
+    models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
+    return render(request,'prvsStrategy/strategyNew.html',{'models':models})
+def strategyManagement(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
+    models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
+    return render(request,'prvsStrategy/strategyManagement.html',{'models':models})
 def default(request):
     '''
     method = request.method

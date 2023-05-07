@@ -1,4 +1,4 @@
-{% extends "prvsbase.html" %}
+{% extends "prvsBase/base2.html" %}
 {% block menu %}
 {% load static %}
 <a href="/monitor" id="shop_index" class="weui-tabbar__item">
@@ -16,7 +16,8 @@
     <img src="{%static 'icons/prvs/tradeback.png'%}" alt="" class="weui-tabbar__icon">
     <p class="weui-tabbar__label">Tradeback</p>
 </a>
-<a href="/personal?code={{code}}" id="join" class="weui-tabbar__item">
+<!--a href="/personal?code={{code}}" id="join" class="weui-tabbar__item"></a-->
+<a href="/personal" id="join" class="weui-tabbar__item">
     <img src="{%static 'icons/prvs/personal.png'%}" alt="" class="weui-tabbar__icon">
     <p class="weui-tabbar__label">Personal Center</p>
 </a>

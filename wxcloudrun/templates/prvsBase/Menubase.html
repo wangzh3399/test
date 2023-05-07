@@ -1,0 +1,42 @@
+{% extends "prvsBase/base.html" %}
+{% block menu %}
+{% load static %}
+<a href="/monitor" id="shop_index" class="weui-tabbar__item">
+    <span style="display: inline-block;position: relative;">
+        <img src="{%static 'icons/prvs/monitor.png'%}" alt="" class="weui-tabbar__icon">
+    </span>
+    <p class="weui-tabbar__label">Monitor Setting</p>
+</a>
+</a>
+<a href="/strategy" id="management" class="weui-tabbar__item">
+    <img src="{%static 'icons/prvs/strategy.png'%}" alt="" class="weui-tabbar__icon">
+    <p class="weui-tabbar__label">Strategy</p>
+</a>
+<a href="/tradeBack" id="management" class="weui-tabbar__item">
+    <img src="{%static 'icons/prvs/tradeback.png'%}" alt="" class="weui-tabbar__icon">
+    <p class="weui-tabbar__label">Tradeback</p>
+</a>
+<!--a href="/personal?code={{code}}" id="join" class="weui-tabbar__item"></a-->
+<a href="/personal" id="join" class="weui-tabbar__item">
+    <img src="{%static 'icons/prvs/personal.png'%}" alt="" class="weui-tabbar__icon">
+    <p class="weui-tabbar__label">Personal Center</p>
+</a>
+<script>
+    //刷新购物车中产品数
+    $.get('/getShopCartItemCount',function(data){
+        if (data.count!=0){
+            $("#shopcart_count").html(data.count).addClass("weui-badge");
+        }else{
+            $("#shopcart_count").removeClass("weui-badge");
+        }
+    });
+    //刷新购物车中未读活动数
+    $.get('/getActiveCount',function(data){
+        if (data.count!=0){
+            $("#active_count").html(data.count).addClass("weui-badge");
+        }else{
+            $("#active_count").removeClass("weui-badge");
+        }
+    })
+</script>
+{%endblock%}

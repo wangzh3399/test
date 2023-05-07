@@ -98,8 +98,11 @@ urlpatterns = [
     url(r'^^wxui(/)?$', views.index),
     url(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^myself$',views.myself),
-     url(r'^personal$',views.personal),
-     url(r'(/)?$', views.wxapi),
+    url(r'^strategy$',views.strategy),
+    url(r'^strategy/New$',views.strategynew),
+    url(r'^strategy/Management$',views.strategyManagement),
+    url(r'^personal$',views.personal),
+    url(r'(/)?$', views.wxapi),
     url(r'', views.default)
 
 ]

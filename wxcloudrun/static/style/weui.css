@@ -1276,7 +1276,7 @@ i.weui-tabbar__icon,
           transform: scaleY(0.5);
 }
 .weui-navbar + .weui-tab__panel {
-  padding-top: 50px;
+  padding-top: 34px;
   padding-bottom: 0;
 }
 .weui-navbar__item {
@@ -1285,7 +1285,7 @@ i.weui-tabbar__icon,
   -webkit-box-flex: 1;
   -webkit-flex: 1;
           flex: 1;
-  padding: 13px 0;
+  padding: 5px;
   text-align: center;
   font-size: 15px;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -1320,6 +1320,14 @@ i.weui-tabbar__icon,
 .weui-tab__panel {
   box-sizing: border-box;
   height: 100%;
+  padding-bottom: 50px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.weui-tab__panel_strategy {
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: 34px;
   padding-bottom: 50px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
@@ -1395,6 +1403,16 @@ i.weui-tabbar__icon,
   font-size: 13px;
   position: relative;
 }
+.weui-panel__bd {
+  padding: 14px 15px 10px;
+  color: #999999;
+  font-size: 13px;
+  position: relative;
+}
+.weui-panel__hd_noposition {
+  padding: 14px 15px 10px;
+  color: #999999;
+  font-size: 13px;}
 .weui-panel__hd:after {
   content: " ";
   position: absolute;
@@ -1411,7 +1429,7 @@ i.weui-tabbar__icon,
   left: 15px;
 }
 .weui-media-box {
-  padding: 15px;
+  padding: 0 px;
   position: relative;
 }
 .weui-media-box:before {
@@ -1441,7 +1459,7 @@ a.weui-media-box:active {
 }
 .weui-media-box__title {
   font-weight: 400;
-  font-size: 17px;
+  font-size: 20px;
   width: auto;
   overflow: hidden;
   text-overflow: ellipsis;
