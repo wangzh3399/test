@@ -10,9 +10,11 @@
         <!-- 引入 WeUI -->
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{%static 'style/weui.css'%}" media="all" />
+        <link rel="stylesheet" type="text/css" href="{%static 'style/weuix.css' %}" media="all" />
         <link rel="stylesheet" type="text/css" href="{%static 'style/site.css' %}" media="all" />
         <link rel="stylesheet" type="text/css" href="{%static 'style/detail.css' %}" media="all" />
         <link rel="stylesheet" type="text/css" href="{%static 'style/example.css' %}" media="all" />
+        
 
         <script type="text/javascript" src="{%static 'script/zepto.min.js'%}"></script>
         <script type="text/javascript" src="{%static 'script/iscroll.js'%}"></script>
@@ -22,8 +24,16 @@
         <script type="text/javascript" src="{%static 'script/site.js'%}"></script>
         <script type="text/javascript" src="{%static 'script/js.cookie.js'%}"></script>
         <script type="text/javascript" src="{%static 'script/json2.js'%}"></script>
+        <script type="text/javascript" src="{%static 'script/main-v1.4.0.js'%}"></script>
+        <script type="text/javascript" src="{%static 'script/zepto.weui.js'%}"></script>
         <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+        <!-- 引入 WeUI 扩展组件 -->
+
+        <!-- vux:https://github.com/airyland/vux/commits/v2   17.6K star  最后更新日期 2022 -->
+        <!-- zepto:https://weui.shanliwawa.top/weui/demo/js3.html   不找了，原有项目作者也用了zepto，而且有demo-->
         <script>
+
+
         /*
         $(function(){
             var fInitWeixin = function(d){
@@ -49,7 +59,7 @@
                 }
             })
         })
-        */
+        
         $(function(){
             var fInitWeixin = function(d){
                 wx.config({ // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
@@ -74,6 +84,7 @@
                 }
             })
         })
+        */
         </script>
         <style>
             .weui-product-select {

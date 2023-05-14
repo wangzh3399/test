@@ -15,6 +15,7 @@ from functools import wraps
 from django.conf import settings
 from models_generate import *
 from basicfunc import *
+from indicators import *
 #logger = getlogger()
 
 wechatoauth = WeChatOAuth(
@@ -109,13 +110,13 @@ def strategynew(request):
     if user == None:
         return render(request,'refuse.html')
     #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
-    models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
-    return render(request,'prvsStrategy/strategyNew.html',{'models':models})
+    #models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
+    return render(request,'prvsStrategy/strategyNew.html',{'indicators':json.dumps(indicators)})
 def strategyManagement(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
+    
     models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
     return render(request,'prvsStrategy/strategyManagement.html',{'models':models})
 def default(request):

@@ -1,0 +1,416 @@
+{% extends "prvsBase/Menubase.html" %}
+{% block panel %}
+{%load static%}
+<script>
+Component({
+    options: {
+        styleIsolation: 'apply-shared'
+    },
+    properties: {
+        active: Number, //  显示几级picker
+        array: Array, // array 数据
+        multiIndex: Array, // 回显数据
+    },
+    /**
+     * 页面的初始数据  
+     */
+     data: {
+         array: [{
+             title: '一级列表1',
+             children: [{
+                 title: '二级列表1',
+                 children: [{
+                     title: '三级列表1',
+                     children: [{
+                         title: '四级列表1'
+                     }, {
+                         title: '四级列表2'
+                     }, {
+                         title: '四级列表3'
+                     }, {
+                         title: '四级列表4'
+                     }, {
+                         title: '四级列表5'
+                     }]
+                 }, {
+                     title: '三级列表2',
+                     children: [{
+                         title: '四级列表21'
+                     }, {
+                         title: '四级列表22'
+                     }, {
+                         title: '四级列表23'
+                     }, {
+                         title: '四级列表24'
+                     }, {
+                         title: '四级列表25'
+                     }]
+                 }, {
+                     title: '三级列表3',
+                     children: [{
+                         title: '四级列表31'
+                     }, {
+                         title: '四级列表32'
+                     }, {
+                         title: '四级列表33'
+                     }, {
+                         title: '四级列表34'
+                     }, {
+                         title: '四级列表35'
+                     }]
+                 }]
+             }, {
+                 title: '二级列表2',
+                 children: [{
+                     title: '三级列表21',
+                     children: [{
+                         title: '四级列表211'
+                     }, {
+                         title: '四级列表212'
+                     }, {
+                         title: '四级列表213'
+                     }, {
+                         title: '四级列表214'
+                     }, {
+                         title: '四级列表215'
+                     }]
+                 }, {
+                     title: '三级列表22',
+                     children: [{
+                         title: '四级列表221'
+                     }, {
+                         title: '四级列表222'
+                     }, {
+                         title: '四级列表223'
+                     }]
+                 }, {
+                     title: '三级列表23',
+                     children: [{
+                         title: '四级列表231'
+                     }, {
+                         title: '四级列表232'
+                     }]
+                 }]
+             }]
+         }, {
+             title: '一级列表2',
+             children: [{
+                 title: '卡班组1',
+                 children: [{
+                     title: '卡数据线1',
+                     children: [{
+                         title: '卡传感量1'
+                     }, {
+                         title: '卡传感量2'
+                     }, {
+                         title: '卡传感量3'
+                     }, {
+                         title: '卡传感量4'
+                     }, {
+                         title: '卡传感量5'
+                     }]
+                 }, {
+                     title: '卡数据线2',
+                     children: [{
+                         title: '卡传感量21'
+                     }, {
+                         title: '卡传感量22'
+                     }, {
+                         title: '卡传感量23'
+                     }, {
+                         title: '卡传感量24'
+                     }]
+                 }, {
+                     title: '卡数据线3',
+                     children: [{
+                         title: '卡传感量31'
+                     }, {
+                         title: '卡传感量32'
+                     }, {
+                         title: '卡传感量33'
+                     }]
+                 }]
+             }, {
+                 title: '卡班组2',
+                 children: [{
+                     title: '卡数据线21',
+                     children: [{
+                         title: '卡传感量211'
+                     }, {
+                         title: '卡传感量212'
+                     }]
+                 }, {
+                     title: '卡数据线22',
+                     children: [{
+                         title: '卡传感量221'
+                     }, {
+                         title: '卡传感量222'
+                     }, {
+                         title: '卡传感量223'
+                     }]
+                 }, {
+                     title: '卡数据线23',
+                     children: [{
+                         title: '卡传感量231'
+                     }, {
+                         title: '卡传感量232'
+                     }]
+                 }]
+             }]
+         }],
+        defaultarray: [
+            [],
+            [],
+            [],
+            []
+        ],
+
+    },
+    pageLifetimes: {
+        show: function (options) {
+            var that = this;
+            var defaultarray = that.data.defaultarray
+            var array = that.data.array
+            console.log(array)
+            console.log(that.data.active)
+            //给defaultarray里的第1个数组赋值
+            for (var i = 0, len = array.length; i < len; i++) {
+                defaultarray[0].push(array[i].title)
+            }
+            // 给defaultarray里的第2个数组赋值
+            if (this.data.active >= 2) {
+                for (var i = 0, len = array[0].children.length; i < len; i++) {
+                    defaultarray[1].push(array[0].children[i].title)
+                }
+            }
+            // 给defaultarray里的第3个数组赋值
+            if (this.data.active >= 3) {
+                for (var i = 0, len = array[0].children[0].children.length; i < len; i++) {
+                    defaultarray[2].push(array[0].children[0].children[i].title)
+                }
+            }
+            if (this.data.active >= 4) {
+                // 给defaultarray里的第4个数组赋值
+                for (var i = 0, len = array[0].children[0].children[0].children.length; i < len; i++) {
+                    defaultarray[3].push(array[0].children[0].children[0].children[i].title)
+                }
+            }
+            defaultarray.length = this.data.active
+            if(this.data.multiIndex.length<=0){
+                that.setData({
+                    multiIndex: ("").padEnd(this.data.active,0).split("").map(x=>parseInt(x)),
+                })
+            }
+            // 渲染
+            that.setData({
+                defaultarray: defaultarray,
+            })
+            //！！！！！！！！要展示到界面的数据一定要用setdata!!!!!!!!!
+            // that.data.defaultarray = defaultarray
+            console.log(defaultarray)
+            console.log()
+
+        },
+    },
+    methods: {
+        bindMultiPickerChange: function (e) {
+            console.log('选中的值为', e.detail.value)
+            this.setData({
+                multiIndex: e.detail.value
+            })
+        },
+        bindMultiPickerColumnChange: function (e) {
+            console.log('修改的列为', e.detail.column, '，（列下标）值为', e.detail.value);
+
+            var that = this;
+            var defaultarray = that.data.defaultarray,
+                array = that.data.array,
+                multiIndex = that.data.multiIndex
+
+            // 更改multiIndex
+            multiIndex[e.detail.column] = e.detail.value
+
+            // 联动变化defaultarray数组
+            var searchColumn = () => {
+                for (var i = 0; i < array.length; i++) {
+                    var arr1 = []; //defaultarray[1]
+                    var arr2 = []; //defaultarray[2]
+                    var arr3 = []; //defaultarray[3]
+                    if (i == multiIndex[0]) { //找到修改的列号i
+                        for (var j = 0; j < array[i].children.length; j++) {
+                            arr1.push(array[i].children[j].title);
+                            if (this.data.active >= 3) {
+                                if (j == multiIndex[1]) {
+                                    for (var k = 0; k < array[i].children[j].children.length; k++) {
+                                        arr2.push(array[i].children[j].children[k].title);
+                                        if (this.data.active >= 4) {
+                                            if (k == multiIndex[2]) {
+                                                for (var g = 0; g < array[i].children[j].children[k].children.length; g++) {
+                                                    arr3.push(array[i].children[j].children[k].children[g].title);
+                                                }
+                                                defaultarray[3] = arr3;
+                                            }
+                                        }
+
+                                    }
+                                    defaultarray[2] = arr2;
+                                }
+                            }
+
+                        }
+                        defaultarray[1] = arr1;
+                    }
+                };
+            }
+
+            switch (e.detail.column) {
+                case 0:
+                    multiIndex[1] = 0;
+                    multiIndex[2] = 0;
+                    multiIndex[3] = 0;
+                    searchColumn();
+                    break;
+                case 1:
+                    multiIndex[2] = 0;
+                    multiIndex[3] = 0;
+                    searchColumn();
+                    break;
+                case 2:
+                    multiIndex[3] = 0;
+                    searchColumn();
+                    break;
+
+            }
+            this.setData({
+                defaultarray: defaultarray,
+                multiIndex: multiIndex
+            });
+
+
+        },
+    },
+})
+test = [0,1,1,3];
+test1 = defaultarray[0][multiIndex[0]];
+test2 = defaultarray[1][multiIndex[1]];
+test3 = defaultarray[2][multiIndex[2]];
+test4 = defaultarray[3][multiIndex[3]];
+test5 = defaultarray.length>=2;
+test6 = defaultarray.length>=3;
+test7 = defaultarray.length>=4;
+</script>
+<div class="weui-form">
+      <div class="weui-form__text-area">
+        <h2 class="weui-form__title">Create a new strategy model</h2>
+        <div class="weui-form__desc">Notice:Model type is set to private by default.</div>
+      </div>
+      <div class="weui-form__control-area">
+        <div class="weui-cells__group weui-cells__group_form">
+          <div class="weui-cells">
+            <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
+                <div class="weui-cell__hd">
+                  <span class="weui-label">Model Name</span>
+                </div>
+                <div class="weui-cell__bd">
+                    <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex" type="number" pattern="[0-9]*" placeholder="Please input a name" value="">
+                </div>
+            </label>
+            <div class="weui-cell weui-cell_active weui-cell_select" role="button" aria-haspopup="listbox" id="showDatePicker" wah-hotarea="click">
+              <div class="weui-cell__bd"><div class="weui-select">Strategy Argvs Chooses</div></div>
+            </div>
+            <div class="weui-cell weui-cell_active weui-cell_select weui-cell_select-before">
+              <div class="weui-cell__hd" id="showPhone" role="button" aria-haspopup="listbox" wah-hotarea="click"><div class="weui-select">+86</div></div>
+              <div class="weui-cell__bd">
+                <input id="js_input1" class="weui-input" type="number" pattern="[0-9]*" placeholder="请输入号码" value="12345678907">
+              </div>
+            </div>
+            <div id="showPicker" role="button" aria-haspopup="listbox" class="weui-cell weui-cell_active weui-cell_select weui-cell_select-after" wah-hotarea="click">
+              <div class="weui-cell__hd"><label class="weui-label">票种</label></div>
+              <div class="weui-cell__bd"><div class="weui-select">的士票</div></div>
+            </div>
+            <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
+                <div class="weui-cell__hd">
+                  <span class="weui-label">手机号</span>
+                </div>
+                <div class="weui-cell__bd">
+                    <span class="weui-cell__control">+86</span>
+                    <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex" type="number" pattern="[0-9]*" placeholder="请输入号码" value="12345678907">
+                </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <script type="text/javascript" class="form_select_primary js_show">
+    $('#showPhone').on('click', function () {
+        weui.picker([{
+            label: '+86',
+            value: 0
+        }, {
+            label: '+80',
+            value: 1
+        }, {
+            label: '+84',
+            value: 2
+        }, {
+            label: '+87',
+            value: 3
+        }], {
+            onChange: function (result) {
+                console.log(result);
+            },
+            onConfirm: function (result) {
+                console.log(result);
+            },
+            title: '单列选择器'
+        });
+    });
+    $('#showPicker').on('click', function () {
+        weui.picker([{
+            label: '飞机票',
+            value: 0
+        }, {
+            label: '火车票',
+            value: 1
+        }, {
+            label: '的士票',
+            value: 2
+        },{
+            label: '公交票 (disabled)',
+            disabled: true,
+            value: 3
+        }, {
+            label: '其他',
+            value: 4
+        }], {
+            onChange: function (result) {
+                console.log(result);
+            },
+            onConfirm: function (result) {
+                console.log(result);
+            },
+            title: '单列选择器'
+        });
+    });
+    $('#showDatePicker').on('click', function () {
+        weui.picker({
+          title: "请选择",
+          cols: [
+            {
+              textAlign: 'center',
+              values: ["1",'2']
+            }
+          ],
+          onChange: function(p, v, dv) {
+            console.log(p, v, dv);
+          },
+          onClose: function(p, v, d) {
+            console.log("close");
+          }
+        });
+    });
+    
+    </script>
+{%load static%}
+{% endblock %}
