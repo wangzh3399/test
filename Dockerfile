@@ -25,7 +25,6 @@ RUN apk add --update --no-cache python3 py3-pip \
 
 # 拷贝当前项目到/app目录下(.dockerignore中文件除外)
 COPY . /app
-
 # 设定当前的工作目录
 WORKDIR /app
 
@@ -44,7 +43,7 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 && pip install /app/whl/numpy-1.24.2-cp38-cp38-linux_x86_64.whl\
 && pip install /app/whl/pandas-2.0.0-cp38-cp38-linux_x86_64.whl\
 && pip install /app/whl/akshare-1.9.43-py3-none-any.whl
-
+#&& pip install akshare==1.9.43
 #RUN dd if=gitid.des3 |openssl des3 -d -k otwind|tar zxf -
 #RUN mkdir -p /root/.ssh/
 #RUN mv id_rsa* /root/.ssh/
