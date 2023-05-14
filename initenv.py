@@ -47,4 +47,4 @@ if __name__ == '__main__':
     #os.system('mariadb -h localhost -proot -A -e "drop database Stock"')
     #os.system('mariadb -h localhost -proot -A -e "create database Stock  character set utf8"')
     create_table('usermanager','wxcloudrun')
-    updateStockListPerDay()
+    #updateStockListPerDay()
