@@ -46,5 +46,5 @@ if __name__ == '__main__':
     #不论如何，执行这个脚本时，尝试删除Stock数据库并重建。
     #os.system('mariadb -h localhost -proot -A -e "drop database Stock"')
     #os.system('mariadb -h localhost -proot -A -e "create database Stock  character set utf8"')
-    create_table()
+    create_table('usermanager','wxcloudrun')
     updateStockListPerDay()

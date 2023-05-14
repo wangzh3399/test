@@ -40,65 +40,65 @@ if __name__ == '__main__':
         "button":
         [
             {
-                "name": "阅千帆",
+                "name": "未发布",
                 "sub_button":
                 [
                     {
                         "type": "click",
-                        "name": "锦囊妙计",
+                        "name": "未发布",
                         "key": "defaultRecommend"
                     },
                     {
                         "type": "click",
-                        "name": "排沙简金",
+                        "name": "未发布",
                         "key": "strategyRecommend"
                     },
                     {
                         "type": "click",
-                        "name": "洪水猛兽",
+                        "name": "未发布",
                         "key": "chasingHotSpots"
                     }
                 ]
             },
             {
-                "name": "观天象",
+                "name": "未发布",
                 "sub_button":
                 [
                     {
                         "type": "click",
-                        "name": "约法三章",
+                        "name": "未发布",
                         "key": "setMonitor"
                     },
                     {
                         "type": "click",
-                        "name": "日出而作",
+                        "name": "未发布",
                         "key": "startMonitor"
                     },
                     {
                         "type": "click",
-                        "name": "日落而息",
+                        "name": "未发布",
                         "key": "stopMonitor"
                     }
                 ]
             },
             {
-                "name": "理朝政",
+                "name": "未发布",
                 "sub_button":
                 [
                     {
                         "type": "click",
-                        "name": "良禽择木",
+                        "name": "未发布",
                         "key": "join"
                     },
                     {
                         "type": "click",
-                        "name": "排兵布阵",
+                        "name": "未发布",
                         "key": "setStrategy"
                     },
                     {
-                        "type": "click",
-                        "name": "授业解惑",
-                        "key": "help"
+                        "type": "view",
+                        "name": "测试跳转URL",
+                        "url":"http://wxservice.otwind.cn/wxui"
                     }
                 ]
             }
@@ -108,3 +108,4 @@ if __name__ == '__main__':
     accessToken = Basic().get_access_token()
     #myMenu.delete(accessToken)
     myMenu.create(postJson.encode('utf-8'), accessToken)
+    #myMenu.delete(accessToken)
