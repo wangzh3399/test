@@ -10,45 +10,38 @@
     </div>
     <div class="page-bd-15">
         <div class="weui-cells">
-            <div class="weui-cell weui-cell_swiped" id="s1">
+            <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
+                <div class="weui-cell__hd">
+                  <span class="weui-label">模型名称</span>
+                </div>
+                <div class="weui-cell__bd">
+                    <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value="">
+                </div>
+            </label>   
+            <div class="weui-cell weui-cell_swiped" id="indicatorSelect1">
                 <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                     <div class="weui-cell">
                         <div class="weui-cell__bd">
-                            <p>左滑列表</p>
+                            <p id="indicatorName1">选择指标</p>
                         </div>
-                        <div class="weui-cell__ft">向左滑动试试</div>
-                    </div>
-                </div>
-                <div class="weui-cell__ft">
-                    <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
-                    <a class="weui-swiped-btn weui-swiped-btn_default close-swipeout" href="javascript:">关闭</a>
-                </div>
-            </div>
-            <div class="weui-cell weui-cell_swiped" id="s2">
-                <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
-                    <div class="weui-cell">
-                        <div class="weui-cell__bd">
-                            <p>左滑列表</p>
-                        </div>
-                        <div class="weui-cell__ft">向左滑动试试</div>
+                        <div class="weui-cell__ft">左滑删除</div>
                     </div>
                 </div>
                 <div class="weui-cell__ft">
                     <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
                 </div>
             </div>
-            <div class="weui-cell weui-cell_swiped" id="s3">
-                <div class="weui-cell__bd" style="">
+            <div class="weui-cell weui-cell_swiped" id="stockSelect1">
+                <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAMAAABgZ9sFAAAAVFBMVEXx8fHMzMzr6+vn5+fv7+/t7e3d3d2+vr7W1tbHx8eysrKdnZ3p6enk5OTR0dG7u7u3t7ejo6PY2Njh4eHf39/T09PExMSvr6+goKCqqqqnp6e4uLgcLY/OAAAAnklEQVRIx+3RSRLDIAxE0QYhAbGZPNu5/z0zrXHiqiz5W72FqhqtVuuXAl3iOV7iPV/iSsAqZa9BS7YOmMXnNNX4TWGxRMn3R6SxRNgy0bzXOW8EBO8SAClsPdB3psqlvG+Lw7ONXg/pTld52BjgSSkA3PV2OOemjIDcZQWgVvONw60q7sIpR38EnHPSMDQ4MjDjLPozhAkGrVbr/z0ANjAF4AcbXmYAAAAASUVORK5CYII=" alt="" style="width:20px;margin-right:5px;display:block"></div>
                         <div class="weui-cell__bd">
-                            <p>左滑列表</p>
+                            <p id="stockName1">选择适用股票池</p>
                         </div>
-                        <div class="weui-cell__ft">向左滑动试试</div>
+                        <div class="weui-cell__ft">左滑删除</div>
                     </div>
                 </div>
                 <div class="weui-cell__ft">
-                    <a class="weui-swiped-btn weui-swiped-btn_default close-swipeout" href="javascript:">取消关注</a>
+                    <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
                 </div>
             </div>
         </div>
@@ -60,7 +53,7 @@
 <script type="text/javascript">
     /* picker */
 
-
+    
  
     $('.delete-swipeout').click(function () {
         $(this).parents('.weui-cell').remove()
@@ -68,16 +61,56 @@
     $('.close-swipeout').click(function () {
         $(this).parents('.weui-cell').swipeout('close')
     })
-
- $('.weui-cell_swiped').swipeout('open')
-  $(document).on("swipeout-open",'.weui-cell_swiped',function(){
+    $('.weui-cell_swiped').swipeout('open')
+    $(document).on("swipeout-open",'.weui-cell_swiped',function(){
            //监听打开触发
         })
         $(document).on("swipeout-close",'.weui-cell_swiped',function(){
             //监听关闭触发
         })
-    
-
+    indicatorIndex = 1; 
+    stockIndex = 1;
+    var indicators = {{ indicators|safe }};
+    function indicatorAddListen(selectid,ptextid,selectData){
+    document.querySelector('#'+selectid+indicatorIndex).addEventListener('click', function () {
+    weui.picker(selectData, {
+        depth: 2,
+        defaultValue: [0, 0],
+        onChange: function (result) {
+            //console.log(result);
+        },
+        onConfirm: function (result) {
+            $("#"+ptextid+indicatorIndex).html("指标:"+result[1]["label"]);
+            $("#"+selectid+indicatorIndex).after('<div class="weui-cell weui-cell_swiped" id="'+selectid+(indicatorIndex+1)+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="'+ptextid+(indicatorIndex+1)+'">选择指标</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
+            indicatorIndex = indicatorIndex + 1
+            indicatorAddListen(selectid,ptextid,selectData);
+        
+        },
+        id: 'cascadePicker'
+    });
+});
+}
+function stockAddListen(selectid,ptextid,selectData){
+    document.querySelector('#'+selectid+stockIndex).addEventListener('click', function () {
+    weui.picker(selectData, {
+        depth: 2,
+        defaultValue: [0, 0],
+        onChange: function (result) {
+            //console.log(result);
+        },
+        onConfirm: function (result) {
+            $("#"+ptextid+stockIndex).html("股票池:"+result[1]["label"]);
+            $("#"+selectid+stockIndex).after('<div class="weui-cell weui-cell_swiped" id="'+selectid+(stockIndex+1)+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="'+ptextid+(stockIndex+1)+'">选择适用股票池</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
+            stockIndex = stockIndex + 1
+            stockAddListen(selectid,ptextid,selectData);
+        
+        },
+        id: 'cascadePicker'
+    });
+});
+}
+indicatorAddListen("indicatorSelect","indicatorName",indicators);
+stockAddListen("stockSelect","stockName",indicators);
 </script>
 </html>
 {%load static%}
