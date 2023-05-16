@@ -120,7 +120,7 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
         'stockcode' : models.CharField(max_length=8,blank=False,primary_key=True,verbose_name="股票id"),
         'stockname' : models.CharField(max_length=32,blank=False,verbose_name="股票名称")
     }
-    #每次重新激活策略要重新创建一条记录。
+    #每次重新激活策略要重新创建一条记录。这里的监控表格结构可能要改，以监控策略为primary key
     strategyConfigFieldsList = [
         ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
         ('stockcode' , models.CharField(max_length=8,blank=False,verbose_name="股票id")),
@@ -151,6 +151,31 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
         ]  
 
     usermanagerFieldsDic = {
+        'userid' : models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id"),
+        'useraccount' : models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名"),
+        'username' : models.CharField(max_length=32,blank=False,verbose_name="微信昵称"), 
+        'registtime' : models.CharField(max_length=20,blank=False,verbose_name="注册时间"),
+        'uuid' : models.CharField(max_length=32,blank=False,verbose_name="用户标识"),   #忘记要干嘛用的了
+        'level' : models.CharField(max_length=8,blank=False,verbose_name="用户等级"),  #level 999 管理员 
+        'valid' : models.BooleanField(null=True,verbose_name="生效状态"),
+        'validtime' : models.CharField(max_length=20,blank=False,verbose_name="截止有效时间"),
+        'cashflow' : models.IntegerField(blank=False,null=True,verbose_name="流水") 
+        }
+    strategyPoolFieldsList = [
+        ('strategyid' , models.CharField(max_length=16,blank=False,primary_key=True,verbose_name="策略id")), #以时间戳是10位+userid后6位
+        ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
+        ('indicatorsNum' , models.CharField(max_length=32,blank=False,verbose_name="选取的指标个数")),
+        ('indicatorsid' , models.CharField(max_length=32,blank=False,verbose_name="指标id")), #指标这里标识ID，考虑是为了后续指标持续更新，名字维护不影响这里，能够解耦
+        ('username' , models.CharField(max_length=32,blank=False,verbose_name="微信昵称")), 
+        ('registtime' , models.CharField(max_length=20,blank=False,verbose_name="注册时间")),
+        ('uuid' , models.CharField(max_length=32,blank=False,verbose_name="用户标识")),   #忘记要干嘛用的了
+        ('level' , models.CharField(max_length=8,blank=False,verbose_name="用户等级")),  #level 999 管理员 
+        ('valid' , models.BooleanField(null=True,verbose_name="生效状态")),
+        ('validtime' , models.CharField(max_length=20,blank=False,verbose_name="截止有效时间")),
+        ('cashflow' , models.IntegerField(blank=False,null=True,verbose_name="流水"))
+        ]  
+
+    strategyPoolFieldsDic = {
         'userid' : models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id"),
         'useraccount' : models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名"),
         'username' : models.CharField(max_length=32,blank=False,verbose_name="微信昵称"), 
