@@ -99,7 +99,9 @@ urlpatterns = [
     url(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^myself$',views.myself),
     url(r'^strategy$',views.strategy),
-    url(r'^strategy/New$',views.strategynew),
+    url(r'^strategy/new$',views.strategyNew),
+    url(r'^strategy/Create$',views.strategyCreate),#prvsStrategy/strategyNewFilterIndicator
+    url(r'^strategy/newFilterIn$',views.strategyNewFilterIn),
     url(r'^strategy/Management$',views.strategyManagement),
     url(r'^personal$',views.personal),
     url(r'(/)?$', views.wxapi),

@@ -1,23 +1,49 @@
 {% extends "prvsBase/Menubase.html" %}
 {% block panel %}
 {%load static%}
-
     <div class="page-hd">
         <h1 class="page-hd-title">
-            滑动删除
+            新建初筛指标
         </h1>
-        <p class="page-hd-desc">Swipeout</p>
+        <p class="page-hd-desc">当前策略：xxxxx</p>
     </div>
     <div class="page-bd-15">
+        <div class="page-bd">
+            <div class="weui-cells__title">策略组：筹码集中度</div>
+            <ul class="collapse">
+                <li class="js-show">
+                    <div class="weui-flex js-category">
+                        <div class="weui-flex__item">加减速指标(A/C),MACD...</div>
+                        <i class="icon icon-35"></i>
+                    </div>
+                    <div class="page-category js-categoryInner">
+                        <div class="weui-cell weui-cell_swiped" id="indicatorSelect">
+                            <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <p id="indicatorName">选择指标</p>
+                                    </div>
+                                    <div class="weui-cell__ft">左滑删除</div>
+                                </div>
+                            </div>
+                            <div class="weui-cell__ft">
+                                <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
+                            </div>
+                        </div>
+                        <div class="weui-cell" id="addIndicatorButton" style="padding: 0px 0px;">
+                            <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <a href="javascript:addNewIndicatorBtn()" class="weui-btn weui-btn_mini  bg-blue">新增指标</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>              
         <div class="weui-cells">
-            <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
-                <div class="weui-cell__hd">
-                  <span class="weui-label">模型名称</span>
-                </div>
-                <div class="weui-cell__bd">
-                    <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value="">
-                </div>
-            </label>   
             <div class="weui-cell weui-cell_swiped" id="indicatorSelect">
                 <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                     <div class="weui-cell">
@@ -40,12 +66,13 @@
                     </div>
                 </div>
             </div>
-
-            <div class="weui-cell weui-cell_swiped" id="stockSelect">
+        </div>
+        <div class="weui-cells">
+            <div class="weui-cell weui-cell_swiped" id="indicatorSelect">
                 <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                     <div class="weui-cell">
                         <div class="weui-cell__bd">
-                            <p id="stockName">选择适用股票池</p>
+                            <p id="indicatorName">选择指标</p>
                         </div>
                         <div class="weui-cell__ft">左滑删除</div>
                     </div>
@@ -54,27 +81,40 @@
                     <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
                 </div>
             </div>
-        </div>
-        <div class="weui-cell" id="addStockButton" style="padding: 0px 0px;">
-            <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
-                <div class="weui-cell">
-                    <div class="weui-cell__bd">
-                        <a href="javascript:addNewStockBtn()" class="weui-btn weui-btn_mini  bg-blue">新增股票</a>
+            <div class="weui-cell" id="addIndicatorButton" style="padding: 0px 0px;">
+                <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <a href="javascript:addNewIndicatorBtn()" class="weui-btn weui-btn_mini  bg-blue">新增指标</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
-
 <script type="text/javascript">
     /* picker */
+    $(function(){
+        $('.collapse .js-category').click(function(){
+            $parent = $(this).parent('li');
+            if($parent.hasClass('js-show')){
+                $parent.removeClass('js-show');
+                $(this).children('i').removeClass('icon-35').addClass('icon-74');
+            }else{
+                $parent.siblings().removeClass('js-show');
+                $parent.addClass('js-show');
+                $(this).children('i').removeClass('icon-74').addClass('icon-35');
+                $parent.siblings().find('i').removeClass('icon-35').addClass('icon-74');
+            }
+        });
+
+    });
     indicatorsId = ["indicatorSelect"]; 
     stocksId = ["stockSelect"];
     var indicators = {{ indicators|safe }};
     function allSwipEventOn(){
         $('.delete-swipeout').click(function () {
+
             $(this).parents('.weui-cell').remove()
         })
         $('.close-swipeout').click(function () {

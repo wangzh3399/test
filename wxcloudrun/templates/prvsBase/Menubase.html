@@ -22,21 +22,5 @@
     <p class="weui-tabbar__label">Personal Center</p>
 </a>
 <script>
-    //刷新购物车中产品数
-    $.get('/getShopCartItemCount',function(data){
-        if (data.count!=0){
-            $("#shopcart_count").html(data.count).addClass("weui-badge");
-        }else{
-            $("#shopcart_count").removeClass("weui-badge");
-        }
-    });
-    //刷新购物车中未读活动数
-    $.get('/getActiveCount',function(data){
-        if (data.count!=0){
-            $("#active_count").html(data.count).addClass("weui-badge");
-        }else{
-            $("#active_count").removeClass("weui-badge");
-        }
-    })
 </script>
 {%endblock%}

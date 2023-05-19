@@ -1,0 +1,234 @@
+{% extends "prvsBase/Menubase.html" %}
+{% block panel %}
+{%load static%}
+
+    <div class="page-hd">
+        <h1 class="page-hd-title">
+            新建策略模型
+        </h1>
+        <p class="page-hd-desc">xxxxxxxx</p>
+    </div>
+    <div class="page-bd-15">
+        <div class="timeline">
+            <ul>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head-first" id="timeline-item-01">
+                    </div>
+                    <div class="timeline-item-tail"></div>
+                    <div class="timeline-item-content">
+                        <h4 id="h4-01">
+                            <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
+                                <div class="weui-cell__hd">
+                                  <span class="weui-label">模型名称</span>
+                                </div>
+                                <div class="weui-cell__bd">
+                                    <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value="">
+                                </div>
+                            </label>  
+                        </h4>
+                        <p>说明：名称规格要求</p></div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-02"></div>
+                    <div class="timeline-item-tail"></div>
+                    <div class="timeline-item-content">
+                        <h4 id="h4-02">
+                            定义初筛指标
+                        </h4>
+                        <p>说明:初筛指标会基于股票池持续监控并将符合初筛指标的股票纳入监控队列</p></div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-tail"></div>
+                    <div class="timeline-item-content">
+                        <h4>
+                            定义买入指标
+                        </h4>
+                        <p>在监控队列中的股票一旦符合买入指标，将通知/直接买入。</p></div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-tail"></div>
+                    <div class="timeline-item-content">
+                        <h4>
+                            定义卖出指标
+                        </h4>
+                        <p>在已买入队列中的股票一旦符合买出指标，将通知/直接卖出。</p></div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-tail "></div>
+                    <div class="timeline-item-content">
+                        <h4>
+                            定义剔除指标
+                        </h4>
+                        <p>在已监控队列中的股票一旦符合剔除指标，将剔除监控队列。</p></div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-tail hide"></div>
+                    <div class="timeline-item-content">
+                        <h4>
+                            选择适用股票池
+                        </h4>
+                        <p>指定模型适用的股票池。</p></div>
+                </li>
+            </ul>
+        </div>
+        <a href="javascript:nextBtn();" class="weui-btn weui-btn_mini weui-btn_primary" id="nextBtn">下一步</a>
+
+    </div>
+
+<script type="text/javascript">
+    /* picker */
+    //页面加载时获取当前用户的id是否存在未完成的模型，如果有则弹框是否加载。//暂时不做。
+    //定义一个策略的dic
+    var indicators = {{ indicators|safe }};
+    var userid = "{{ userid|safe }}";
+    var stage = -1;
+    console.log(userid);
+    strategyDic = {"name":"","filterIndicators":{},"buyIndicators":{}}
+    function nextBtn(){
+        switch(stage){
+            case -1: //初始化状态
+                $(".timeline-item-head-first").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
+                $("#h4-01").addClass("recent");
+                $("#h4-01").next().addClass("recent");
+                stage = 0;
+                break;
+            case 0: //模型名称完成并下一步
+                if($("#js_input3").val()!=""){//输入名称后操作
+                    $.ajax({url:"Create",data:{"name":$("#js_input3").val(),"userid":userid},success:function(result){
+                        //删除第一个选中状态
+                        $(".timeline-item-checked").remove();
+                        $("#h4-01").removeClass("recent");
+                        $("#h4-01").next().removeClass("recent");
+                        //禁用名称输入框
+                        $("#js_input3").attr('disabled', 'disabled');
+                        //设置第二个选中状态
+                        $("#timeline-item-02").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
+                        $("#h4-02").addClass("recent");
+                        $("#h4-02").next().addClass("recent");
+                        //添加上一步按钮
+                        $("#nextBtn").before('<a href="javascript:preBtn();" class="weui-btn weui-btn_mini weui-btn_primary" id="preBtn">上一步</a>');
+                        //添加初筛指标跳转链接url
+                        $("#h4-02").html('定义初筛指标<a href="" class="weui-btn weui-btn_mini weui-btn_primary" id="newFilterIn">前往</a>');
+                        $("#newFilterIn").attr("href","newFilterIn?name="+$("#js_input3").val()+"&userid="+userid);
+                        }
+                    });
+                    stage = 1;
+                }
+            case 1: //初筛指标定义完成并下一步
+
+
+        }
+    }
+    function preBtn(){
+        switch(stage){
+            case -1: //已经是初始化页面，无法上一步
+            case 1: //从初筛阶段回到命名阶段
+                //删除选中状态
+                $(".timeline-item-checked").remove();
+                $("#h4-02").removeClass("recent");
+                $("#h4-02").next().removeClass("recent");
+                //启用名称输入框
+                $("#js_input3").removeAttr("disabled");
+                //设置第一个为选中状态
+                $("#timeline-item-01").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
+                $("#h4-01").addClass("recent");
+                $("#h4-01").next().addClass("recent");
+                $("#preBtn").remove();
+                //删除初筛指标跳转链接
+                $("#h4-02").html('定义初筛指标');
+                stage = 0;
+        }
+
+    }
+    nextBtn();
+    indicatorsId = ["indicatorSelect"]; 
+    stocksId = ["stockSelect"];
+    
+    function allSwipEventOn(){
+        $('.delete-swipeout').click(function () {
+
+            $(this).parents('.weui-cell').remove()
+        })
+        $('.close-swipeout').click(function () {
+            $(this).parents('.weui-cell').swipeout('close')
+        })
+        $('.weui-cell_swiped').swipeout('open')
+        $(document).on("swipeout-open",'.weui-cell_swiped',function(){
+        //监听打开触发
+        })
+        $(document).on("swipeout-close",'.weui-cell_swiped',function(){
+            //监听关闭触发
+        })
+    }
+
+    function addNewIndicatorBtn(){
+        if(indicatorsId.length== 1){
+            curIndicatorId = indicatorsId[0];
+            newIndicatorId = indicatorsId[0] + indicatorsId.length;
+        }
+        else{
+            curIndicatorId = indicatorsId[0] + (indicatorsId.length-1);
+            newIndicatorId = indicatorsId[0] + indicatorsId.length;
+        }
+        $("#"+curIndicatorId).after('<div class="weui-cell weui-cell_swiped" id="'+newIndicatorId+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="indicatorName'+indicatorsId.length+'">选择指标</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
+        indicatorsId.push(newIndicatorId)
+        indicatorAddPicker(newIndicatorId,indicators);
+        allSwipEventOn();
+    }
+    function addNewStockBtn(){
+        if(stocksId.length == 1){
+            curStockId = stocksId[0];
+            newStockId = stocksId[0] + stocksId.length;
+        }
+        else{
+            curStockId = stocksId[0] + (stocksId.length-1);
+            newStockId = stocksId[0] + stocksId.length;
+        }
+        $("#"+curStockId).after('<div class="weui-cell weui-cell_swiped" id="'+newStockId+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="stockName'+stocksId.length+'">选择适用股票池</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
+        stocksId.push(newStockId)
+        stockAddPicker(newStockId,indicators);
+        allSwipEventOn();
+    }
+    function indicatorAddPicker(id,selectData){
+        document.querySelector('#'+id).addEventListener('click', function (e) {
+            weui.picker(selectData, {
+                depth: 2,
+                defaultValue: [0, 0],
+                onChange: function (result) {
+                //console.log(result);
+                },
+                onConfirm: function (result) {
+                    $(e.target).html("指标:"+result[1]["label"]);
+                    //e.srcElement.html("指标:"+result[1]["label"])
+                    //console.log(indicatorIndex);
+                },
+                id: 'cascadePicker'
+            });
+        });
+    }
+    function stockAddPicker(id,selectData){
+        document.querySelector('#'+id).addEventListener('click', function (e) {
+            weui.picker(selectData, {
+                depth: 2,
+                defaultValue: [0, 0],
+                onChange: function (result) {
+                //console.log(result);
+                },
+                onConfirm: function (result) {
+                    $(e.target).html("指标:"+result[1]["label"]);
+                },
+                id: 'cascadePicker'
+            });
+        });
+    }
+    indicatorAddPicker(indicatorsId[0],indicators);
+    stockAddPicker(stocksId[0],indicators);
+    allSwipEventOn();
+</script>
+</html>
+{%load static%}
+{% endblock %}
