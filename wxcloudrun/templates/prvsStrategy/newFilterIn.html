@@ -112,7 +112,7 @@
         $("#indicatorSelectCelltmp").attr("id","indicatorSelectCell");
         $("#newIndicatorBtntmp").attr("id","newIndicatorBtn");
         groupIndex.push(indicatorsId.length+"");
-        indicatorsId.push("indicatorSelect"+index);  //这里压栈select，用于后面for循环绑定picker
+        indicatorsId.push("indicatorSelect"+indicatorsId.length);  //这里压栈select，用于后面for循环绑定picker
         //重新绑定折叠事件
         bindCollapse();
         bindPicker();
