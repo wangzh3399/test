@@ -116,6 +116,7 @@
         //重新绑定折叠事件
         bindCollapse();
         bindPicker();
+        allSwipEventOn();
         //重新绑定新增指标btn事件
         $("#newIndicatorBtn"+index).click(function(){
             var selectCell = $("#indicatorSelectCell").clone();
@@ -129,6 +130,7 @@
             $("#indicatorSelecttmp").attr("id","indicatorSelect");
             indicatorsId.push("indicatorSelect"+indicatorsId.length);  //新增一个selectCell，把子元素selectid压栈，用于后面for循环绑定picker
             bindPicker()
+            allSwipEventOn();
         });
     }
     function allSwipEventOn(){//左滑删除监听事件
