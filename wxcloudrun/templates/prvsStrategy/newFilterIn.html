@@ -9,7 +9,7 @@
     </div>
     <div class="page-bd-15">
         <div class="page-bd" id="group" style="display: none;">
-            <div class="weui-cells__title" id="grouptitle">条件组1：<a href="">名称设置</a>&nbsp&nbsp<a href="">删除</a></div>
+            <div class="weui-cells__title" id="grouptitle">条件组1：<a href="javascript:void(0)" id="nameSetBtn">名称设置</a>&nbsp&nbsp<a href="javascript:void(0)" id="groupDelBtn">删除</a></div>
             <ul class="collapse">
                 <li class="js-show">
                     <div class="weui-flex js-category" id="js-category">
@@ -17,7 +17,7 @@
                         <i class="icon icon-35" id="icon"></i>
                     </div>
                     <div class="page-category js-categoryInner">
-                        <div class="weui-cell weui-cell_swiped" id="indicatorSelectCell" style="display: none;">
+                        <div class="weui-cell weui-cell_swiped" id="indicatorSelectCell">
                             <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                                 <div class="weui-cell">
                                     <div class="weui-cell__bd" id="indicatorSelect">
@@ -30,7 +30,7 @@
                                 <a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a>
                             </div>
                         </div>
-                        <div class="weui-cell" id="addIndicatorButton" style="padding: 0px 0px;">
+                        <div class="weui-cell" style="padding: 0px 0px;">
                             <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                                 <div class="weui-cell">
                                     <div class="weui-cell__bd">
@@ -43,7 +43,7 @@
                 </li>
             </ul>
         </div>
-        <a href="javascript:newgroup()" class="weui-btn weui-btn_mini  bg-blue">新增条件组</a>           
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini  bg-blue" id="newGroupBtn">新增条件组</a>           
     </div>
 <script type="text/javascript">
     //变量定义
@@ -53,124 +53,109 @@
     groupIndex = [] //必须从小到大排列
     //绑定折叠
     function bindCollapse(){
-        for(i=0;i<groupIndex.length;i++){  
-            indicatorTitle = "indicatorTitle"+i;
-            $("#"+indicatorTitle).unbind('click').click(function(){
-                if($(this).parent().parent().hasClass("js-show")){
-                    console.log("111")
-                    $(this).parent().parent().removeClass('js-show');
-                    $(this).next().removeClass('icon-35').addClass('icon-74');
-                }
-                else{
-                    console.log("222")
-                    $(this).parent().parent().addClass("js-show")
-                    $(this).next().removeClass('icon-74').addClass('icon-35');
-                }
-            });
-        }
-        
-    }
-    function newgroup(){
-        var pageBd = $("#group").clone();
-        
-        //将模板改为临时id
-        $("#group").attr("id","grouptmp");
-        $("#grouptitle").attr("id","grouptitletmp");
-        $("#indicatorTitle").attr("id","indicatorTitletmp");
-        $("#indicatorSelect").attr("id","indicatorSelecttmp");
-        $("#indicatorName").attr("id","indicatorNametmp");
-        $("#indicatorSelectCell").attr("id","indicatorSelectCelltmp");
-        $("#newIndicatorBtn").attr("id","newIndicatorBtntmp");
-        var index = groupIndex.length;
-        console.log(index);
-        var lastGroupId; //最后一个group的id
-        if(index==0){
-            lastGroupId = "grouptmp";
-        }
-        else{
-            lastGroupId = "group"+(index-1);
-        }
-        //插入克隆的条件组
-        $("#"+lastGroupId).after(pageBd);
-        //新插入条件组的id重新定义 
-        $("#group").attr("id","group"+index);
-        $("#grouptitle").attr("id","grouptitle"+index);
-        $("#indicatorTitle").attr("id","indicatorTitle"+index);
-        $("#indicatorSelect").attr("id","indicatorSelect"+indicatorsId.length);
-        $("#indicatorName").attr("id","indicatorName"+index);
-        $("#indicatorSelectCell").attr("id","indicatorSelectCell"+indicatorsId.length);
-        $("#newIndicatorBtn").attr("id","newIndicatorBtn"+index);
-        $("#group"+index).attr("style","");//模板display，去掉
-        $("#indicatorSelectCell"+indicatorsId.length).attr("style","");//模板display，去掉
-        $("#grouptitle"+index).html('条件组'+index+'：<a href="" id="nameSetBtn'+index+'"">名称设置</a>&nbsp&nbsp<a href="" id="groupDelBtn'+index+'">删除</a>');
-        //将模板再改回原有id
-        $("#grouptmp").attr("id","group");
-        $("#grouptitletmp").attr("id","grouptitle");
-        $("#indicatorTitletmp").attr("id","indicatorTitle");
-        $("#indicatorSelecttmp").attr("id","indicatorSelect");
-        $("#indicatorNametmp").attr("id","indicatorName");
-        $("#indicatorSelectCelltmp").attr("id","indicatorSelectCell");
-        $("#newIndicatorBtntmp").attr("id","newIndicatorBtn");
-        groupIndex.push(indicatorsId.length+"");
-        indicatorsId.push("indicatorSelect"+indicatorsId.length);  //这里压栈select，用于后面for循环绑定picker
-        //重新绑定折叠事件
-        bindCollapse();
-        bindPicker();
-        allSwipEventOn();
-        //重新绑定新增指标btn事件
-        $("#newIndicatorBtn"+index).click(function(){
-            var selectCell = $("#indicatorSelectCell").clone();
-            $("#indicatorSelectCell").attr("id","indicatorSelectCelltmp");
-            $("#indicatorSelect").attr("id","indicatorSelecttmp");
-            $(this).parent().parent().parent().parent().before(selectCell);
-            $("#indicatorSelectCell").attr("id","indicatorSelectCell"+indicatorsId.length);
-            $("#indicatorSelect").attr("id","indicatorSelect"+indicatorsId.length);
-            $("#indicatorSelectCell"+indicatorsId.length).attr("style","");//模板display，去掉
-            $("#indicatorSelectCelltmp").attr("id","indicatorSelectCell");
-            $("#indicatorSelecttmp").attr("id","indicatorSelect");
-            indicatorsId.push("indicatorSelect"+indicatorsId.length);  //新增一个selectCell，把子元素selectid压栈，用于后面for循环绑定picker
-            bindPicker()
-            allSwipEventOn();
+        var Collapses = $("div[id^='indicatorTitle']");
+        $(Collapses).unbind('click').click(function(){
+            if($(this).parent().parent().hasClass("js-show")){
+                $(this).parent().parent().removeClass('js-show');
+                $(this).next().removeClass('icon-35').addClass('icon-74');
+            }
+            else{
+                $(this).parent().parent().addClass("js-show")
+                $(this).next().removeClass('icon-74').addClass('icon-35');
+            }
         });
     }
-    function allSwipEventOn(){//左滑删除监听事件
-        $('.delete-swipeout').click(function () {
-
-            $(this).parents('.weui-cell').remove()
-        })
-        $('.close-swipeout').click(function () {
-            $(this).parents('.weui-cell').swipeout('close')
-        })
-        $('.weui-cell_swiped').swipeout('open')
-        $(document).on("swipeout-open",'.weui-cell_swiped',function(){
-        //监听打开触发
-        })
-        $(document).on("swipeout-close",'.weui-cell_swiped',function(){
-            //监听关闭触发
-        })
+    function bindNewGroupBtn(){//这个用选择器通配、元素链实现会简单很多。
+        $("#newGroupBtn").unbind("click").click(function(){
+            var pageBd = $(".page-bd:first").clone();
+            console.log(pageBd);
+            $(this).before(pageBd);
+            $(".page-bd:last").attr("style","");
+            rearrange();
+            reBindAll();
+        });
+    }
+    function bindNewIndicatorBtn(){
+        var newIndicatorBtns = $("div[id^='newIndicatorBtn']");
+        $(newIndicatorBtns).unbind("click").click(function(){
+            var selectCell = $("#indicatorSelectCell:first").clone();
+            $(this).parent().parent().parent().parent().before(selectCell);
+            reBindAll()
+            rearrange();
+        });
     }
     function bindPicker(){
-        for(i=0;i<indicatorsId.length;i++){//绑定picker
-            console.log('#'+indicatorsId[i]);
-            document.querySelector('#'+indicatorsId[i]).addEventListener('click', function (e) {
-                weui.picker(indicators, {
-                    depth: 2,
-                    defaultValue: [0, 0],
-                    onChange: function (result) {
-                        //console.log(result);
-                    },
-                    onConfirm: function (result) {
-                        $(e.target).html("指标:"+result[1]["label"]);
-                        //e.srcElement.html("指标:"+result[1]["label"])
-                        //console.log(indicatorIndex);
-                    },
-                    id: 'cascadePicker'
-                });
+        var indicatorSelects = $("div[id^='indicatorSelect']");
+        $(indicatorSelects).unbind("click").click(function(e){
+            weui.picker(indicators, {
+                depth: 2,
+                defaultValue: [0, 0],
+                onChange: function (result) {
+                    //console.log(result);
+                },
+                onConfirm: function (result) {
+                    $(e.target).html("指标:"+result[1]["label"]);
+                    //e.srcElement.html("指标:"+result[1]["label"])
+                    //console.log(indicatorIndex);
+                },
+                id: 'cascadePicker'
             });
-        }
+        });
     };
-    allSwipEventOn();
-    bindCollapse()
+    function bindNameSetBtn(){ 
+        $("a[id^='nameSetBtn']").unbind('click').click(function(e) {
+                $.prompts({
+                    title: "设置"+$(e.target).parent().html().split("：")[0]+"的名称",
+                    //text: '内容文案',
+                    input: $(e.target).html()=="名称设置"?"":$(e.target).html(),
+                    empty: false, // 是否允许为空
+                    onOK: function (input) {
+                        $(e.target).html(input);
+                    },
+                    onCancel: function () {
+                        //点击取消
+                    }
+                });
+            })
+    }
+    function bindGroupDelBtn(){ 
+        $("a[id^='groupDelBtn']").unbind('click').click(function(e) {
+            $.confirm("确认删除["+$(e.target).parent().html().split("：")[0]+"]吗?", "确认删除?", function() {
+                $(e.target).parent().parent().remove();
+                rearrange();
+                reBindAll();
+            }, function() {
+                    //取消操作
+            });
+        });
+        
+    }
+    function reBindAll(){
+        bindCollapse();
+        bindNewGroupBtn();
+        bindNewIndicatorBtn();
+        bindPicker();
+        bindNameSetBtn();
+        bindGroupDelBtn();
+    }
+    function rearrange(){
+        //重排组名
+        var groups = $(".weui-cells__title");
+        console.log(groups);
+        for(i=0;i<groups.length;i++){
+            console.log(i);
+            preTxt = $(groups[i]).html();
+            newTxt = preTxt.replace(/\d+：/i,i+"：")
+            $(groups[i]).html(newTxt);
+        }
+    }
+    $(document).ready(function(){ 
+        var pageBd = $("#group").clone();
+        $("#newGroupBtn").before(pageBd);
+        $(".page-bd:last").attr("style","");
+        reBindAll();
+    });  
+
 </script>
 </html>
 {%load static%}
