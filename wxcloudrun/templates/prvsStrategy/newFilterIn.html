@@ -80,8 +80,8 @@
         $(newIndicatorBtns).unbind("click").click(function(){
             var selectCell = $("#indicatorSelectCell:first").clone();
             $(this).parent().parent().parent().parent().before(selectCell);
-            reBindAll()
             rearrange();
+            reBindAll()
         });
     }
     function bindPicker(){
