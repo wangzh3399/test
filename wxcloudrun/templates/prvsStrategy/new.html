@@ -83,7 +83,6 @@
     /* picker */
     //页面加载时获取当前用户的id是否存在未完成的模型，如果有则弹框是否加载。//暂时不做。
     //定义一个策略的dic
-    var indicators = {{ indicators|safe }};
     var userid = "{{ userid|safe }}";
     var stage = -1;
     console.log(userid);
@@ -144,90 +143,7 @@
         }
 
     }
-    function nextBtn();
-    indicatorsId = ["indicatorSelect"]; 
-    stocksId = ["stockSelect"];
-    
-    function allSwipEventOn(){
-        $('.delete-swipeout').click(function () {
-
-            $(this).parents('.weui-cell').remove()
-        })
-        $('.close-swipeout').click(function () {
-            $(this).parents('.weui-cell').swipeout('close')
-        })
-        $('.weui-cell_swiped').swipeout('open')
-        $(document).on("swipeout-open",'.weui-cell_swiped',function(){
-        //监听打开触发
-        })
-        $(document).on("swipeout-close",'.weui-cell_swiped',function(){
-            //监听关闭触发
-        })
-    }
-
-    function addNewIndicatorBtn(){
-        if(indicatorsId.length== 1){
-            curIndicatorId = indicatorsId[0];
-            newIndicatorId = indicatorsId[0] + indicatorsId.length;
-        }
-        else{
-            curIndicatorId = indicatorsId[0] + (indicatorsId.length-1);
-            newIndicatorId = indicatorsId[0] + indicatorsId.length;
-        }
-        $("#"+curIndicatorId).after('<div class="weui-cell weui-cell_swiped" id="'+newIndicatorId+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="indicatorName'+indicatorsId.length+'">选择指标</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
-        indicatorsId.push(newIndicatorId)
-        indicatorAddPicker(newIndicatorId,indicators);
-        allSwipEventOn();
-    }
-    function addNewStockBtn(){
-        if(stocksId.length == 1){
-            curStockId = stocksId[0];
-            newStockId = stocksId[0] + stocksId.length;
-        }
-        else{
-            curStockId = stocksId[0] + (stocksId.length-1);
-            newStockId = stocksId[0] + stocksId.length;
-        }
-        $("#"+curStockId).after('<div class="weui-cell weui-cell_swiped" id="'+newStockId+'"><div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);"><div class="weui-cell"><div class="weui-cell__bd"><p id="stockName'+stocksId.length+'">选择适用股票池</p></div><div class="weui-cell__ft">左滑删除</div></div></div><div class="weui-cell__ft"><a class="weui-swiped-btn weui-swiped-btn_warn delete-swipeout" href="javascript:">删除</a></div></div>')
-        stocksId.push(newStockId)
-        stockAddPicker(newStockId,indicators);
-        allSwipEventOn();
-    }
-    function indicatorAddPicker(id,selectData){
-        document.querySelector('#'+id).addEventListener('click', function (e) {
-            weui.picker(selectData, {
-                depth: 2,
-                defaultValue: [0, 0],
-                onChange: function (result) {
-                //console.log(result);
-                },
-                onConfirm: function (result) {
-                    $(e.target).html("指标:"+result[1]["label"]);
-                    //e.srcElement.html("指标:"+result[1]["label"])
-                    //console.log(indicatorIndex);
-                },
-                id: 'cascadePicker'
-            });
-        });
-    }
-    function stockAddPicker(id,selectData){
-        document.querySelector('#'+id).addEventListener('click', function (e) {
-            weui.picker(selectData, {
-                depth: 2,
-                defaultValue: [0, 0],
-                onChange: function (result) {
-                //console.log(result);
-                },
-                onConfirm: function (result) {
-                    $(e.target).html("指标:"+result[1]["label"]);
-                },
-                id: 'cascadePicker'
-            });
-        });
-    }
-    indicatorAddPicker(indicatorsId[0],indicators);
-    stockAddPicker(stocksId[0],indicators);
-    allSwipEventOn();
+    nextBtn();
 </script>
 </html>
 {%load static%}
