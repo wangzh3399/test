@@ -1,12 +1,88 @@
 import json
 
-#两种分类，常用指标和全量指标
+condition = [{
+   'label':'>',
+   'value':0
+   },{
+   'label':'≥',
+   'value':1       
+   },{
+   'label':'<',
+   'value':2   
+   },{
+   'label':'≤',
+   'value':3
+   },{
+   'label':'=',
+   'value':4       
+   },{
+   'label':'≠',
+   'value':5   
+   }
+]
+#常用指标放上面，非常用放下面，不再单独搞一列用于区分
+indicators_col1 = [{
+   'label': '选择指标/数值',
+   'value': 0
+   },{
+   'label': '加/减速指标(AC)',
+   'value': 1
+   },{
+   'label': 'MACD',
+   'value': 2
+   },{
+   'label': 'AdaptiveMovingAverage',
+   'value': 3
+   }]
+indicators_col2 = [{
+   'label': '选择条件',
+   'value': 0
+   },{
+   'label':'>',
+   'value':1
+   },{
+   'label':'≥',
+   'value':2       
+   },{
+   'label':'<',
+   'value':3   
+   },{
+   'label':'≤',
+   'value':4
+   },{
+   'label':'=',
+   'value':5       
+   },{
+   'label':'≠',
+   'value':6   
+   }]
+indicators_col3 = [{
+   'label': '选择指标/数值',
+   'value': 0
+   },{
+   'label': '指定数值',
+   'value': 1
+   },{
+   'label': '加/减速指标(AC)',
+   'value': 2
+   },{
+   'label': 'MACD',
+   'value': 3
+   },{
+   'label': 'AdaptiveMovingAverage',
+   'value': 4
+   }]
+'''
 indicators = [{
    'label':'请选择',
    'value':0,
    'children':[{
       'label':'请选择',
-      'value': 0
+      'value': 0,
+      'children':[{
+          'label':'请选择',
+          'value':0,
+      }]
    }]
 },{
    'label':'通用指标',
@@ -35,7 +111,7 @@ indicators = [{
       'value': 3
    }]
 }]
-
+'''
 AccelerationDecelerationOscillator = {}
 Accum = {}
 AdaptiveMovingAverage = {}

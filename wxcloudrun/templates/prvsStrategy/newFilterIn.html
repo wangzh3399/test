@@ -17,7 +17,8 @@
                         <i class="icon icon-35" name="icon"></i>
                     </div>
                     <div class="page-category js-categoryInner">
-                        <div class="weui-cell weui-cell_swiped indicatorSelectCell" name="indicatorSelectCell">
+                        <!--div class="weui-cell weui-cell_swiped indicatorSelectCell" name="indicatorSelectCell"-->
+                        <div class="weui-cell weui-cell_swiped indicatorSelectCell" name="indicatorSelectCell"-->
                             <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
                                 <div class="weui-cell">
                                     <div class="weui-cell__bd" name="select">
@@ -32,6 +33,7 @@
                                 <div class="weui-cell">
                                     <div class="weui-cell__bd">
                                         <div  class="weui-btn weui-btn_mini  bg-blue newIndicatorBtn" name="newIndicatorBtn">新增指标</div>
+                                        <div  class="weui-btn weui-btn_mini  bg-blue newIndicatorBtn" name="combineIndicatorBtn">指标条件组合</div>
                                     </div>
                                 </div>
                             </div>
@@ -46,9 +48,14 @@
     //变量定义
     indicatorsId = []; 
     stocksId = ["stockSelect"];
-    var indicators = {{ indicators|safe }};
+    var indicators_col1 = {{ indicators_col1|safe }};
+    var indicators_col2 = {{ indicators_col2|safe }};
+    var indicators_col3 = {{ indicators_col3|safe }};
     groupIndex = [] //必须从小到大排列
     //绑定折叠
+    function carr (start, end) {
+      return Array.from(new Array(end + 1).keys()).slice(start)
+    }
     function bindCollapse(){
         var Collapses = $("div[name^='indicatorTitle']");
         $(Collapses).unbind('click').click(function(){
@@ -81,21 +88,82 @@
             reBindAll()
         });
     }
+    function combineIndicatorBtn(){
+        var combineIndicatorBtns = $("div[name^='combineIndicatorBtn']");
+        $(combineIndicatorBtns).unbind("click").click(function(){
+            //点击组合时，先找title，然后选择器选出所有的indicator节点。并弹框进行组合条件。
+            var abort = false;
+            var conditions = []
+            var selectCells = $(this).parent().parent().parent().parent().parent().children(".indicatorSelectCell");
+            var regexSelectCellClass = /(条件组\d+_select_\d+)/
+            for(i=0;i<selectCells.length;i++){//先获取Cell的class，然后使用后代元素选择器找出所有的p和input，每个p+input为一个条件
+                regexSelectCellClass.exec($(selectCells[i]).attr('class'));
+                var selectCellClass = RegExp.$1;
+                if($('.'+selectCellClass+' p').html()=="选择指标"){//存在指标未定义的
+                    console.log("111");
+                    alert("存在未定义的指标，请先定义");
+                    abort = true;
+                    break;
+                }
+                if($('.'+selectCellClass+' input').length==1){
+                    if($('.'+selectCellClass+' input').val()==""){//input的合法性校验后面再引入进来。
+                        alert("存在待指定数值的内容未填写，请先填写");
+                        console.log("222");
+                        abort = true;
+                        break;
+                    }
+                    conditions.push($('.'+selectCellClass+' p').html()+$('.'+selectCellClass+' input').val());
+                }
+                else{//没有指定数值的select
+                    conditions.push($('.'+selectCellClass+' p').html())
+                }
+            }
+            text = "";
+            for(i=0;i<conditions.length;i++){
+                //拼接
+                text = text + '<a class="weui-btn weui-btn_mini bg-blue">'+conditions[i]+'</a><bt/>'
+            }
+            text = text + '<bt/><a class="weui-btn weui-btn_mini bg-green">或</a><a class="weui-btn weui-btn_mini bg-green">且</a><a class="weui-btn weui-btn_mini bg-green">非</a><a class="weui-btn weui-btn_mini bg-green">(</a><a class="weui-btn weui-btn_mini bg-green">)</a><a class="weui-btn weui-btn_mini bg-red">删除</a>'
+            if(!abort){
+                console.log("dialog");
+                $.modal({
+                    title: "点击条件进行组合选择",
+                    text: text,
+                    buttons: [
+                        { text: "支付宝", onClick: function(){ console.log(1)} },
+                        { text: "微信支付", onClick: function(){ console.log(2)} },
+                        { text: "取消", className: "default", onClick: function(){ console.log(3)} },
+                    ]
+                });
+                //绑定a标签事件
+            }
+        });
+    }
     function bindPicker(){
         var indicatorSelects = $("div[name^='select']");
         $(indicatorSelects).unbind("click").click(function(e){
-            weui.picker(indicators, {
-                depth: 2,
-                defaultValue: [0, 0],
+            weui.picker(indicators_col1,indicators_col2,indicators_col3,{
+                depth: 3,
+                defaultValue: ['0', 'A','0'],
                 onChange: function (result) {
-                    //console.log(result);
+                    //console.log(typeof(result[1]));
+                    //$(e.target).html("指标:"+result[0]+result[1]);
                 },
-                onConfirm: function (result) {
-                    $(e.target).html("指标:"+result[1]["label"]);
+                onConfirm: function (result) { //bug：如果从input改回其他指标，需要删除input
+                    //如果是指定数值，把左侧加一个input出来
+                    if(result[2]["label"]=="指定数值"){
+                        $(e.target).parent().after('<div class="weui-cell__bd" name="select"><input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value=""></div>')
+                        $(e.target).html(result[0]["label"]+"  "+result[1]["label"]);
+                    }
+                    else{
+                        $(e.target).html(result[0]["label"]+"  "+result[1]["label"]+"  "+result[2]["label"]);
+                    }
+                    
                     //e.srcElement.html("指标:"+result[1]["label"])
                     //console.log(indicatorIndex);
                 },
-                id: 'cascadePicker'
+                //id: 'cascadePicker'
+                id:'multiPickerBtn'//这个只是保存选择状态的
             });
         });
     };
@@ -129,7 +197,18 @@
     }
     function bindIndicatorDelBtn(){ 
         $("a[name^='indicatorDelBtn']").unbind('click').click(function(e) {
-            $.confirm("确认删除[]吗?", "确认删除?", function() {
+            var text = "";
+            var allTextDom = $(e.target).parent().parent().children(".weui-cell__bd");
+            for(i=0;i<allTextDom.length;i++){
+                if($(allTextDom[i]).has("p").length==1){
+                    text = text + $(allTextDom[i]).children("p").html();
+                }
+                else{
+                    text = text +" "+$(allTextDom[i]).children("input").val();
+                }
+                
+            }
+            $.confirm("确认删除["+text+"]吗?", "确认删除?", function() {
                 $(e.target).parent().parent().parent().remove();
                 rearrange();
                 reBindAll();
@@ -146,17 +225,37 @@
         bindPicker();
         bindNameSetBtn();
         bindGroupDelBtn();
-        bindIndicatorDelBtn()
+        bindIndicatorDelBtn();
+        combineIndicatorBtn();
     }
     function rearrange(){
         //重排组名
-        var groups = $(".weui-cells__title");
-        console.log(groups);
-        for(i=0;i<groups.length;i++){
-            console.log(i);
-            preTxt = $(groups[i]).html();
+        var groupTitles = $(".weui-cells__title");
+        console.log(groupTitles);
+        for(i=0;i<groupTitles.length;i++){
+            preTxt = $(groupTitles[i]).html();
             newTxt = preTxt.replace(/\d+：/i,i+"：")
-            $(groups[i]).html(newTxt);
+            $(groupTitles[i]).html(newTxt)
+        }
+
+        //重排指标名,从上向下匹配搜搜，每个指标的select加一个 title_select_num的class
+        var groupTitle = ""; //每一个select向上查title，一致则继续编号，不一致则重新编号
+        var selectors = $(".indicatorSelectCell");
+        var regexTitle = /(条件组\d+)：/
+        var selectIndex = 0;
+        for(i=0;i<selectors.length;i++){
+            $(selectors[i]).removeClass(function (index, className) {
+                return (className.match(/(^|\s)条件组\S+/g) || []).join(' ');
+            })
+            regexTitle.exec($(selectors[i]).parent().parent().parent().prev().html());
+            var curTitle = RegExp.$1;
+            console.log(curTitle)
+            if(curTitle!=groupTitle){//第一个select，对title赋值，并自己编号取为0
+                groupTitle = curTitle;
+                selectIndex = 0;
+            }
+            $(selectors[i]).addClass(curTitle+"_select_"+selectIndex);
+            selectIndex = selectIndex + 1;
         }
     }
     $(document).ready(function(){ 
@@ -164,6 +263,7 @@
         $(".newGroupBtn").before(pageBd);
         $(".page-bd:last").attr("style","");
         reBindAll();
+        rearrange()
     });  
 
 </script>
