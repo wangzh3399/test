@@ -22,9 +22,6 @@ condition = [{
 ]
 #常用指标放上面，非常用放下面，不再单独搞一列用于区分
 indicators_col1 = [{
-   'label': '选择指标/数值',
-   'value': 0
-   },{
    'label': '加/减速指标(AC)',
    'value': 1
    },{
@@ -35,9 +32,6 @@ indicators_col1 = [{
    'value': 3
    }]
 indicators_col2 = [{
-   'label': '选择条件',
-   'value': 0
-   },{
    'label':'>',
    'value':1
    },{
@@ -57,9 +51,6 @@ indicators_col2 = [{
    'value':6   
    }]
 indicators_col3 = [{
-   'label': '选择指标/数值',
-   'value': 0
-   },{
    'label': '指定数值',
    'value': 1
    },{

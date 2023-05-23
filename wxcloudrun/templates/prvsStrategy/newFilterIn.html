@@ -13,7 +13,7 @@
             <ul class="collapse">
                 <li class="js-show">
                     <div class="weui-flex js-category" id="js-category">
-                        <div class="weui-flex__item" name="indicatorTitle">加减速指标(A/C),MACD...</div>
+                        <div class="weui-flex__item" name="indicatorTitle">指标组合结果</div>
                         <i class="icon icon-35" name="icon"></i>
                     </div>
                     <div class="page-category js-categoryInner">
@@ -42,7 +42,8 @@
                 </li>
             </ul>
         </div>
-        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue newGroupBtn" name="newGroupBtn">新增条件组</a>           
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue newGroupBtn" name="newGroupBtn">新增条件组</a>
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue finishBtn" name="finish">完成并创建初筛指标</a>
     </div>
 <script type="text/javascript">
     //变量定义
@@ -98,21 +99,14 @@
             $(combineUnits[i]).unbind("click").click(function(){
                 var textContent = $(".weui-textarea").html();
                 if($(this).html()=="删除"){//
-                    console.log("111")
-                    console.log(curIndicatorCombineList)
                     lastUnit = curIndicatorCombineList.pop();
-                    console.log(curIndicatorCombineList)
                     if(lastUnit==undefined){
-                        console.log("222")
                         return;//说明删光了
                     }
                     else{
                         newtextContent = "";
-                        console.log("333")
-                        for(i=0;i<curIndicatorCombineList.length;i++){
-                            
+                        for(i=0;i<curIndicatorCombineList.length;i++){ 
                             newtextContent = newtextContent + curIndicatorCombineList[i]+" ";
-                            console.log("444")
                             console.log(newtextContent)
                         }
                         $(".weui-textarea").html(newtextContent);
@@ -129,27 +123,35 @@
     }
     function combineIndicatorBtn(){
         var combineIndicatorBtns = $("div[name^='combineIndicatorBtn']");
-        $(combineIndicatorBtns).unbind("click").click(function(){
+        $(combineIndicatorBtns).unbind("click").click(function(e){
             //点击组合时，先找title，然后选择器选出所有的indicator节点。并弹框进行组合条件。
             var abort = false;
             var conditions = []
             var selectCells = $(this).parent().parent().parent().parent().parent().children(".indicatorSelectCell");
+            if(selectCells.length==1){
+                alert("单个指标无需组合");
+                return;
+            }
+            if($(this).parent().parent().parent().parent().parent().prev().children("div").html()!="指标组合结果"){
+                if(!confirm("确定要重新组合指标条件?")){
+                    return;
+                }
+            }
+            groupRe = /(条件组\d+)：/
+            groupRe.exec($(e.target).parent().parent().parent().parent().parent().parent().parent().prev().html());
+            var groupname = RegExp.$1;
             var regexSelectCellClass = /(条件组\d+_select_\d+)/
             for(i=0;i<selectCells.length;i++){//先获取Cell的class，然后使用后代元素选择器找出所有的p和input，每个p+input为一个条件
                 regexSelectCellClass.exec($(selectCells[i]).attr('class'));
                 var selectCellClass = RegExp.$1;
                 if($('.'+selectCellClass+' p').html()=="选择指标"){//存在指标未定义的
-                    console.log("111");
                     alert("存在未定义的指标，请先定义");
-                    abort = true;
-                    break;
+                    return;
                 }
                 if($('.'+selectCellClass+' input').length==1){
                     if($('.'+selectCellClass+' input').val()==""){//input的合法性校验后面再引入进来。
                         alert("存在待指定数值的内容未填写，请先填写");
-                        console.log("222");
-                        abort = true;
-                        break;
+                        return;
                     }
                     conditions.push($('.'+selectCellClass+' p').html()+$('.'+selectCellClass+' input').val());
                 }
@@ -163,23 +165,26 @@
                 text = text + '<a class="weui-btn weui-btn_mini bg-blue">'+conditions[i]+'</a><bt/>'
             }
             text = text + '<div class="weui-dialog__content"></div><bt/><a class="weui-btn weui-btn_mini bg-green">或</a><a class="weui-btn weui-btn_mini bg-green">且</a><a class="weui-btn weui-btn_mini bg-green">非</a><a class="weui-btn weui-btn_mini bg-green">(</a><a class="weui-btn weui-btn_mini bg-green">)</a><a class="weui-btn weui-btn_mini bg-red">删除</a>'
-            if(!abort){
-                $.prompts({
-                    title: '点击条件进行组合选择',
-                    text: text,
-                    input: "",
-                    empty: false, // 是否允许为空
-                    onOK: function (input) {
-                        //点击确认
-                    },
-                    onCancel: function () {
-                        //点击取消
-                    }
-                });
-                curIndicatorCombineList = [];//生成prompts时清空。
-                bindconbineUnits()
+            $.prompts({
+                title: '点击条件进行组合选择',
+                text: text,
+                input: "",
+                empty: false, // 是否允许为空
+                onOK: function (input) {
+                    //点击确认
+                    $(e.target).parent().parent().parent().parent().parent().prev().children("div").html(input);
+                    //更新条件dic
+                    indicatorCombineDic[groupname] = curIndicatorCombineList;
+
+                },
+                onCancel: function () {
+                    //点击取消
+                }
+            });
+            curIndicatorCombineList = [];//生成prompts时清空。
+            indicatorCombineDic[groupname] = [];//生成prompts时清空。
+            bindconbineUnits()
                 
-            }
         });
     }
     function bindPicker(){
@@ -187,7 +192,7 @@
         $(indicatorSelects).unbind("click").click(function(e){
             weui.picker(indicators_col1,indicators_col2,indicators_col3,{
                 depth: 3,
-                defaultValue: ['0', 'A','0'],
+                defaultValue: ['1', '1','1'],
                 onChange: function (result) {
                     //console.log(typeof(result[1]));
                     //$(e.target).html("指标:"+result[0]+result[1]);
@@ -274,8 +279,9 @@
         bindGroupDelBtn();
         bindIndicatorDelBtn();
         combineIndicatorBtn();
+        bindFinishBtn();
     }
-    function rearrange(){
+    function rearrange(){//下个迭代改进时，把每个元素加好id，减少后续一堆parent
         //重排组名
         var groupTitles = $(".weui-cells__title");
         console.log(groupTitles);
@@ -305,8 +311,45 @@
             selectIndex = selectIndex + 1;
         }
     }
-    function test(){
-        console.log("test")
+    function bindFinishBtn(){
+        $(".finishBtn").unbind("click").click(function(){
+            //单个指标的条件组进行单独获取。
+            var pageBd = $(".page-bd");
+            var regexTitle = /(条件组\d+)：/
+            for(i=1;i<pageBd.length;i++){//跳过i=0,默认的page模板
+                regexTitle.exec($(pageBd[i]).children(".weui-cells__title").html());
+                var groupname = RegExp.$1;  
+                console.log($(pageBd[i]).find(".indicatorSelectCell"))
+                if($(pageBd[i]).find(".indicatorSelectCell").length==1){//只有一个指标的条件组
+                    console.log("1 indi")
+                    if($(pageBd[i]).find("input").length==1){//说明有input
+                        if($(pageBd[i]).find("p").html()=="选择指标" || $(pageBd[i]).find("input").val()==""){
+                            console.log($(pageBd[i]).find("p").html())
+                            console.log($(pageBd[i]).find("input").val())
+                            alert("当前条件组"+i+"存在未选择的指标或未输入的数值");
+                        }
+                        console.log("1 input")
+                        console.log($(pageBd[i]).find("input").val());
+
+                        indicatorCombineDic[groupname] = [$(pageBd[i]).find("p").html()+" "+$(pageBd[i]).find("input").val()];
+                    }
+                    else{
+                        if($(pageBd[i]).find("p").html()=="选择指标"){
+                            alert("当前条件组"+i+"存在未选择的指标");
+                        }
+                        console.log("not input")
+                        indicatorCombineDic[groupname] = [$(pageBd[i]).find("p").html()];
+                    }
+                }
+            }
+            //判断条件组名称是否定义
+            var groupnames = $('a[name=nameSetBtn]')
+            for(i=1;i<groupnames.length;i++){
+                if($(groupnames[i]).html()=="名称设置"){
+                    alert("条件组"+i+"未设置名称")
+                }
+            }
+        })
     }
     $(document).ready(function(){ 
         var pageBd = $(".page-bd").clone();
