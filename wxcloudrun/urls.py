@@ -101,7 +101,8 @@ urlpatterns = [
     url(r'^strategy$',views.strategy),
     url(r'^strategy/new$',views.strategyNew),
     url(r'^strategy/Create$',views.strategyCreate),#prvsStrategy/strategyNewFilterIndicator
-    url(r'^strategy/newFilterIn$',views.strategyNewFilterIn),
+    url(r'^strategy/newFilterShow$',views.strategyNewFilterShow),
+    url(r'^strategy/newFilterCreate$',views.newFilterCreate),
     url(r'^strategy/Management$',views.strategyManagement),
     url(r'^personal$',views.personal),
     url(r'(/)?$', views.wxapi),

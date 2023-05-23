@@ -5,7 +5,7 @@
         <h1 class="page-hd-title">
             新建初筛指标
         </h1>
-        <p class="page-hd-desc">当前策略：xxxxx</p>
+        <p class="page-hd-desc">当前策略：{{strategyName}}</p>
     </div>
     <div class="page-bd-15">
         <div class="page-bd" name="group" style="display: none;">
@@ -52,6 +52,8 @@
     var indicators_col1 = {{ indicators_col1|safe }};
     var indicators_col2 = {{ indicators_col2|safe }};
     var indicators_col3 = {{ indicators_col3|safe }};
+    var userid = "{{userid|safe}}";
+    var strategyName = "{{strategyName|safe}}";
     groupIndex = [] //必须从小到大排列
     indicatorCombineDic = {}; //存储多个条件组的每个组内的指标组合结果
     curIndicatorCombineList = [];//单个条件组里的点击顺序。每次promot时要清空。
@@ -311,6 +313,13 @@
             selectIndex = selectIndex + 1;
         }
     }
+    function commit(){
+        data = {"name":strategyName,"userid":userid,"filter":string(indicatorCombineDic)}
+        console.log("post")
+        $.post('newFilterCreate',data,function (res) {
+                    console.log(res);
+        })
+    }
     function bindFinishBtn(){
         $(".finishBtn").unbind("click").click(function(){
             //单个指标的条件组进行单独获取。
@@ -349,6 +358,7 @@
                     alert("条件组"+i+"未设置名称")
                 }
             }
+            commit()
         })
     }
     $(document).ready(function(){ 

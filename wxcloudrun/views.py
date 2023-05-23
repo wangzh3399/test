@@ -112,18 +112,26 @@ def strategyNew(request):
     #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
     #models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
     return render(request,'prvsStrategy/new.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'userid':user.userid})
-def strategyNewFilterIn(request):
+def strategyNewFilterShow(request):
     name = request.GET.get('name')
     userid = request.GET.get('userid')
     logger.error(name)
     #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
     #models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
-    return render(request,'prvsStrategy/newFilterIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'userid':userid})
+    return render(request,'prvsStrategy/newFilterIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'userid':userid,'strategyName':name})
 def strategyCreate(request):
     name = request.GET.get('name')
     userid = request.GET.get('userid')
     logger.error(name)
     logger.error(userid)
+    return HttpResponse('{result:"True"}')
+def newFilterCreate(request):
+    name = request.POST.get('name')
+    userid = request.POST.get('userid')
+    filter = request.POST.get*('filter')
+    logger.error(name)
+    logger.error(userid)
+    logger.error(filter)
     return HttpResponse('{result:"True"}')
 def strategyManagement(request):
     user=getUser(request)
