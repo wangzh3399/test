@@ -314,7 +314,7 @@
         }
     }
     function commit(){
-        data = {"name":strategyName,"userid":userid,"filter":string(indicatorCombineDic)}
+        data = JSON.stringify({"name":strategyName,"userid":userid,"filter":indicatorCombineDic})
         console.log("post")
         $.post('newFilterCreate',data,function (res) {
                     console.log(res);

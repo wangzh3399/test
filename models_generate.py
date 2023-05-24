@@ -163,10 +163,7 @@ def getFields(tablename,datatype): #创建或查询时，根据表明返回field
         }
     strategyPoolFieldsList = [
         ('strategyid' , models.CharField(max_length=16,blank=False,primary_key=True,verbose_name="策略id")), #以时间戳是10位+userid后6位
-        ('userid' , models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")),
-        ('indicatorsNum' , models.CharField(max_length=32,blank=False,verbose_name="选取的指标个数")),
-        ('indicatorsid' , models.CharField(max_length=32,blank=False,verbose_name="指标id")), #指标这里标识ID，考虑是为了后续指标持续更新，名字维护不影响这里，能够解耦
-        ('username' , models.CharField(max_length=32,blank=False,verbose_name="微信昵称")), 
+        ('strategyname' , models.CharField(max_length=16,blank=False,verbose_name="策略id")), #策略名
         ('registtime' , models.CharField(max_length=20,blank=False,verbose_name="注册时间")),
         ('uuid' , models.CharField(max_length=32,blank=False,verbose_name="用户标识")),   #忘记要干嘛用的了
         ('level' , models.CharField(max_length=8,blank=False,verbose_name="用户等级")),  #level 999 管理员 

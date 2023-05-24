@@ -16,6 +16,8 @@ from django.conf import settings
 from models_generate import *
 from basicfunc import *
 from indicators import *
+from html import unescape
+
 #logger = getlogger()
 
 wechatoauth = WeChatOAuth(
@@ -126,12 +128,10 @@ def strategyCreate(request):
     logger.error(userid)
     return HttpResponse('{result:"True"}')
 def newFilterCreate(request):
-    name = request.POST.get('name')
-    userid = request.POST.get('userid')
-    filter = request.POST.get*('filter')
-    logger.error(name)
-    logger.error(userid)
-    logger.error(filter)
+    #初筛指标完成，在数据库创建记录
+    data = json.loads(request.body)
+    logger.error(unescape(data['name']))
+    logger.error(unescape(data['filter']['条件组1'][0]))
     return HttpResponse('{result:"True"}')
 def strategyManagement(request):
     user=getUser(request)
