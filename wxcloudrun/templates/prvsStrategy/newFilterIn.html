@@ -9,7 +9,7 @@
     </div>
     <div class="page-bd-15">
         <div class="page-bd" name="group" style="display: none;">
-            <div class="weui-cells__title" name="grouptitle">条件组1：<a href="javascript:void(0)" name="nameSetBtn">名称设置</a>&nbsp&nbsp<a href="javascript:void(0)" name="groupDelBtn">删除</a></div>
+            <div class="weui-cells__title" name="grouptitle">条件组1：<a href="javascript:void(0)" class="nameSetBtn" name="nameSetBtn">名称设置</a>&nbsp&nbsp<a href="javascript:void(0)" name="groupDelBtn">删除</a></div>
             <ul class="collapse">
                 <li class="js-show">
                     <div class="weui-flex js-category" id="js-category">
@@ -43,10 +43,14 @@
             </ul>
         </div>
         <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue newGroupBtn" name="newGroupBtn">新增条件组</a>
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue combineGroupBtn" name="combineGroupBtn">条件组组合</a>
         <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue finishBtn" name="finish">完成并创建初筛指标</a>
+        <div id="simulated-textarea" contenteditable="true" style="width: 300px; height: 100px; border: 1px solid #cccccc; white-space: pre-wrap; overflow: auto;"></div>
     </div>
 <script type="text/javascript">
     //变量定义
+    const simulatedTextarea = document.getElementById('simulated-textarea');  
+    //simulatedTextarea.addEventListener('input', function() {    console.log(this.innerHTML);  });
     indicatorsId = []; 
     stocksId = ["stockSelect"];
     var indicators_col1 = {{ indicators_col1|safe }};
@@ -57,6 +61,7 @@
     groupIndex = [] //必须从小到大排列
     indicatorCombineDic = {}; //存储多个条件组的每个组内的指标组合结果
     curIndicatorCombineList = [];//单个条件组里的点击顺序。每次promot时要清空。
+    groupCombine = "";
     //绑定折叠
     function carr (start, end) {
       return Array.from(new Array(end + 1).keys()).slice(start)
@@ -189,6 +194,38 @@
                 
         });
     }
+    function combineGroupBtn(){
+        $(".combineGroupBtn").unbind("click").click(function(e){
+            var groupNames = $("a[name^='nameSetBtn']");
+            text = "";
+            if(groupNames.length==2){
+                alert("只有一个条件组无需组合");
+            }
+            for(i=1;i<groupNames.length;i++){
+
+                text = text + '<a class="weui-btn weui-btn_mini bg-blue">条件组'+i+'['+$(groupNames[i]).html()+']</a><bt/>'
+            }
+            text = text + '<div class="weui-dialog__content"></div><bt/><a class="weui-btn weui-btn_mini bg-green">或</a><a class="weui-btn weui-btn_mini bg-green">且</a><a class="weui-btn weui-btn_mini bg-green">非</a><a class="weui-btn weui-btn_mini bg-green">(</a><a class="weui-btn weui-btn_mini bg-green">)</a><a class="weui-btn weui-btn_mini bg-red">删除</a>'
+            $.prompts({
+                title: '点击条件进行组合选择',
+                text: text,
+                input: "",
+                empty: false, // 是否允许为空
+                onOK: function (input) {
+                    //点击确认
+                    $("#simulated-textarea").html(input);
+                    //更新条件dic
+                    groupCombine = input;
+
+                },
+                onCancel: function () {
+                    //点击取消
+                }
+            });
+            bindconbineUnits();
+
+        })
+    }
     function bindPicker(){
         var indicatorSelects = $("div[name^='select']");
         $(indicatorSelects).unbind("click").click(function(e){
@@ -282,6 +319,7 @@
         bindIndicatorDelBtn();
         combineIndicatorBtn();
         bindFinishBtn();
+        combineGroupBtn()
     }
     function rearrange(){//下个迭代改进时，把每个元素加好id，减少后续一堆parent
         //重排组名
@@ -314,7 +352,18 @@
         }
     }
     function commit(){
-        data = JSON.stringify({"name":strategyName,"userid":userid,"filter":indicatorCombineDic})
+        var groupNames = $("a[name^='nameSetBtn']")
+        var groupList = [];
+        if(groupNames.length==2){
+            groupCombine = "条件组1["+$(groupNames[1]).html()+"]"
+            groupList = ["条件组1["+$(groupNames[1]).html()+"]"];
+        }
+        else{
+            for(i=1;i<groupNames.length;i++){
+                groupList.push("条件组"+i+"["+$(groupNames[i]).html()+"]")
+            }
+        }
+        data = JSON.stringify({"name":strategyName,"userid":userid,"group":groupList,"indicators":indicatorCombineDic,"filter":groupCombine})
         console.log("post")
         $.post('newFilterCreate',data,function (res) {
                     console.log(res);

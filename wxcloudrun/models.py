@@ -21,11 +21,12 @@ class usermanager(models.Model): #model的meta有
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 
-class strategypool(models.Model):  #用户创建的量化策略，不指定primary，按照查阅资料，会自动增加一个自增id，而指定了则不会
+class strategypool(models.Model): 
+    strategyid = models.AutoField(primary_key=True)
     strategyname = models.CharField(max_length=16,blank=False,verbose_name="策略名") #策略名
     strategydesc = models.CharField(max_length=256,blank=False,verbose_name="策略描述")
-    ownderid=models.ForeignKey(usermanager,on_delete=models.PROTECT,verbose_name="策略拥有者") #外键，CASCADE关联删除   PROTECT保护处理  SET_NULL置空处理  DO_NOTHING不处理
-    creatorid = models.ForeignKey(usermanager,on_delete=models.PROTECT,verbose_name="策略创建者")   #随着策略交易，可能某些策略会属于不同的人。  通过策略拥有者和创建者一致性判断是否是购买的策略
+    ownderid=models.ForeignKey(to=usermanager,to_field="userid",on_delete=models.PROTECT,verbose_name="策略拥有者",related_name="owner") #外键，CASCADE关联删除   PROTECT保护处理  SET_NULL置空处理  DO_NOTHING不处理
+    creatorid = models.ForeignKey(to=usermanager,to_field="userid",on_delete=models.PROTECT,verbose_name="策略创建者",related_name="buyer")   #随着策略交易，可能某些策略会属于不同的人。  通过策略拥有者和创建者一致性判断是否是购买的策略
     createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
     owntime = models.CharField(max_length=20,blank=False,verbose_name="归属时间")  #策略归属于拥有者的时间
     changetime = models.CharField(max_length=20,blank=False,verbose_name="变更时间") #策略被修改时间，可以是创建者或者拥有者
@@ -43,28 +44,27 @@ class stockpool(models.Model):#股票池表，用户可以自定义股票池，�
 
 class strategyyields(models.Model):   #收益率表
     poolname = models.ForeignKey(stockpool,on_delete=models.PROTECT)
-    strategyid = models.ForeignKey(to=strategypool,to_field=id,on_delete=models.PROTECT)  #如果这么会报错的话就手动指定strategy的primary key和自增id
+    strategyid = models.ForeignKey(strategypool,on_delete=models.PROTECT)
     yields = models.DecimalField(max_digits=7,decimal_places=4,blank=False,null=True,verbose_name="收益率")
     starttime = models.CharField(max_length=20,blank=False,verbose_name="起始时间")
     endtime = models.CharField(max_length=20,blank=False,verbose_name="终止时间")
 
 class strategyorder(models.Model): #策略买卖订单
-    strategyid = models.ForeignKey(to=strategypool,to_field=id,on_delete=models.PROTECT)
+    strategyid = models.ForeignKey(strategypool,on_delete=models.PROTECT)
     userid = models.ForeignKey(usermanager,on_delete=models.PROTECT)
 
 class indicators(models.Model): #指标标准库
-    
     indicators = models.CharField(max_length=32,blank=False,verbose_name="指标or数值")  #不区分前缀指标和后缀指标。通过运算表达式统一控制
     desc = models.CharField(max_length=256,blank=False,verbose_name="描述")
 class indicatorexpression(models.Model): #指标表达式
     group = models.CharField(max_length=32,blank=False,verbose_name="指标组")
-    strategyid = models.ForeignKey(to=strategypool,to_field=id,on_delete=models.PROTECT)
+    strategyid = models.ForeignKey(strategypool,on_delete=models.PROTECT)
     prefixindicator = models.CharField(max_length=32,blank=False,verbose_name="前缀指标")
     condition = models.CharField(max_length=32,blank=False,verbose_name="条件")
     suffixindicator = models.CharField(max_length=32,blank=False,verbose_name="前缀指标")
 
 class filter(models.Model):  #过滤器表
-    strategyid = models.ForeignKey(to=strategypool,to_field=id,on_delete=models.PROTECT)  
+    strategyid = models.ForeignKey(strategypool,on_delete=models.PROTECT)  
     userid = models.ForeignKey(usermanager,on_delete=models.PROTECT)
     type = models.CharField(max_length=8,blank=False,verbose_name="过滤器类别")  #前缀过滤器、买入过滤器等
     expression = models.CharField(max_length=256,blank=False,verbose_name="过滤器表达式")  #group1 & group2类似  这里没有再搞外键，担心表过于复杂。
