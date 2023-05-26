@@ -17,6 +17,10 @@ from models_generate import *
 from basicfunc import *
 from indicators import *
 from html import unescape
+from wxcloudrun.models import *
+import datetime
+import time
+import traceback
 
 #logger = getlogger()
 
@@ -42,13 +46,13 @@ def oauth(method):
             else:
                 user=None
                 try:
-                    userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
-                    logger.info('get userModel')
-                    user = userModel.objects.get(userid=user_info['openid'])
+                    #userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
+                    #logger.info('get userModel')
+                    user = usermanager.objects.get(userid=user_info['openid'])
                     logger.info('after getuser ')
                 except:
                     #返回一个没有权限的页面，并要求用户发邮件给管理员
-                    userModel.objects.create(userid=user_info['openid'],useraccount = '',username=user_info['nickname'],registtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),uuid='',level='',valid=False,validtime='',cashflow=0)
+                    usermanager.objects.create(userid=user_info['openid'],useraccount = '',username=user_info['nickname'],registtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),uuid='',level='',valid=False,validtime='',cashflow=0)
                     #logger.error(traceback.format_exc())
                     return render(request,'refuse.html')
                 if user.valid == False:
@@ -130,8 +134,17 @@ def strategyCreate(request):
 def newFilterCreate(request):
     #初筛指标完成，在数据库创建记录
     data = json.loads(request.body)
-    logger.error(unescape(data['name']))
-    logger.error(unescape(data['filter']['条件组1'][0]))
+    strategyname = data['name']
+    userid = data['userid']
+    group = data['group']  #["条件组1[xxx111]","条件组2[bbb]"]
+    indicators = data['indicators']#{"条件组1":["AdaptiveMovingAverage  &gt;  AdaptiveMovingAverage","且","MACD  &gt;123","条件组1[xxx111]","且","条件组2[bbb]"],"条件组2":["加/减速指标(AC)  &gt;  MACD"]}
+    filter = data['filter']   #"条件组1[xxx111] 且 条件组2[bbb] 
+    try:
+        user = usermanager.objects.get(userid=userid)
+        strategypool.objects.create(strategyname=strategyname,ownderid=user,creatorid=user,createtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),runstatus="createFilter")
+    except:
+        logger.error(traceback.format_exc())
+        return HttpResponse('{result:"False"}')
     return HttpResponse('{result:"True"}')
 def strategyManagement(request):
     user=getUser(request)

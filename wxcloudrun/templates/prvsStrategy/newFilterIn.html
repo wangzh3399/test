@@ -61,6 +61,7 @@
     groupIndex = [] //必须从小到大排列
     indicatorCombineDic = {}; //存储多个条件组的每个组内的指标组合结果
     curIndicatorCombineList = [];//单个条件组里的点击顺序。每次promot时要清空。
+    curGroupCombineList = []
     groupCombine = "";
     //绑定折叠
     function carr (start, end) {
@@ -82,7 +83,6 @@
     function bindNewGroupBtn(){//这个用选择器通配、元素链实现会简单很多。
         $(".newGroupBtn").unbind("click").click(function(){
             var pageBd = $(".page-bd:first").clone();
-            console.log(pageBd);
             $(this).before(pageBd);
             $(".page-bd:last").attr("style","");
             rearrange();
@@ -98,7 +98,7 @@
             reBindAll()
         });
     }
-    function bindconbineUnits(){//后面有时间需要重新实现，使用div替换textarea，使内容运算符能够更做颜色区分
+    function bindIndicatorConbineUnits(){//后面有时间需要重新实现，使用div替换textarea，使内容运算符能够更做颜色区分
         //绑定a标签事件,并实时生成运算表达式
         //先插入一个<div class="weui-dialog__bd">123</div>，占新一行
         var combineUnits = $(".weui-dialog__bd").find("a");
@@ -114,13 +114,40 @@
                         newtextContent = "";
                         for(i=0;i<curIndicatorCombineList.length;i++){ 
                             newtextContent = newtextContent + curIndicatorCombineList[i]+" ";
-                            console.log(newtextContent)
                         }
                         $(".weui-textarea").html(newtextContent);
                     }
                 }
                 else{
                     curIndicatorCombineList.push($(this).html());
+                    textContent = textContent + $(this).html()+" ";
+                    var textContent = $(".weui-textarea").html(textContent);
+                }
+                        
+            })
+        }
+    }
+    function bindGroupConbineUnits(){
+        //绑定a标签事件,并实时生成运算表达式
+        var combineUnits = $(".weui-dialog__bd").find("a");
+        for(i=0;i<combineUnits.length;i++){
+            $(combineUnits[i]).unbind("click").click(function(){
+                var textContent = $(".weui-textarea").html();
+                if($(this).html()=="删除"){//
+                    lastUnit = curGroupCombineList.pop();
+                    if(lastUnit==undefined){
+                        return;//说明删光了
+                    }
+                    else{
+                        newtextContent = "";
+                        for(i=0;i<curGroupCombineList.length;i++){ 
+                            newtextContent = newtextContent + curGroupCombineList[i]+" ";
+                        }
+                        $(".weui-textarea").html(newtextContent);
+                    }
+                }
+                else{
+                    curGroupCombineList.push($(this).html());
                     textContent = textContent + $(this).html()+" ";
                     var textContent = $(".weui-textarea").html(textContent);
                 }
@@ -190,7 +217,7 @@
             });
             curIndicatorCombineList = [];//生成prompts时清空。
             indicatorCombineDic[groupname] = [];//生成prompts时清空。
-            bindconbineUnits()
+            bindIndicatorConbineUnits()
                 
         });
     }
@@ -222,7 +249,7 @@
                     //点击取消
                 }
             });
-            bindconbineUnits();
+            bindGroupConbineUnits();
 
         })
     }
@@ -239,7 +266,6 @@
                 onConfirm: function (result) { //bug：如果从input改回其他指标，需要删除input
                     //如果是指定数值，把左侧加一个input出来
                     if($(e.target).parent().parent().children().length==3){//说明这时是之前已经选择过指定数值的，先删除原有的input
-                        console.log("xxx")
                         $(e.target).parent().parent().children()[1].remove();
                     }
                     if(result[2]["label"]=="指定数值"){
@@ -324,7 +350,6 @@
     function rearrange(){//下个迭代改进时，把每个元素加好id，减少后续一堆parent
         //重排组名
         var groupTitles = $(".weui-cells__title");
-        console.log(groupTitles);
         for(i=0;i<groupTitles.length;i++){
             preTxt = $(groupTitles[i]).html();
             newTxt = preTxt.replace(/\d+：/i,i+"：")
@@ -342,7 +367,6 @@
             })
             regexTitle.exec($(selectors[i]).parent().parent().parent().prev().html());
             var curTitle = RegExp.$1;
-            console.log(curTitle)
             if(curTitle!=groupTitle){//第一个select，对title赋值，并自己编号取为0
                 groupTitle = curTitle;
                 selectIndex = 0;
@@ -363,8 +387,7 @@
                 groupList.push("条件组"+i+"["+$(groupNames[i]).html()+"]")
             }
         }
-        data = JSON.stringify({"name":strategyName,"userid":userid,"group":groupList,"indicators":indicatorCombineDic,"filter":groupCombine})
-        console.log("post")
+        data = JSON.stringify({"name":strategyName,"userid":userid,"group":groupList,"indicators":indicatorCombineDic,"filter":curGroupCombineList})
         $.post('newFilterCreate',data,function (res) {
                     console.log(res);
         })
@@ -377,25 +400,19 @@
             for(i=1;i<pageBd.length;i++){//跳过i=0,默认的page模板
                 regexTitle.exec($(pageBd[i]).children(".weui-cells__title").html());
                 var groupname = RegExp.$1;  
-                console.log($(pageBd[i]).find(".indicatorSelectCell"))
                 if($(pageBd[i]).find(".indicatorSelectCell").length==1){//只有一个指标的条件组
-                    console.log("1 indi")
                     if($(pageBd[i]).find("input").length==1){//说明有input
                         if($(pageBd[i]).find("p").html()=="选择指标" || $(pageBd[i]).find("input").val()==""){
-                            console.log($(pageBd[i]).find("p").html())
-                            console.log($(pageBd[i]).find("input").val())
                             alert("当前条件组"+i+"存在未选择的指标或未输入的数值");
                         }
-                        console.log("1 input")
-                        console.log($(pageBd[i]).find("input").val());
-
                         indicatorCombineDic[groupname] = [$(pageBd[i]).find("p").html()+" "+$(pageBd[i]).find("input").val()];
+                        console.log($(pageBd[i]).find("p").html()+" "+$(pageBd[i]).find("input").val())
                     }
                     else{
                         if($(pageBd[i]).find("p").html()=="选择指标"){
                             alert("当前条件组"+i+"存在未选择的指标");
                         }
-                        console.log("not input")
+                        console.log($(pageBd[i]).find("p").html())
                         indicatorCombineDic[groupname] = [$(pageBd[i]).find("p").html()];
                     }
                 }
