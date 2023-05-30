@@ -98,11 +98,11 @@ urlpatterns = [
     url(r'^^wxui(/)?$', views.index),
     url(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^myself$',views.myself),
-    url(r'^strategy$',views.strategy),
+    url(r'^strategy$',views.strategyHome), #策略首页
     url(r'^strategy/new$',views.strategyNew),
-    url(r'^strategy/Create$',views.strategyCreate),#prvsStrategy/strategyNewFilterIndicator
-    url(r'^strategy/newFilterShow$',views.strategyNewFilterShow),
-    url(r'^strategy/newFilterCreate$',views.newFilterCreate),
+    url(r'^strategy/newFilterShow$',views.strategyNewFilterShow), 
+    url(r'^strategy/createOrUpdate$',views.strategyCreateOrUpdate),
+    url(r'^strategy/newBuyInShow$',views.strategyNewBuyInShow),
     url(r'^strategy/Management$',views.strategyManagement),
     url(r'^personal$',views.personal),
     url(r'(/)?$', views.wxapi),

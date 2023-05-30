@@ -3,8 +3,9 @@
 {%load static%}
     <div class="page-hd">
         <h1 class="page-hd-title">
-            新建初筛策略 for {{strategyName}}
+            新建买入策略
         </h1>
+        <a href="javascript:void(0)" class="strategyNameSetBtn" name="strategyNameSetBtn">{{strategyName}}</a>&nbsp&nbsp点击可修改策略名
     </div>
     <div class="page-bd-15">
         <div class="page-bd" name="group" style="display: none;">
@@ -43,8 +44,7 @@
         </div>
         <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue newGroupBtn" name="newGroupBtn">新增指标组</a>
         <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue combineGroupBtn" name="combineGroupBtn">指标组组合</a>
-        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue finishreturnBtn" name="finishreturn">完成并返回</a>
-        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue finishnextBtn" name="finishnext">完成并直接下一步</a>
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini bg-blue finishBtn" name="finish">完成并创建初筛指标</a>
         <div id="simulated-textarea" contenteditable="true" style="width: 300px; height: 100px; border: 1px solid #cccccc; white-space: pre-wrap; overflow: auto;"></div>
     </div>
 <script type="text/javascript">
@@ -55,8 +55,8 @@
     var indicators_col1 = {{ indicators_col1|safe }};
     var indicators_col2 = {{ indicators_col2|safe }};
     var indicators_col3 = {{ indicators_col3|safe }};
+    var userid = "{{userid|safe}}";
     var strategyName = "{{strategyName|safe}}";
-    var strategyid = "{{strategyid|safe}}"
     groupIndex = [] //必须从小到大排列
     indicatorCombineDic = {}; //存储多个指标组的每个组内的指标组合结果
     curIndicatorCombineList = [];//单个指标组里的点击顺序。每次promot时要清空。
@@ -257,28 +257,24 @@
         $(indicatorSelects).unbind("click").click(function(e){
             weui.picker(indicators_col1,indicators_col2,indicators_col3,{
                 depth: 3,
-                defaultValue: ['1','1','1','1','1'],
+                defaultValue: ['1', '1','1'],
                 onChange: function (result) {
                     //console.log(typeof(result[1]));
                     //$(e.target).html("指标:"+result[0]+result[1]);
                 },
                 onConfirm: function (result) { //bug：如果从input改回其他指标，需要删除input
-                    weuicell = $(e.target).parent().parent();
-                    curChildCount = $(weuicell).children().length                
-                    $(weuicell).children().remove();//先清理掉再新增，主要为了考虑重新选择的场景。
-                    $(weuicell).prepend('<div class="weui-cell__bd" name="select"><p name="indicatorName">选择指标</p></div>')
+                    //如果是指定数值，把左侧加一个input出来
+                    if($(e.target).parent().parent().children().length==3){//说明这时是之前已经选择过指定数值的，先删除原有的input
+                        $(e.target).parent().parent().children()[1].remove();
+                    }
                     if(result[2]["label"]=="指定数值"){
-                        $(weuicell).prepend('<div class="weui-cell__bd" name="xxx"><input class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div>')
-                        $(weuicell).append('<div class="weui-cell__bd" name="xxx"><input  class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入数值" value=""></div>')
-                        $(weuicell).find("p").html(result[0]["label"]+"  "+result[1]["label"]);
+                        $(e.target).parent().after('<div class="weui-cell__bd" name="select"><input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value=""></div>')
+                        $(e.target).html(result[0]["label"]+"  "+result[1]["label"]);
                     }
                     else{
-                        $(weuicell).prepend('<div class="weui-cell__bd" name="xxx"><input class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div>')
-                        $(weuicell).find("p").html(result[0]["label"]+' '+result[1]["label"]);
-                        $(weuicell).append('<div class="weui-cell__bd" name="xxx"><input  class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div><div class="weui-cell__bd" name="xxx"><p name="indicatorName">'+result[2]["label"]+'</p></div>')
+                        $(e.target).html(result[0]["label"]+"  "+result[1]["label"]+"  "+result[2]["label"]);
                     }
-                    $(weuicell).append('<div class="weui-cell__ft"><a name="indicatorDelBtn">删除</a></div>')
-                    reBindAll();
+                    
                     //e.srcElement.html("指标:"+result[1]["label"])
                     //console.log(indicatorIndex);
                 },
@@ -287,6 +283,23 @@
             });
         });
     };
+    function bindstrategyNameSetBtn(){ 
+        $("a[name^='strategyNameSetBtn']").unbind('click').click(function(e) {
+                $.prompts({
+                    title: "修改策略名称",
+                    //text: '内容文案',
+                    input: $(e.target).html(),
+                    empty: false, // 是否允许为空
+                    onOK: function (input) {
+                        $(e.target).html(input);
+                        strategyName = input;
+                    },
+                    onCancel: function () {
+                        //点击取消
+                    }
+                });
+            })
+    }
     function bindgroupNameSetBtn(){ 
         $("a[name^='groupNameSetBtn']").unbind('click').click(function(e) {
                 $.prompts({
@@ -343,6 +356,7 @@
         bindNewGroupBtn();
         bindNewIndicatorBtn();
         bindPicker();
+        bindstrategyNameSetBtn();
         bindgroupNameSetBtn();
         bindGroupDelBtn();
         bindIndicatorDelBtn();
@@ -390,8 +404,8 @@
                 groupList.push("指标组"+i+"["+$(groupNames[i]).html()+"]")
             }
         }
-        data = JSON.stringify({"stage":"1","strategyid":strategyid,"group":groupList,"indicators":indicatorCombineDic,"filter":curGroupCombineList})
-        $.post('strategyCreateOrUpdate',data,function (res) {
+        data = JSON.stringify({"strategyName":strategyName,"userid":userid,"group":groupList,"indicators":indicatorCombineDic,"filter":curGroupCombineList})
+        $.post('newFilterCreate',data,function (res) {
             resObj = eval('(' + res + ')')
             console.log(resObj)
             if(resObj.result==false){
@@ -403,7 +417,7 @@
         })
     }
     function bindFinishBtn(){
-        $(".finishreturnBtn").unbind("click").click(function(){
+        $(".finishBtn").unbind("click").click(function(){
             //单个指标的指标组进行单独获取。
             var pageBd = $(".page-bd");
             var regexTitle = /(指标组\d+)：/

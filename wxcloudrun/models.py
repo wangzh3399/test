@@ -29,7 +29,7 @@ class strategypool(models.Model):
     creatorid = models.ForeignKey(to=usermanager,to_field="userid",on_delete=models.PROTECT,verbose_name="策略创建者",related_name="buyer")   #随着策略交易，可能某些策略会属于不同的人。  通过策略拥有者和创建者一致性判断是否是购买的策略
     createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
     owntime = models.CharField(max_length=20,blank=False,verbose_name="归属时间")  #策略归属于拥有者的时间
-    changetime = models.CharField(max_length=20,blank=False,verbose_name="变更时间") #策略被修改时间，可以是创建者或者拥有者
+    changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间") #策略被修改时间，可以是创建者或者拥有者
     validtime = models.CharField(max_length=20,blank=False,verbose_name="有效期") #策略可以以使用时间作为交易。
     runstatus = models.CharField(max_length=16,blank=False,verbose_name="策略运行状态")  #创建状态、回测状态、发布状态、下架状态、生效中等
     buyoutprice = models.IntegerField(blank=False,null=True,verbose_name="买断售价")  #买断：购买者可明文查看策略内容、编辑扩展等。
@@ -43,6 +43,7 @@ class strategypool(models.Model):
         verbose_name = "用户策略"  
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
+        unique_together=(("strategyname","ownderid"),)
 
 class stockpool(models.Model):#股票池表，用户可以自定义股票池，用于应用不同策略
     poolname = models.CharField(max_length=16,blank=False,verbose_name="股票池名称") #策略名
@@ -76,8 +77,11 @@ class strategyorder(models.Model): #策略买卖订单
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 class indicators(models.Model): #指标标准库
-    indicators = models.CharField(max_length=32,blank=False,verbose_name="指标or数值")  #不区分前缀指标和后缀指标。通过运算表达式统一控制
-    desc = models.CharField(max_length=256,blank=False,verbose_name="描述")
+    indicatorid = models.AutoField(primary_key=True)
+    indicatorname = models.CharField(max_length=32,blank=False,verbose_name="指标名称")  #不区分前缀指标和后缀指标。通过运算表达式统一控制
+    type = models.CharField(max_length=8,blank=False,verbose_name="指标类型")   #标准指标 or 自定义数值    standard   custom
+    changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
+    desc = models.CharField(max_length=256,blank=False,verbose_name="指标描述")
     class Meta:
         # 设置表名
         db_table = "indicators"
@@ -87,9 +91,11 @@ class indicators(models.Model): #指标标准库
 class indicatorexpression(models.Model): #指标表达式
     group = models.CharField(max_length=32,blank=False,verbose_name="指标组")
     strategyid = models.ForeignKey(strategypool,on_delete=models.PROTECT)
-    prefixindicator = models.CharField(max_length=32,blank=False,verbose_name="前缀指标")
+    prefixcoefficient = models.CharField(max_length=8,blank=False,null=True,verbose_name="前缀系数")
+    prefixindicator = models.ForeignKey(indicators,on_delete=models.PROTECT,verbose_name="前缀指标",related_name="prefix")
     condition = models.CharField(max_length=32,blank=False,verbose_name="条件")
-    suffixindicator = models.CharField(max_length=32,blank=False,verbose_name="前缀指标")
+    suffixcoefficient = models.CharField(max_length=8,blank=False,null=True,verbose_name="后缀系数")
+    suffixindicator = models.ForeignKey(indicators,on_delete=models.PROTECT,verbose_name="后缀指标",related_name="suffix")
     class Meta:
         # 设置表名
         db_table = "indicatorexpression"

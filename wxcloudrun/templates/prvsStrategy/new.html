@@ -12,14 +12,14 @@
         <div class="timeline">
             <ul>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head-first" id="timeline-item-01">
+                    <div class="timeline-item-color timeline-item-head-first" id="timeline-item-00">
                     </div>
                     <div class="timeline-item-tail"></div>
                     <div class="timeline-item-content">
-                        <h4 id="h4-01">
+                        <h4 id="h4-00">
                             <label for="js_input3" class="weui-cell weui-cell_active weui-cell_wrap">
                                 <div class="weui-cell__hd">
-                                  <span class="weui-label">模型名称</span>
+                                  <span class="weui-label">策略名称</span>
                                 </div>
                                 <div class="weui-cell__bd">
                                     <input id="js_input3" class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入" value="">
@@ -29,53 +29,54 @@
                         <p>说明：名称规格要求</p></div>
                 </li>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head" id="timeline-item-02"></div>
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-01"></div>
                     <div class="timeline-item-tail"></div>
                     <div class="timeline-item-content">
-                        <h4 id="h4-02">
+                        <h4 id="h4-01">
                             定义初筛指标
                         </h4>
                         <p>说明:初筛指标会基于股票池持续监控并将符合初筛指标的股票纳入监控队列</p></div>
                 </li>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-02></div>
                     <div class="timeline-item-tail"></div>
                     <div class="timeline-item-content">
-                        <h4>
+                        <h4 id="h4-02">
                             定义买入指标
                         </h4>
                         <p>在监控队列中的股票一旦符合买入指标，将通知/直接买入。</p></div>
                 </li>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-03></div>
                     <div class="timeline-item-tail"></div>
                     <div class="timeline-item-content">
-                        <h4>
+                        <h4 id="h4-03">
                             定义卖出指标
                         </h4>
                         <p>在已买入队列中的股票一旦符合买出指标，将通知/直接卖出。</p></div>
                 </li>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-04></div>
                     <div class="timeline-item-tail "></div>
                     <div class="timeline-item-content">
-                        <h4>
+                        <h4 id="h4-04">
                             定义剔除指标
                         </h4>
                         <p>在已监控队列中的股票一旦符合剔除指标，将剔除监控队列。</p></div>
                 </li>
                 <li class="timeline-item">
-                    <div class="timeline-item-color timeline-item-head"></div>
+                    <div class="timeline-item-color timeline-item-head" id="timeline-item-05></div>
                     <div class="timeline-item-tail hide"></div>
                     <div class="timeline-item-content">
-                        <h4>
+                        <h4 id="h4-05">
                             选择适用股票池
                         </h4>
                         <p>指定模型适用的股票池。</p></div>
                 </li>
             </ul>
         </div>
-        <a href="javascript:nextBtn();" class="weui-btn weui-btn_mini weui-btn_primary" id="nextBtn">下一步</a>
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini weui-btn_primary" id="preBtn">上一步</a>
+        <a href="javascript:void(0);" class="weui-btn weui-btn_mini weui-btn_primary" id="nextBtn">下一步</a>
 
     </div>
 
@@ -83,26 +84,21 @@
     /* picker */
     //页面加载时获取当前用户的id是否存在未完成的模型，如果有则弹框是否加载。//暂时不做。
     //定义一个策略的dic
-    var userid = "{{ userid|safe }}";
-    var stage = -1;
-    console.log(userid);
+    //var userid = "{{ userid|safe }}";
+    //var stage = "{{stage}}";  //初始是0
+    //var strategyName = "{{strategyname}}"
+    reqData = {"stage":"{{stage|safe}}","userid":"{{ userid|safe }}","strategyName":"{{strategyname|safe}}"}  //stage初始是0
     strategyDic = {"name":"","filterIndicators":{},"buyIndicators":{}}
-    function nextBtn(){
-        switch(stage){
-            case -1: //初始化状态
+    function loadpage(){//只加载页面，设置元素状态
+        $("#js_input3").val(reqData["strategyname"])
+        switch(reqData["stage"]){
+            case '0': //初始化状态
                 $(".timeline-item-head-first").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
-                $("#h4-01").addClass("recent");
-                $("#h4-01").next().addClass("recent");
-                stage = 0;
+                $("#h4-00").addClass("recent");
+                $("#h4-00").next().addClass("recent");
                 break;
-            case 0: //模型名称完成并下一步
-                if($("#js_input3").val()!=""){//输入名称后操作
-                    $.ajax({url:"Create",data:{"name":$("#js_input3").val(),"userid":userid},success:function(result){
-                        //删除第一个选中状态
-                        $(".timeline-item-checked").remove();
-                        $("#h4-01").removeClass("recent");
-                        $("#h4-01").next().removeClass("recent");
-                        //禁用名称输入框
+            case '1': //定义初筛指标
+            case '2': //定义买入指标,只有从初筛指标页面点击完成并返回时，会访问到。
                         $("#js_input3").attr('disabled', 'disabled');
                         //设置第二个选中状态
                         $("#timeline-item-02").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
@@ -110,22 +106,55 @@
                         $("#h4-02").next().addClass("recent");
                         //添加上一步按钮
                         $("#nextBtn").before('<a href="javascript:preBtn();" class="weui-btn weui-btn_mini weui-btn_primary" id="preBtn">上一步</a>');
-                        //添加初筛指标跳转链接url
-                        $("#h4-02").html('定义初筛指标<a href="" class="weui-btn weui-btn_mini weui-btn_primary" id="newFilterIn">前往</a>');
-                        $("#newFilterIn").attr("href","newFilterShow?name="+$("#js_input3").val()+"&userid="+userid);
-                        }
-                    });
-                    stage = 1;
-                }
-            case 1: //初筛指标定义完成并下一步
+                        
+            case "3": //定义买入指标
+                //删除选中状态
+                $(".timeline-item-checked").remove();
+                $("#h4-02").removeClass("recent");
+                $("#h4-02").next().removeClass("recent");
+                //设置第三个选中状态
+                $("#timeline-item-03").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
+                $("#h4-03").addClass("recent");
+                $("#h4-03").next().addClass("recent");
+                //添加买入指标跳转链接
+                $("#h4-03").html('定义买入指标<a href="" class="weui-btn weui-btn_mini weui-btn_primary" id="newBuyIn">前往</a>');
+                $("#newBuyIn").attr("href","newBuyInShow?strategyname="+$("#js_input3").val()+"&userid="+userid);
+                stage = "2";
+
 
 
         }
     }
-    function preBtn(){
+    function bindNextBtn(){
+        $("#nextBtn").unbind('click').click(function(){
+            
+            switch(reqData["stage"]){
+                case '0': //要进入初筛指标逻辑
+                    if($("#js_input3").val()==""){//未定义策略名
+                        alert("请先输入策略名称");
+                    }
+                    else{//请求后端判断是否策略名OK
+                        reqData["strategyName"] = $("#js_input3").val()
+                        $.post('createOrUpdate',JSON.stringify(reqData),function (res) { //这个阶段只创建策略名,stage=1，并写入数据库
+                            resObj = eval('(' + res + ')')
+                            if(resObj.result==true){//创建成功，带策略ID跳转到初筛指标新增页面，整个交互使用策略ID,userid不用带，session里应该有
+                                console.log(resObj)
+                                window.location.replace("newFilterShow?strategyid="+resObj.strategyid);
+                            }
+                            else{
+                                alert("创建策略失败，原因:"+resObj.msg)
+                            }
+                        })
+                    }
+                case '2':
+
+            }
+        })
+    }
+    function bindPreBtn(){
         switch(stage){
-            case -1: //已经是初始化页面，无法上一步
-            case 1: //从初筛阶段回到命名阶段
+            case "-1" || "0": //已经是初始化页面，无法上一步
+            case "1": //从初筛阶段回到命名阶段
                 //删除选中状态
                 $(".timeline-item-checked").remove();
                 $("#h4-02").removeClass("recent");
@@ -139,11 +168,27 @@
                 $("#preBtn").remove();
                 //删除初筛指标跳转链接
                 $("#h4-02").html('定义初筛指标');
-                stage = 0;
+                stage = "0";
+            case "2":
+                //删除选中状态
+                $(".timeline-item-checked").remove();
+                $("#h4-03").removeClass("recent");
+                $("#h4-03").next().removeClass("recent");
+                //设置第三个选中状态
+                $("#timeline-item-02").prepend('<i class="timeline-item-checked   weui-icon-success-no-circle"></i>');
+                $("#h4-02").addClass("recent");
+                $("#h4-02").next().addClass("recent");
+                //添加买入指标跳转链接
+                $("#h4-03").html('定义买入指标');
+                stage = "2";
+
         }
 
     }
-    nextBtn();
+    loadpage();
+    bindNextBtn();
+    //bindPreBtn()
+
 </script>
 </html>
 {%load static%}

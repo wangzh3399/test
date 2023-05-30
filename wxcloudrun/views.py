@@ -72,8 +72,7 @@ def getUser(request):
         return None
     user=None
     try:
-        userModel = getModel(tableName='wxcloudrun_usermanager',appLabel='wxcloudrun')
-        user=userModel.objects.get(userid=userid)
+        user=usermanager.objects.get(userid=userid)
     except:
         logger.error(traceback.format_exc())
         return None
@@ -104,48 +103,120 @@ def personal(request):
     userinfo={'name':user.username,'get_rank_display':'1','avator_url':'media/products/girl4.jpeg'}
     return render(request,'prvsPerson/person.html',{'user':userinfo})
 
-def strategy(request): 
+def strategyHome(request): #策略首页
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
     #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
     models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
     return render(request,'prvsStrategy/home.html',{'models':models})
-def strategyNew(request):
+def strategyNew(request): #新建策略 流水线页面  
+    #从策略首页跳转    中间某个指标创建完跳转回来
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
-    #models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
-    return render(request,'prvsStrategy/new.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'userid':user.userid})
-def strategyNewFilterShow(request):
-    name = request.GET.get('name')
-    userid = request.GET.get('userid')
-    logger.error(name)
-    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
-    #models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
-    return render(request,'prvsStrategy/newFilterIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'userid':userid,'strategyName':name})
-def strategyCreate(request):
-    name = request.GET.get('name')
-    userid = request.GET.get('userid')
-    logger.error(name)
-    logger.error(userid)
-    return HttpResponse('{result:"True"}')
-def newFilterCreate(request):
-    #初筛指标完成，在数据库创建记录
+    stage = request.GET.get('stage','')
+    resp = {'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'userid':user.userid,'stage':stage,'strategyName':''}
+    return render(request,'prvsStrategy/new.html',resp)
+def strategyNewFilterShow(request):   #新建初筛指标页面
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    strategyid = request.GET.get('strategyid','')
+    strategy = strategypool.objects.get(strategyid=strategyid)
+    return render(request,'prvsStrategy/newFilterIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'strategyName':strategy.strategyname,'strategyid':strategyid})
+def strategyCreateOrUpdate(request):  #定义一个统一的创建or更新接口， 每个阶段都访问这个来写入策略数据，根据传参stage判断。
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':False,'strategyid':0,'msg':'未知原因，请联系管理员!'}
     data = json.loads(request.body)
-    strategyname = data['name']
+    if data['stage'] == "0": #创建策略名称
+        try:
+            strategypool.objects.create(strategyname=data['strategyName'],ownderid=user,creatorid=user,createtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),runstatus="createName")
+            resp['strategyid'] = strategypool.objects.get(strategyname=data['strategyName'],ownderid=user).strategyid
+            resp['msg'] = 'successful'
+            resp['result'] = True
+        except:
+            errMsg = traceback.format_exc()
+            logger.error(errMsg)
+            if errMsg.find('Duplicate entry')!= -1:
+                resp['msg'] = '您名下已存在重复策略['+data['strategyName']+'],请修改名称后重试！'
+    elif data['stage'] == "1": #创建初筛策略
+        strategyid = data['strategyid'] 
+        group = data['group']  #["条件组1[xxx111]","条件组2[bbb]"]
+        indicators = data['indicators']#{"条件组1":["AdaptiveMovingAverage  &gt;  AdaptiveMovingAverage","且","MACD  &gt;123","条件组1[xxx111]","且","条件组2[bbb]"],"条件组2":["加/减速指标(AC)  &gt;  MACD"]}
+        filter = data['filter']   #"条件组1[xxx111] 且 条件组2[bbb] 
+        #校验下用户身份和数据库一致，谨慎起见，防止异常。
+        strategyRecord = strategypool.objects.get(strategyid=strategyid)
+        if strategyRecord.ownderid == user.userid:
+            #如果有自定义数值，则需要写入标准指标库中
+            strategypool.objects.update(strategyid=strategyid,ownderid=user,runstatus="createFilter")
+            strategyid = strategypool.objects.get(strategyname=strategyName,ownderid=user)
+            resp['result'] = True
+            resp['msg'] = 'successful'
+            resp['strategyid'] = strategyid.strategyid
+        else:
+            logger.error("未知错误，请求的用户id和数据库中已写入的用户id不一致")
+    return HttpResponse(json.dumps(resp))
+'''
+    resp = {'result':False,'msg':'未知原因，请联系管理员!'}
+    strategyName = data['strategyName']
     userid = data['userid']
     group = data['group']  #["条件组1[xxx111]","条件组2[bbb]"]
     indicators = data['indicators']#{"条件组1":["AdaptiveMovingAverage  &gt;  AdaptiveMovingAverage","且","MACD  &gt;123","条件组1[xxx111]","且","条件组2[bbb]"],"条件组2":["加/减速指标(AC)  &gt;  MACD"]}
     filter = data['filter']   #"条件组1[xxx111] 且 条件组2[bbb] 
     try:
         user = usermanager.objects.get(userid=userid)
-        strategypool.objects.create(strategyname=strategyname,ownderid=user,creatorid=user,createtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),runstatus="createFilter")
+        strategypool.objects.create(strategyname=strategyName,ownderid=user,creatorid=user,createtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),runstatus="createFilter")
+        strategyid = strategypool.objects.get(strategyname=strategyName,ownderid=user)
+        resp['result'] = True
+        resp['msg'] = 'successful'
+        resp['strategyid'] = strategyid.strategyid
     except:
-        logger.error(traceback.format_exc())
-        return HttpResponse('{result:"False"}')
-    return HttpResponse('{result:"True"}')
+        resp['result'] = False
+        errMsg = traceback.format_exc()
+        logger.error(errMsg)
+        if errMsg.find('Duplicate entry')!= -1:
+           resp['msg'] = '您名下已存在重复策略['+strategyName+'],请修改名称后重试！'
+    return HttpResponse(json.dumps(resp))
+'''
+def strategyNewBuyInShow(request):   #新建买入指标页面
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    strategyName = request.GET.get('strategyName','')
+    userid = request.GET.get('userid','')
+    return render(request,'prvsStrategy/newBuyIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'userid':userid,'strategyName':strategyName})
+def strategyNewBuyInCreate(request):  #初筛指标ajax 访问后端写数据库
+    #初筛指标完成，在数据库创建记录
+    data = json.loads(request.body)
+    resp = {'result':False,'msg':'未知原因，请联系管理员!'}
+    strategyName = data['strategyName']
+    userid = data['userid']
+    group = data['group']  #["条件组1[xxx111]","条件组2[bbb]"]
+    indicators = data['indicators']#{"条件组1":["AdaptiveMovingAverage  &gt;  AdaptiveMovingAverage","且","MACD  &gt;123","条件组1[xxx111]","且","条件组2[bbb]"],"条件组2":["加/减速指标(AC)  &gt;  MACD"]}
+    filter = data['filter']   #"条件组1[xxx111] 且 条件组2[bbb] 
+    try:
+        user = usermanager.objects.get(userid=userid)
+        strategypool.objects.create(strategyname=strategyName,ownderid=user,creatorid=user,createtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),runstatus="createFilter")
+        strategyid = strategypool.objects.get(strategyname=strategyName,ownderid=user)
+        resp['result'] = True
+        resp['msg'] = 'successful'
+        resp['strategyid'] = strategyid
+    except:
+        resp['result'] = False
+        errMsg = traceback.format_exc()
+        logger.error(errMsg)
+        if errMsg.find('Duplicate entry')!= -1:
+           resp['msg'] = '您名下已存在重复策略['+strategyName+'],请修改名称后重试！'
+    return HttpResponse(json.dumps(resp))
+
+
+
+
+
+
 def strategyManagement(request):
     user=getUser(request)
     if user == None:
