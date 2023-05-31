@@ -19,9 +19,21 @@
                         <!--div class="weui-cell weui-cell_swiped indicatorSelectCell" name="indicatorSelectCell"-->
                         <div class="weui-cell weui-cell_swiped indicatorSelectCell" name="indicatorSelectCell"-->
                             <div class="weui-cell__bd" style="transform: translate3d(0px, 0px, 0px);">
-                                <div class="weui-cell">
-                                    <div class="weui-cell__bd" name="select">
-                                        <p name="indicatorName">选择指标</p>
+                                <div class="weui-cell" name="indicator">
+                                    <div class="weui-cell__bd" name="prefixcoefficient" style="display:none">
+                                        <p name="prefixcoefficient">系数</p>
+                                    </div>
+                                    <div class="weui-cell__bd" name="prefixindicator">
+                                        <p name="prefixindicator">指标</p>
+                                    </div>
+                                    <div class="weui-cell__bd" name="condition" >
+                                        <p name="condition">条件</p>
+                                    </div>
+                                    <div class="weui-cell__bd" name="suffixcoefficient" style="display:none">
+                                        <p name="suffixcoefficient">系数</p>
+                                    </div>
+                                    <div class="weui-cell__bd" name="suffixindicator">
+                                        <p name="suffixindicator">指标</p>
                                     </div>
                                     <div class="weui-cell__ft"><a name="indicatorDelBtn">删除</a></div>
                                 </div>
@@ -52,14 +64,17 @@
     const simulatedTextarea = document.getElementById('simulated-textarea');  
     //simulatedTextarea.addEventListener('input', function() {    console.log(this.innerHTML);  });
     indicatorsId = []; 
-    var indicators_col1 = {{ indicators_col1|safe }};
-    var indicators_col2 = {{ indicators_col2|safe }};
-    var indicators_col3 = {{ indicators_col3|safe }};
+    var prefixindicator = {{ prefixindicator|safe }};
+    var conditions = {{ conditions|safe }};
+    var suffixindicator = {{ suffixindicator|safe }};
+    var coefficient = {{ coefficient|safe }};
     var strategyName = "{{strategyName|safe}}";
     var strategyid = "{{strategyid|safe}}"
+    var groupRe = /(指标组\d+)：/    //指标组正则
     groupIndex = [] //必须从小到大排列
-    indicatorCombineDic = {}; //存储多个指标组的每个组内的指标组合结果
-    curIndicatorCombineList = [];//单个指标组里的点击顺序。每次promot时要清空。
+    indicatorList = [[],[]]   //初始化时，有两个组，存储每行的指标原始数据   [    [    [],[],[],  ]   ,     [    [],[],[],  ]     ]  初始化时新增指标组1，新增组和新增指标时，填充结构
+    indicatorCombineDic = {}; //存储多个指标组的每个组内的指标组合结果    这两个可能要合并
+    curIndicatorCombineList = [];//单个指标组里的点击顺序。每次promot时要清空。  这两个可能要合并
     curGroupCombineList = []
     groupCombine = "";
     //绑定折叠
@@ -84,6 +99,7 @@
             var pageBd = $(".page-bd:first").clone();
             $(this).before(pageBd);
             $(".page-bd:last").attr("style","");
+            indicatorList.push([])
             rearrange();
             reBindAll();
         });
@@ -91,6 +107,13 @@
     function bindNewIndicatorBtn(){
         var newIndicatorBtns = $("div[name^='newIndicatorBtn']");
         $(newIndicatorBtns).unbind("click").click(function(){
+            //给indicatorList追加一个[]
+            selectClass = $(this).parent().parent().parent().parent().prev().attr("class")
+            indexRe = /指标组(\d+)_select(\d+)/
+            indexRe.exec(selectClass)
+            groupIndex = RegExp.$1;
+            cellIndex = RegExp.$2;
+            indicatorList[Number(groupIndex)].push([])
             var selectCell = $(".indicatorSelectCell:first").clone();
             $(this).parent().parent().parent().parent().before(selectCell);
             rearrange();
@@ -170,7 +193,6 @@
                     return;
                 }
             }
-            groupRe = /(指标组\d+)：/
             groupRe.exec($(e.target).parent().parent().parent().parent().parent().parent().parent().prev().html());
             var groupname = RegExp.$1;
             var regexSelectCellClass = /(指标组\d+_select_\d+)/
@@ -253,34 +275,51 @@
         })
     }
     function bindPicker(){
-        var indicatorSelects = $("div[name^='select']");
+        var indicatorSelects = $("div[name^='prefixindicator']");
         $(indicatorSelects).unbind("click").click(function(e){
-            weui.picker(indicators_col1,indicators_col2,indicators_col3,{
-                depth: 3,
-                defaultValue: ['1','1','1','1','1'],
+            weui.picker(coefficient,prefixindicator,conditions,coefficient,suffixindicator,{
+                depth: 5,
+                defaultValue: ['0','1','1','1','1'],
                 onChange: function (result) {
                     //console.log(typeof(result[1]));
                     //$(e.target).html("指标:"+result[0]+result[1]);
                 },
-                onConfirm: function (result) { //bug：如果从input改回其他指标，需要删除input
-                    weuicell = $(e.target).parent().parent();
-                    curChildCount = $(weuicell).children().length                
-                    $(weuicell).children().remove();//先清理掉再新增，主要为了考虑重新选择的场景。
-                    $(weuicell).prepend('<div class="weui-cell__bd" name="select"><p name="indicatorName">选择指标</p></div>')
-                    if(result[2]["label"]=="指定数值"){
-                        $(weuicell).prepend('<div class="weui-cell__bd" name="xxx"><input class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div>')
-                        $(weuicell).append('<div class="weui-cell__bd" name="xxx"><input  class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入数值" value=""></div>')
-                        $(weuicell).find("p").html(result[0]["label"]+"  "+result[1]["label"]);
+                onConfirm: function (result) { 
+                    //需要先判断当前点击的是哪个指标组，组内第几个
+                    selectClass = $(e.target).parent().parent().parent().parent().attr('class')
+                    console.log(selectClass)
+                    //class:指标组1_select0
+                    indexRe = /指标组(\d+)_select(\d+)/
+                    indexRe.exec(selectClass)
+                    groupIndex = RegExp.$1;
+                    cellIndex = RegExp.$2;
+                    //数据存储起来
+                    indicatorList[Number(groupIndex)][Number(cellIndex)] = [result[0]["label"],result[1]["label"],result[2]["label"],result[3]["label"],result[4]["label"]]
+                    //数据更新到界面
+                    if(result[0]["label"]=="自定义"){
+                        $(e.target).parent().parent().find("p[name^='prefixcoefficient']").html('<input class="weui-input  weui-cell__control weui-cell__control_flex indicator_input" name="prefixcoefficient" placeholder="系数" value="">')
+                        $(e.target).parent().parent().find("div[name^='prefixcoefficient']").attr("style","")
                     }
                     else{
-                        $(weuicell).prepend('<div class="weui-cell__bd" name="xxx"><input class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div>')
-                        $(weuicell).find("p").html(result[0]["label"]+' '+result[1]["label"]);
-                        $(weuicell).append('<div class="weui-cell__bd" name="xxx"><input  class="weui-input  weui-cell__control weui-cell__control_flex"  placeholder="请输入系数" value=""></div><div class="weui-cell__bd" name="xxx"><p name="indicatorName">'+result[2]["label"]+'</p></div>')
+                        $(e.target).parent().parent().find("div[name^='prefixcoefficient']").attr("style","display:none")
                     }
-                    $(weuicell).append('<div class="weui-cell__ft"><a name="indicatorDelBtn">删除</a></div>')
-                    reBindAll();
-                    //e.srcElement.html("指标:"+result[1]["label"])
-                    //console.log(indicatorIndex);
+                    $(e.target).parent().parent().find("p[name^='prefixindicator']").html(result[1]["label"])
+
+                    $(e.target).parent().parent().find("p[name^='condition']").html(result[2]["label"])
+                    if(result[3]["label"]=="自定义"){
+                        $(e.target).parent().parent().find("p[name^='suffixcoefficient']").html('<input class="weui-input  weui-cell__control weui-cell__control_flex indicator_input" name="suffixcoefficient" placeholder="系数" value="">')
+                        $(e.target).parent().parent().find("div[name^='suffixcoefficient']").attr("style","")
+                    }
+                    else{
+                        $(e.target).parent().parent().find("div[name^='suffixcoefficient']").attr("style","display:none")
+                    }
+                    if(result[4]["label"]=="指定数值"){
+                        $(e.target).parent().parent().find("p[name^='suffixindicator']").html('<input class="weui-input  weui-cell__control weui-cell__control_flex indicator_input" name="suffixindicator" placeholder="指定数值" value="">')
+                    }
+                    else{
+                        $(e.target).parent().parent().find("p[name^='suffixindicator']").html(result[4]["label"])
+                    }
+                    reBindAll()
                 },
                 //id: 'cascadePicker'
                 id:'multiPickerBtn'//这个只是保存选择状态的
@@ -306,6 +345,8 @@
     function bindGroupDelBtn(){ 
         $("a[name^='groupDelBtn']").unbind('click').click(function(e) {
             $.confirm("确认删除["+$(e.target).parent().html().split("：")[0]+"]吗?", "确认删除?", function() {
+                groupIndex = Number($(e.target).parent().html().split("：")[0].split("指标组")[1])
+                indicatorList.splice(groupIndex,1)
                 $(e.target).parent().parent().remove();
                 rearrange();
                 reBindAll();
@@ -329,6 +370,14 @@
                 
             }
             $.confirm("确认删除["+text+"]吗?", "确认删除?", function() {
+                //需要先判断当前点击的是哪个指标组，组内第几个,然后从indicatorList中删除
+                selectClass = $(e.target).parent().parent().parent().parent().attr('class')
+                //class:指标组1_select0
+                indexRe = /指标组(\d+)_select(\d+)/
+                indexRe.exec(selectClass)
+                groupIndex = RegExp.$1;
+                cellIndex = RegExp.$2;
+                indicatorList[Number(groupIndex)].splice(Number(cellIndex),1)
                 $(e.target).parent().parent().parent().remove();
                 rearrange();
                 reBindAll();
@@ -337,6 +386,27 @@
             });
         });
         
+    }
+    function bindAllInput(){
+        $(".indicator_input").bind("input propertychange",function(e){
+            selectClass = $(e.target).parent().parent().parent().parent().parent().attr("class")
+            indexRe = /指标组(\d+)_select(\d+)/
+            indexRe.exec(selectClass)
+            groupIndex = RegExp.$1;
+            cellIndex = RegExp.$2;
+            if($(e.target).attr("name")=="prefixcoefficient"){
+                indicatorList[Number(groupIndex)][Number(cellIndex)][0] = $(e.target).val()
+            }
+            else if($(e.target).attr("name")=="suffixcoefficient"){
+                indicatorList[Number(groupIndex)][Number(cellIndex)][3] = $(e.target).val()
+            }
+            else if($(e.target).attr("name")=="suffixindicator"){
+                indicatorList[Number(groupIndex)][Number(cellIndex)][4] = $(e.target).val()
+            }
+            else{
+                console.log("other input is listen,error")
+            }
+        });
     }
     function reBindAll(){
         bindCollapse();
@@ -349,11 +419,13 @@
         combineIndicatorBtn();
         bindFinishBtn();
         combineGroupBtn();
+        bindAllInput()
     }
     function rearrange(){//下个迭代改进时，把每个元素加好id，减少后续一堆parent
         //重排组名
         var groupTitles = $(".weui-cells__title");
         for(i=0;i<groupTitles.length;i++){
+
             preTxt = $(groupTitles[i]).html();
             newTxt = preTxt.replace(/\d+：/i,i+"：")
             $(groupTitles[i]).html(newTxt)
@@ -362,19 +434,18 @@
         //重排指标名,从上向下匹配搜搜，每个指标的select加一个 title_select_num的class
         var groupTitle = ""; //每一个select向上查title，一致则继续编号，不一致则重新编号
         var selectors = $(".indicatorSelectCell");
-        var regexTitle = /(指标组\d+)：/
         var selectIndex = 0;
         for(i=0;i<selectors.length;i++){
             $(selectors[i]).removeClass(function (index, className) {
                 return (className.match(/(^|\s)指标组\S+/g) || []).join(' ');
             })
-            regexTitle.exec($(selectors[i]).parent().parent().parent().prev().html());
+            groupRe.exec($(selectors[i]).parent().parent().parent().prev().html());
             var curTitle = RegExp.$1;
             if(curTitle!=groupTitle){//第一个select，对title赋值，并自己编号取为0
                 groupTitle = curTitle;
                 selectIndex = 0;
             }
-            $(selectors[i]).addClass(curTitle+"_select_"+selectIndex);
+            $(selectors[i]).addClass(curTitle+"_select"+selectIndex);
             selectIndex = selectIndex + 1;
         }
     }
@@ -406,9 +477,8 @@
         $(".finishreturnBtn").unbind("click").click(function(){
             //单个指标的指标组进行单独获取。
             var pageBd = $(".page-bd");
-            var regexTitle = /(指标组\d+)：/
             for(i=1;i<pageBd.length;i++){//跳过i=0,默认的page模板
-                regexTitle.exec($(pageBd[i]).children(".weui-cells__title").html());
+                groupRe.exec($(pageBd[i]).children(".weui-cells__title").html());
                 var groupname = RegExp.$1;  
                 if($(pageBd[i]).find(".indicatorSelectCell").length==1){//只有一个指标的指标组
                     if($(pageBd[i]).find("input").length==1){//说明有input

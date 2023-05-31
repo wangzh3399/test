@@ -116,7 +116,7 @@ def strategyNew(request): #新建策略 流水线页面
     if user == None:
         return render(request,'refuse.html')
     stage = request.GET.get('stage','')
-    resp = {'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'userid':user.userid,'stage':stage,'strategyName':''}
+    resp = {'stage':stage,'strategyName':''}
     return render(request,'prvsStrategy/new.html',resp)
 def strategyNewFilterShow(request):   #新建初筛指标页面
     user=getUser(request)
@@ -124,7 +124,7 @@ def strategyNewFilterShow(request):   #新建初筛指标页面
         return render(request,'refuse.html')
     strategyid = request.GET.get('strategyid','')
     strategy = strategypool.objects.get(strategyid=strategyid)
-    return render(request,'prvsStrategy/newFilterIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'strategyName':strategy.strategyname,'strategyid':strategyid})
+    return render(request,'prvsStrategy/newFilterIn.html',{'coefficient':json.dumps(coefficient),'prefixindicator':json.dumps(prefixindicator),'conditions':json.dumps(conditions),'suffixindicator':json.dumps(suffixindicator),'strategyid':strategyid,'strategyName':strategy.strategyname})
 def strategyCreateOrUpdate(request):  #定义一个统一的创建or更新接口， 每个阶段都访问这个来写入策略数据，根据传参stage判断。
     user=getUser(request)
     if user == None:
@@ -187,7 +187,7 @@ def strategyNewBuyInShow(request):   #新建买入指标页面
         return render(request,'refuse.html')
     strategyName = request.GET.get('strategyName','')
     userid = request.GET.get('userid','')
-    return render(request,'prvsStrategy/newBuyIn.html',{'indicators_col1':json.dumps(indicators_col1),'indicators_col2':json.dumps(indicators_col2),'indicators_col3':json.dumps(indicators_col3),'userid':userid,'strategyName':strategyName})
+    return render(request,'prvsStrategy/newBuyIn.html',{'coefficient':json.dumps(coefficient),'prefixindicator':json.dumps(prefixindicator),'conditions':json.dumps(conditions),'suffixindicator':json.dumps(suffixindicator),'userid':userid,'strategyName':strategyName})
 def strategyNewBuyInCreate(request):  #初筛指标ajax 访问后端写数据库
     #初筛指标完成，在数据库创建记录
     data = json.loads(request.body)

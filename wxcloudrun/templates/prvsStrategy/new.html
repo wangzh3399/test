@@ -87,7 +87,7 @@
     //var userid = "{{ userid|safe }}";
     //var stage = "{{stage}}";  //初始是0
     //var strategyName = "{{strategyname}}"
-    reqData = {"stage":"{{stage|safe}}","userid":"{{ userid|safe }}","strategyName":"{{strategyname|safe}}"}  //stage初始是0
+    reqData = {"stage":"{{stage|safe}}","strategyName":"{{strategyname|safe}}"}  //stage初始是0
     strategyDic = {"name":"","filterIndicators":{},"buyIndicators":{}}
     function loadpage(){//只加载页面，设置元素状态
         $("#js_input3").val(reqData["strategyname"])
@@ -127,7 +127,7 @@
     }
     function bindNextBtn(){
         $("#nextBtn").unbind('click').click(function(){
-            
+            console.log(reqData["stage"])
             switch(reqData["stage"]){
                 case '0': //要进入初筛指标逻辑
                     if($("#js_input3").val()==""){//未定义策略名

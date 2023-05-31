@@ -1,28 +1,15 @@
 import json
 
-
-condition = [{
-   'label':'>',
+coefficient = [{
+   'label':'不指定',
    'value':0
    },{
-   'label':'≥',
+   'label':'自定义',
    'value':1       
-   },{
-   'label':'<',
-   'value':2   
-   },{
-   'label':'≤',
-   'value':3
-   },{
-   'label':'=',
-   'value':4       
-   },{
-   'label':'≠',
-   'value':5   
    }
 ]
 #常用指标放上面，非常用放下面，不再单独搞一列用于区分
-indicators_col1 = [{
+prefixindicator = [{
    'label': '加/减速指标(AC)',
    'value': 1
    },{
@@ -32,7 +19,7 @@ indicators_col1 = [{
    'label': 'AdaptiveMovingAverage',
    'value': 3
    }]
-indicators_col2 = [{
+conditions = [{
    'label':'>',
    'value':1
    },{
@@ -51,7 +38,7 @@ indicators_col2 = [{
    'label':'≠',
    'value':6   
    }]
-indicators_col3 = [{
+suffixindicator = [{
    'label': '指定数值',
    'value': 1
    },{
