@@ -9,6 +9,7 @@ coefficient = [{
    }
 ]
 #常用指标放上面，非常用放下面，不再单独搞一列用于区分
+#指标label不要有空格
 prefixindicator = [{
    'label': '加/减速指标(AC)',
    'value': 1

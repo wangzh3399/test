@@ -72,9 +72,9 @@
     var strategyid = "{{strategyid|safe}}"
     var groupRe = /(指标组\d+)：/    //指标组正则
     groupIndex = [] //必须从小到大排列
-    indicatorList = [[],[]]   //初始化时，有两个组，存储每行的指标原始数据   [    [    [],[],[],  ]   ,     [    [],[],[],  ]     ]  初始化时新增指标组1，新增组和新增指标时，填充结构
-    indicatorCombineDic = {}; //存储多个指标组的每个组内的指标组合结果    这两个可能要合并
-    curIndicatorCombineList = [];//单个指标组里的点击顺序。每次promot时要清空。  这两个可能要合并
+    indicatorList = [[['NA','NA','NA']],[[]]]   //初始化时，有两个组,每个组有一个默认指标行，模板0中填充无效数据，便于后面判断[]为空说明有指标行没有选择内容。  存储结构[    [    [],[],[],  ]   ,     [    [],[],[],  ]     ] 
+    combineList = [{"groupname":"模板指标组0","indicatorCombineRes":["没有组合结果"]},{"groupCombineRes":[]}]; //存储多个指标组的每个组内的指标组合结果,和指标组的组合结果,tmpCombineResList用于点击过程中存储点击内容
+    curIndicatorCombineList = []
     curGroupCombineList = []
     groupCombine = "";
     //绑定折叠
@@ -100,6 +100,9 @@
             $(this).before(pageBd);
             $(".page-bd:last").attr("style","");
             indicatorList.push([])
+            combineList.pop() //弹出最后一个groupCombineRes,确保最后一个永远是groupCombineRes
+            combineList.push({"groupname":"","combineRes":""})
+            combineList.push({"groupCombineRes":[]})
             rearrange();
             reBindAll();
         });
@@ -114,6 +117,8 @@
             groupIndex = RegExp.$1;
             cellIndex = RegExp.$2;
             indicatorList[Number(groupIndex)].push([])
+            combineList[groupIndex]["indicatorCombineRes"] = []//该指标组内新增或删除了一个指标组，则需要重置组合结果，并更新title
+            $(this).parent().parent().parent().parent().parent().prev().children("div[name^='indicatorTitle']").html("指标组合结果")
             var selectCell = $(".indicatorSelectCell:first").clone();
             $(this).parent().parent().parent().parent().before(selectCell);
             rearrange();
@@ -122,7 +127,7 @@
     }
     function bindIndicatorConbineUnits(){//后面有时间需要重新实现，使用div替换textarea，使内容运算符能够更做颜色区分
         //绑定a标签事件,并实时生成运算表达式
-        //先插入一个<div class="weui-dialog__bd">123</div>，占新一行
+        //组合时候对所有dialog的按钮绑定事件。
         var combineUnits = $(".weui-dialog__bd").find("a");
         for(i=0;i<combineUnits.length;i++){
             $(combineUnits[i]).unbind("click").click(function(){
@@ -180,39 +185,32 @@
     function combineIndicatorBtn(){
         var combineIndicatorBtns = $("div[name^='combineIndicatorBtn']");
         $(combineIndicatorBtns).unbind("click").click(function(e){
-            //点击组合时，先找title，然后选择器选出所有的indicator节点。并弹框进行组合指标。
-            var abort = false;
-            var conditions = []
-            var selectCells = $(this).parent().parent().parent().parent().parent().children(".indicatorSelectCell");
-            if(selectCells.length==1){
+            //点击组合时，先定位具体的指标组，并导入指标组的所有结果。并弹框进行组合指标。
+            selectClass = $(this).parent().parent().parent().parent().prev().attr("class")
+            indexRe = /指标组(\d+)_select(\d+)/
+            indexRe.exec(selectClass)
+            groupIndex = RegExp.$1;
+            cellIndex = RegExp.$2;
+            if(cellIndex==1){//btn的上一个selectcell就是第0个，说明只有1个。
                 alert("单个指标无需组合");
                 return;
             }
-            if($(this).parent().parent().parent().parent().parent().prev().children("div").html()!="指标组合结果"){
+            //重新点击要提示，第一次点击不提示
+            if(combineList[Number(groupIndex)]["combineRes"].length!=0){
                 if(!confirm("确定要重新组合指标?")){
                     return;
                 }
+                combineList[Number(groupIndex)]["combineRes"] ==[]
+                curIndicatorCombineList = []
             }
-            groupRe.exec($(e.target).parent().parent().parent().parent().parent().parent().parent().prev().html());
-            var groupname = RegExp.$1;
-            var regexSelectCellClass = /(指标组\d+_select_\d+)/
-            for(i=0;i<selectCells.length;i++){//先获取Cell的class，然后使用后代元素选择器找出所有的p和input，每个p+input为一个指标
-                regexSelectCellClass.exec($(selectCells[i]).attr('class'));
-                var selectCellClass = RegExp.$1;
-                if($('.'+selectCellClass+' p').html()=="选择指标"){//存在指标未定义的
-                    alert("存在未定义的指标，请先定义");
+            var conditions = [] //用于保存拼接后的每个指标  ['指标1','指标2']，用于弹框后的组合使用
+            for(i=0;i<indicatorList[Number(groupIndex)].length;i++){//每个 循环是一个['前缀系数','前缀指标','运算条件','后缀系数','后缀指标']
+                indicatorLineConent = indicatorList[Number(groupIndex)][i].join(" ");
+                if(indicatorLineConent.length==0||indicatorLineConent.includes("自定义")||indicatorLineConent.includes("指定数值")){//为空说明有指标行没有添加内容
+                    alert("指标组["+groupIndex+"]的第["+i+"]行非法，请先定义完整");
                     return;
                 }
-                if($('.'+selectCellClass+' input').length==1){
-                    if($('.'+selectCellClass+' input').val()==""){//input的合法性校验后面再引入进来。
-                        alert("存在待指定数值的内容未填写，请先填写");
-                        return;
-                    }
-                    conditions.push($('.'+selectCellClass+' p').html()+$('.'+selectCellClass+' input').val());
-                }
-                else{//没有指定数值的select
-                    conditions.push($('.'+selectCellClass+' p').html())
-                }
+                conditions.push(indicatorList[Number(groupIndex)][i].join(" "))
             }
             text = "";
             for(i=0;i<conditions.length;i++){
@@ -225,34 +223,48 @@
                 text: text,
                 input: "",
                 empty: false, // 是否允许为空
-                onOK: function (input) {
+                onOK: function (input,groupIndex) {
                     //点击确认
                     $(e.target).parent().parent().parent().parent().parent().prev().children("div").html(input);
-                    //更新指标组dic
-                    indicatorCombineDic[groupname] = curIndicatorCombineList;
-
+                    combineList[Number(groupIndex)]["combineRes"] = curIndicatorCombineList
                 },
                 onCancel: function () {
                     //点击取消
                 }
             });
-            curIndicatorCombineList = [];//生成prompts时清空。
-            indicatorCombineDic[groupname] = [];//生成prompts时清空。
             bindIndicatorConbineUnits()
                 
         });
     }
     function combineGroupBtn(){
         $(".combineGroupBtn").unbind("click").click(function(e){
-            var groupNames = $("a[name^='groupNameSetBtn']");
             text = "";
-            if(groupNames.length==2){
+            if(combineList.length==3){  //[{"groupname":"模板指标组0","indicatorCombineRes":["没有组合结果"]},{"groupname":"指标组1","indicatorCombineRes":[""]},{"groupCombineRes":[]}];
                 alert("只有一个指标组无需组合");
             }
-            for(i=1;i<groupNames.length;i++){
+            for(i=1;i<combineList.length;i++){  //i=0是默认指标组
+                if(combineList[i].hasOwnProperty("groupCombineRes")){
+                    if(combineList[i]["groupCombineRes"].length!=0){
+                        if(!confirm("确定要重新组合指标?")){
+                            return;
+                        }
+                        combineList[combineList.length-1]["groupCombineRes"] = []
+                        curGroupCombineList = [];
+                    }
+                    continue;//继续但不添加到text
+                }
+                if(combineList[i].hasOwnProperty("groupname") && combineList[i]["groupname"] == ""){//指标组未设置名字
+                    alert("指标组"+i+"未设置名字，请先设置名字后再进行组合")
+                    return
+                }
+                if(combineList[i].hasOwnProperty("groupname") && combineList[i]["indicatorCombineRes"].length==0){//说明某个指标组内的指标未完成组合。
+                    alert("指标组"+i+"["+combineList[i]["groupname"]+"]未完成组合，请先进行组合");  //只有一行的应该也默认在组合结果里。
+                    return
+                }
 
-                text = text + '<a class="weui-btn weui-btn_mini bg-blue">指标组'+i+'['+$(groupNames[i]).html()+']</a><bt/>'
+                text = text + '<a class="weui-btn weui-btn_mini bg-blue">指标组'+i+'['+combineList[i]["groupname"]+']</a><bt/>'
             }
+
             text = text + '<div class="weui-dialog__content"></div><bt/><a class="weui-btn weui-btn_mini bg-green">或</a><a class="weui-btn weui-btn_mini bg-green">且</a><a class="weui-btn weui-btn_mini bg-green">非</a><a class="weui-btn weui-btn_mini bg-green">(</a><a class="weui-btn weui-btn_mini bg-green">)</a><a class="weui-btn weui-btn_mini bg-red">删除</a>'
             $.prompts({
                 title: '点击指标组进行组合',
@@ -263,7 +275,7 @@
                     //点击确认
                     $("#simulated-textarea").html(input);
                     //更新指标组dic
-                    groupCombine = input;
+                    combineList[combineList.length-1]["groupCombineRes"] = curGroupCombineList;
 
                 },
                 onCancel: function () {
@@ -293,24 +305,30 @@
                     indexRe.exec(selectClass)
                     groupIndex = RegExp.$1;
                     cellIndex = RegExp.$2;
-                    //数据存储起来
-                    indicatorList[Number(groupIndex)][Number(cellIndex)] = [result[0]["label"],result[1]["label"],result[2]["label"],result[3]["label"],result[4]["label"]]
-                    //数据更新到界面
+
+                    //数据更新到界面,并存储到List
+                    tmpList = []//最终结果是变长的，3~5个
                     if(result[0]["label"]=="自定义"){
                         $(e.target).parent().parent().find("p[name^='prefixcoefficient']").html('<input class="weui-input  weui-cell__control weui-cell__control_flex indicator_input" name="prefixcoefficient" placeholder="系数" value="">')
                         $(e.target).parent().parent().find("div[name^='prefixcoefficient']").attr("style","")
+                        tmpList.push(result[0]["label"])
                     }
-                    else{
+                    else{//不指定则不存储到list，界面不可见
                         $(e.target).parent().parent().find("div[name^='prefixcoefficient']").attr("style","display:none")
                     }
+
                     $(e.target).parent().parent().find("p[name^='prefixindicator']").html(result[1]["label"])
+                    tmpList.push(result[1]["label"])
 
                     $(e.target).parent().parent().find("p[name^='condition']").html(result[2]["label"])
+                    tmpList.push(result[2]["label"])
+
                     if(result[3]["label"]=="自定义"){
                         $(e.target).parent().parent().find("p[name^='suffixcoefficient']").html('<input class="weui-input  weui-cell__control weui-cell__control_flex indicator_input" name="suffixcoefficient" placeholder="系数" value="">')
                         $(e.target).parent().parent().find("div[name^='suffixcoefficient']").attr("style","")
+                        tmpList.push(result[3]["label"])
                     }
-                    else{
+                    else{//不指定则不存储到list，界面不可见
                         $(e.target).parent().parent().find("div[name^='suffixcoefficient']").attr("style","display:none")
                     }
                     if(result[4]["label"]=="指定数值"){
@@ -318,6 +336,11 @@
                     }
                     else{
                         $(e.target).parent().parent().find("p[name^='suffixindicator']").html(result[4]["label"])
+                    }
+                    tmpList.push(result[5]["label"])//无论是数值还是指标都要加入
+                    indicatorList[Number(groupIndex)][Number(cellIndex)] = tmpList;
+                    if(tmpList.length==3 &&[Number(groupIndex)].length==1){//只有一个指标行时，先将该行指标加入到指标组合结果，如果后面新增或者删除指标时，再清空组合结果。这里只能更新没有指定数值或者自定义的，在input事件初也要更新。
+                        combineList[Number(groupIndex)]["indicatorCombineRes"] = [tmpList.join(" ")]
                     }
                     reBindAll()
                 },
@@ -344,9 +367,11 @@
     }
     function bindGroupDelBtn(){ 
         $("a[name^='groupDelBtn']").unbind('click').click(function(e) {
-            $.confirm("确认删除["+$(e.target).parent().html().split("：")[0]+"]吗?", "确认删除?", function() {
+            $.confirm("确认删除["+$(e.target).parent().html().split("：")[0]+"]吗?指标组的组合结果会同步清除，需要重新组合", "确认删除?", function() {
                 groupIndex = Number($(e.target).parent().html().split("：")[0].split("指标组")[1])
                 indicatorList.splice(groupIndex,1)
+                combineList.splice(groupIndex,1)
+                combineList[combineList.length-1]["groupCombineRes"] = []
                 $(e.target).parent().parent().remove();
                 rearrange();
                 reBindAll();
@@ -369,7 +394,7 @@
                 }
                 
             }
-            $.confirm("确认删除["+text+"]吗?", "确认删除?", function() {
+            $.confirm("确认删除["+text+"]吗?删除后需要重新进行指标结果组合", "确认删除?", function() {
                 //需要先判断当前点击的是哪个指标组，组内第几个,然后从indicatorList中删除
                 selectClass = $(e.target).parent().parent().parent().parent().attr('class')
                 //class:指标组1_select0
@@ -378,6 +403,9 @@
                 groupIndex = RegExp.$1;
                 cellIndex = RegExp.$2;
                 indicatorList[Number(groupIndex)].splice(Number(cellIndex),1)
+                combineList[Number(groupIndex)]["indicatorCombineRes"] = []//新增或删除指标行，都重置指标组合结果并刷新标题
+                $(e.target).parent().parent().parent().parent().prev().children("div[name^='indicatorTitle']").html("指标组合结果")
+
                 $(e.target).parent().parent().parent().remove();
                 rearrange();
                 reBindAll();
@@ -394,17 +422,21 @@
             indexRe.exec(selectClass)
             groupIndex = RegExp.$1;
             cellIndex = RegExp.$2;
-            if($(e.target).attr("name")=="prefixcoefficient"){
-                indicatorList[Number(groupIndex)][Number(cellIndex)][0] = $(e.target).val()
+            listLen = indicatorList[Number(groupIndex)][Number(cellIndex)].length
+            if($(e.target).attr("name")=="prefixcoefficient"){//如果是前缀系数，不论indicatorList里面是多长，一定是第0个
+                indicatorList[Number(groupIndex)][Number(cellIndex)][0] = $(e.target).val()+"*";//系数是乘法，加上*
             }
-            else if($(e.target).attr("name")=="suffixcoefficient"){
-                indicatorList[Number(groupIndex)][Number(cellIndex)][3] = $(e.target).val()
+            else if($(e.target).attr("name")=="suffixcoefficient"){//如果是后缀系数，不论indicatorList里面是多长，一定是第-2个,即len-2
+                indicatorList[Number(groupIndex)][Number(cellIndex)][listLen-2] = $(e.target).val()+"*";//系数是乘法，加上*
             }
-            else if($(e.target).attr("name")=="suffixindicator"){
-                indicatorList[Number(groupIndex)][Number(cellIndex)][4] = $(e.target).val()
+            else if($(e.target).attr("name")=="suffixindicator"){//如果是后缀指标，不论indicatorList里面是多长，一定是第-1个,即len-1
+                indicatorList[Number(groupIndex)][Number(cellIndex)][listLen-1] = $(e.target).val()
             }
             else{
                 console.log("other input is listen,error")
+            }
+            if(indicatorList[Number(groupIndex)].length==1){//只有一个cell时，直接把指标行放入组合结果
+                combineList[Number(groupIndex)]["indicatorCombineRes"] = [indicatorList[Number(groupIndex)][Number(cellIndex)].join(" ")]
             }
         });
     }
