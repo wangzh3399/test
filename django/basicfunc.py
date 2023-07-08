@@ -13,7 +13,7 @@ fh = logging.FileHandler('./logs/djangoserver.log', encoding='utf-8', mode='a')
 formatter = logging.Formatter("%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def table_exists(table_name):
     return table_name in connection.introspection.table_names()
@@ -88,6 +88,25 @@ def getLastWeekLastTradeDate(curDate):
 def getLastMonthLastTradeDate(curDate):
     dt = datetime.datetime.strptime(curDate, '%Y-%m-%d')
     monday = curDate.isoweekday()
+def fmtStockCode(code,prefix=True):
+    code = str(code)
+    if len(code) > 8:
+        logger.error("format stockcode fail,for len > 8:"+code)
+        return code
+    if prefix and len(code)==6:
+        #包含前缀
+        if code.startswith('00') or code.startswith('30'):
+            return 'sz'+code
+        if code.startswith('60') or code.startswith('68'):
+            return 'sh'+code
+        else:
+            logger.error("format stockcode fail,for unknown code:"+code)
+            return code
+    elif not prefix and len(code)==8:
+        return code[2:]
+    else:
+        return code
+
 if __name__ == '__main__':
     print('do nothing')
     print(getLastTradeDate())

@@ -2,6 +2,11 @@ import os
 from pathlib import Path
 import time
 import configparser
+import djcelery
+import django
+from django.utils.encoding import force_str
+django.utils.encoding.force_text = force_str
+
 CUR_PATH = os.path.dirname(os.path.realpath(__file__))  
 LOG_PATH = os.path.join(os.path.dirname(CUR_PATH), 'logs') # LOG_PATH是存放日志的路径
 if not os.path.exists(LOG_PATH): os.mkdir(LOG_PATH)  # 如果不存在这个logs文件夹，就自动创建一个
@@ -67,7 +72,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wxcloudrun'
+    'wxcloudrun',
+    'djcelery'
 ]
 
 MIDDLEWARE = [
@@ -252,3 +258,17 @@ CKEDITOR_JQUERY_URL = '/static/script/jquery2.1.4.min.js'
 
 
 
+djcelery.setup_loader()
+BROKER_URL = 'amqp://laowang:laowang123@'+host+':5672/djangomq' # Broker配置，这个值再RabbitMQ页面可以找到   这个才管用
+CELERY_BROKER_URL = 'amqp://laowang:laowang123@'+host+':5672/0' # Broker配置，这个值再RabbitMQ页面可以找到
+CELERY_RESULT_BACKEND = 'amqp://laowang:laowang123@'+host # BACKEND配置
+
+CELERYD_MAX_TASKS_PER_CHILD = 200 #每个worker执行了多少任务就会死掉
+
+CELERYD_CONCURRENCY = 20 # celery worker的并发数．不是worker也越多越好,保证任务不堆积,加上一定新增任务的预留就可以
+
+CELERYD_PREFETCH_MULTIPLIER = 3 # celery worker 每次去rabbitmq取任务的数量
+
+CELERY_CREATE_MISSING_QUEUES = True
+
+CELERY_TASK_RESULT_EXPIRES = 3600 # 任务执行结果的超时时间

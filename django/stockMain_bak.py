@@ -1,13 +1,12 @@
-import logging
 import traceback
 import datetime
 import time
 import akshare as ak
 import decimal
 from  basicfunc import *
-from models_generate import *
 from django.apps import apps
 from updateStockLIist import *
+from django.db import models
 
 def dataFormat(data,n):#取小数点后n位
     if n > 8:
@@ -64,7 +63,7 @@ def getMMA(df,dffield,curIndex,shiftday):  #算ma时，要包含当天的数据�
     return sum/shiftday
 
 def updateSingleStockData(stockcode):
-    #维护近三年的股票数据. stockcode 默认带sz sh等前缀
+    #维护自2020年后的股票数据. stockcode 默认带sz sh等前缀
     t = datetime.datetime.now()
     month = '0' + str(t.month)
     day = '0' + str(t.day)
@@ -305,7 +304,7 @@ def updateSingleStockData(stockcode):
             logger.error(traceback.format_exc())
             break
     return 
-def slowloop():
+def mainloop():
     #采集股票全量信息，维护近三年的股票数据。2020年后。
     previousRunDay = 0  #同一天只执行1轮
     loopMonitor = 0   #用于监控异常处理，如果已经处理过一次异常，第二次就不再处理了直接退出。
@@ -337,7 +336,8 @@ def slowloop():
             time.sleep(1)  #避免故障场景循环过快
 
 if __name__ == '__main__':
-    slowloop()
+    #后台独立运行的进程，持续更新stock数据，维护自2020年以后的数据，多进程
+    mainloop()
     
     
     

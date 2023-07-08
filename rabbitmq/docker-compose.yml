@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  rabbitmq:
+    # image: rabbitmq:latest    # 如果要用不带web界面的可以选这个
+    image: rabbitmq:management  # 带有web界面的镜像
+    container_name: rabbitmq    # 取一个容器名
+    ports:  # 开放两个端口，当然没有web界面的话就不用开放15672了
+      - "5672:5672"
+      - "15672:15672"
+    environment:    # 这里设置登录名和密码
+      RABBITMQ_DEFAULT_USER: laowang
+      RABBITMQ_DEFAULT_PASS: laowang123  

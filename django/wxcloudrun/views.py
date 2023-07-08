@@ -1,7 +1,7 @@
 import json
 from basicfunc import *   #这里就有logger了
-
-from django.http import JsonResponse
+from .task import order_created
+from django.http import HttpResponseRedirect,JsonResponse
 from django.shortcuts import render
 from django.http import HttpResponse
 from wechatpy.utils import check_signature
@@ -13,8 +13,6 @@ from wechatpy.oauth import WeChatOAuth
 import sys
 from functools import wraps
 from django.conf import settings
-from models_generate import *
-from basicfunc import *
 from indicators import *
 from html import unescape
 from wxcloudrun.models import *
@@ -115,6 +113,7 @@ def strategyNew(request): #新建策略 流水线页面
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
+    order_created.delay()
     stage = request.GET.get('stage','')
     resp = {'stage':stage,'strategyName':''}
     return render(request,'prvsStrategy/new.html',resp)

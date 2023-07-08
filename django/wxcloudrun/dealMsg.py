@@ -3,7 +3,6 @@ from basicfunc import *
 import traceback
 import datetime
 import sys
-from models_generate import *
 import re
 from django.apps import apps
 

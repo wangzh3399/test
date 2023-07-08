@@ -1,14 +1,20 @@
 from basicfunc import *
 import akshare as ak
-from models_generate import *
 import traceback
+import django
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wxcloudrun.settings") 
+django.setup()
+from django.db.models import *
+import wxcloudrun.models as mdl
+
 
 def fullUpdateLocal(stockModel):
     #从基础的txt更新一次，后面再定期扫描。 这里还有个问题，股票名称还没有获取到，先使用id吧，后面再加
     stocklist = open('./stocklist.txt','r')
     for stockcode in stocklist:
         stockModel.objects.create(stockcode = stockcode,stockname = '')
-def UpdateOnline(stockModel):
+def UpdateOnline(stockModel): #全量更新基本上30s以内
     stockinfoDf = ak.stock_info_a_code_name()
     #stockinfoDf_sz = ak.stock_info_sz_name_code()
     print(stockinfoDf)
@@ -29,21 +35,5 @@ def UpdateOnline(stockModel):
     for i in range(0,len(stockinfoDf.index)):
         stockModel.objects.get_or_create(stockcode = stockinfoDf['code'][i],stockname = stockinfoDf['name'][i])
 
-def updateStockListPerDay():
-    #每天凌晨更新股票列表，写数据库。退市的保留，只增不删。 启动时判断，如果股票静态信息表如果为空则默认写一次，否则不写。
-    #改用model写，没有表则创建。
-    #放在slowloop中每天调用一次。
-    try:
-        stockModel = getModel(tableName='wxcloudrun_stockstaticdata',appLabel='wxcloudrun')
-    except:
-        logger.info(traceback.format_exc())
-        logger.info('没有数据表')
-        create_table('stockstaticdata','wxcloudrun')
-        stockModel = getModel(tableName='wxcloudrun_stockstaticdata',appLabel='wxcloudrun')
-    stocks = stockModel.objects.all()
-    if len(stocks) == 0:
-        fullUpdateLocal(stockModel)
-    else:
-        UpdateOnline(stockModel)
 if __name__ == '__main__':
-    updateStockListPerDay()
+    UpdateOnline(mdl.stockbasicinfo)
