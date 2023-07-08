@@ -90,15 +90,17 @@ urlpatterns = [
 
 
 
-
-
-
-
     # 获取主页
     url(r'^^wxui(/)?$', views.index),
     url(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^myself$',views.myself),
-    url(r'^strategy$',views.strategyHome), #策略首页
+    url(r'^operator$',views.operatorManage),
+    url(r'^condition$',views.conditionManage),
+    url(r'^strategy$',views.strategyManage),
+    url(r'^stockpool$',views.stockpoolManage),
+    url(r'^notice$',views.noticeManage), 
+    url(r'^monitortask$',views.monitortaskManage), 
+
     url(r'^strategy/new$',views.strategyNew),
     url(r'^strategy/newFilterShow$',views.strategyNewFilterShow), 
     url(r'^strategy/createOrUpdate$',views.strategyCreateOrUpdate),

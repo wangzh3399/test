@@ -16,14 +16,14 @@ class stockbasicinfo(models.Model): #股票基础信息，一个表存所有stoc
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 class usermanager(models.Model): #model的meta有
     userid = models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="用户id")  #这里用户id实际长度 28，如：oHqS86cHPMo7D0_2xb8pd6VranAU
-    useraccount = models.CharField(max_length=32,blank=False,verbose_name="微信的账号用户名")
-    username = models.CharField(max_length=32,blank=False,verbose_name="微信昵称")
-    registtime = models.CharField(max_length=20,blank=False,verbose_name="注册时间")
-    uuid = models.CharField(max_length=32,blank=False,verbose_name="用户标识")
-    level = models.CharField(max_length=8,blank=False,verbose_name="用户等级")  #level 999 管理员 
-    valid = models.BooleanField(null=True,verbose_name="生效状态")
-    validtime = models.CharField(max_length=20,blank=False,verbose_name="截止有效时间")
-    cashflow = models.IntegerField(blank=False,null=True,verbose_name="流水")
+    useraccount = models.CharField(max_length=32,blank=True,verbose_name="微信的账号用户名")
+    username = models.CharField(max_length=32,blank=True,verbose_name="微信昵称")
+    registtime = models.CharField(max_length=20,blank=True,verbose_name="注册时间")
+    uuid = models.CharField(max_length=32,blank=True,verbose_name="用户标识")
+    level = models.CharField(max_length=8,blank=True,verbose_name="用户等级")  #level 999 管理员 
+    valid = models.BooleanField(blank=True,verbose_name="生效状态")
+    validtime = models.CharField(max_length=20,blank=True,verbose_name="截止有效时间")
+    cashflow = models.IntegerField(blank=True,verbose_name="流水")
     class Meta:
         # 设置表名
         db_table = "usermanager"
@@ -33,11 +33,11 @@ class usermanager(models.Model): #model的meta有
 class operators(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=16,blank=False,verbose_name="运算符")
-    desc = models.CharField(max_length=256,blank=False,verbose_name="运算符描述")
+    desc = models.CharField(max_length=256,blank=True,verbose_name="运算符描述")
     oprtype = models.CharField(max_length=16,blank=False,verbose_name="运算符类型")  #public公共的，private 私人定义的
     argvnum = models.IntegerField(blank=False,verbose_name="参数数量")
-    ownderid = models.CharField(max_length=32,blank=False,verbose_name="用户id")
-    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="用户id")
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     
     class Meta:
@@ -53,8 +53,8 @@ class conditons(models.Model):
     condtype = models.CharField(max_length=16,blank=False,verbose_name="类型")  #暂时没考虑好，可能后面可以用于可交易的或私有的。
     operatorid = models.IntegerField(blank=False,verbose_name="所用运算符")   #operator[var[var][var]  var要么是stock的字段，要么是系统定义的一些标准库参数 或user自己定义的一些计算组合
     argvs = models.CharField(max_length=256,blank=False,verbose_name="参数集合")
-    ownderid = models.CharField(max_length=32,blank=False,verbose_name="用户id")
-    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
+    creatorid = models.CharField(max_length=32,blank=False,verbose_name="用户id")
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:
         # 设置表名
@@ -89,8 +89,10 @@ class strategys(models.Model):
 
 class stockpool(models.Model):#股票池表，用户可以自定义股票池，用于应用不同策略
     id = models.AutoField(primary_key=True)
-    poolname = models.CharField(max_length=16,blank=False,verbose_name="股票池名称") #策略名
-    userid = models.CharField(max_length=32,blank=False,primary_key=True,verbose_name="所属用户id")
+    name = models.CharField(max_length=16,blank=False,verbose_name="股票池名称") #策略名
+    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
+    changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:
         # 设置表名
         db_table = "stockpool"
@@ -104,11 +106,11 @@ class monitortask(models.Model): #r任务绑定某一个股票池、策略池，
     tasktype = models.CharField(max_length=16,blank=False,verbose_name="任务类型")
     strategyid = models.IntegerField(blank=False,verbose_name="策略id")
     stockpoolid = models.IntegerField(blank=False,verbose_name="股票池id")
-    userid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
-    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
-    lastrun = models.CharField(max_length=20,blank=False,verbose_name="最后运行时间")
-    runstatus = models.CharField(max_length=16,blank=False,verbose_name="运行状态")
+    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
+    lastrun = models.CharField(max_length=20,blank=True,verbose_name="最后运行时间")
+    runstatus = models.CharField(max_length=16,blank=True,verbose_name="运行状态")
     noticeid = models.IntegerField(blank=False,verbose_name="通知配置方案id")
+    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
     class Meta:
         # 设置表名
         db_table = "monitortask"
@@ -117,9 +119,12 @@ class monitortask(models.Model): #r任务绑定某一个股票池、策略池，
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 class noticeconfig(models.Model):   #收益率表
     id = models.AutoField(primary_key=True)
-    userid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
+    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
     method = models.CharField(max_length=32,blank=False,verbose_name="通知方案")    #email   wx   message
-
+    email = models.CharField(max_length=32,blank=True,verbose_name="email")    #email   wx   message
+    phonenum = models.CharField(max_length=32,blank=True,verbose_name="手机号")    #email   wx   message
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
+    changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:
         # 设置表名
         db_table = "noticeconfig"

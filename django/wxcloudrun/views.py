@@ -117,6 +117,107 @@ def strategyNew(request): #新建策略 流水线页面
     stage = request.GET.get('stage','')
     resp = {'stage':stage,'strategyName':''}
     return render(request,'prvsStrategy/new.html',resp)
+def operatorManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsOpr/operator.html',{'operators':operators})
+def conditionManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsCond/condition.html',{'operators':operators})
+
+def strategyManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsStrategy/strategy.html',{'operators':operators})
+def stockpoolManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsStockpool/stockpool.html',{'operators':operators})
+    
+def noticeManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsNotice/notice.html',{'operators':operators})
+
+def monitortaskManage(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsMonitortask/monitortask.html',{'operators':operators})
+
+def createoperator(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+
+    data = json.loads(request.body)
+    operators.objects.create(name = data['name'],desc = data['desc'],oprtype = 'private',argvnum = data['argvnum'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    return HttpResponse(json.dumps(resp))
+
+def createcondition(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+
+    data = json.loads(request.body)
+    conditions.objects.create(name = data['name'],desc = data['desc'],condtype = 'private',operatorid = data['operatorid'],argvs = data['argvs'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    return HttpResponse(json.dumps(resp))   
+
+def createstrategy(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+
+    data = json.loads(request.body)
+    strategys.objects.create(name = data['name'],desc = data['desc'],sttype = 'private',expression = data['expression'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    return HttpResponse(json.dumps(resp))  
+
+def createstockpool(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+    data = json.loads(request.body)
+    stockpool.objects.create(name = data['name'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    #先手动在后台配置文件按照ini格式增加stock吧，name和section保持一致
+    return HttpResponse(json.dumps(resp))  
+
+def createnotice(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+    data = json.loads(request.body)
+    stockpool.objects.create(creatorid = user.userid,method = data['method'],email = data['email'],phonenum = data['phonenum'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    #先手动在后台配置文件按照ini格式增加stock吧，name和section保持一致
+    return HttpResponse(json.dumps(resp))  
+def createmonitortask(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+
+    data = json.loads(request.body)
+    strategys.objects.create(name = data['name'],desc = data['desc'],tasktype = 'private',strategyid = data['strategyid'],stockpoolid = data['stockpoolid'],creatorid = user.userid,noticeid = data['noticeid'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    return HttpResponse(json.dumps(resp))  
+
+
+
 def strategyNewFilterShow(request):   #新建初筛指标页面
     user=getUser(request)
     if user == None:
