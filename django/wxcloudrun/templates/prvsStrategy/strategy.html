@@ -1,0 +1,430 @@
+{% extends "menubase.html" %}
+{% block panel %}
+{%load static%}
+<div class="page navbar js_show" tabindex="-1">
+	<div class="page__bd" style="height: 100%;">
+        <div role="alert" class="weui-toptips weui-toptips_warn js_tooltips" style="opacity: 0; display: none;">错误提示</div>
+		<div class="weui-tab">
+			<div class="weui-navbar">
+				<div role="tab" aria-selected="true" aria-controls="panel1" id="tab1" class="weui-navbar__item weui-bar__item_on" wah-hotarea="click">
+					新建
+				</div>
+				<div role="tab" aria-controls="panel2" id="tab2" class="weui-navbar__item" wah-hotarea="click" aria-selected="false">
+					查询
+				</div>
+				<div role="tab" aria-controls="panel3" id="tab3" class="weui-navbar__item" wah-hotarea="click" aria-selected="false">
+					未使用
+				</div>
+			</div>
+			<div role="tabpanel" id="panel1" aria-labelledby="tab1" class="weui-tab__panel" style="display: block;">
+				<div class="weui-form">
+					<div class="weui-form__bd">
+						<div class="weui-form__text-area">
+							<h2 class="weui-form__title">创建新的策略</h2>
+							<div class="weui-form__desc">xxxxxxxxxxxxx</div>
+						</div>
+						<div class="weui-form__control-area">
+							<div class="weui-cells__group weui-cells__group_form">
+								<div class="weui-cells">
+									<label for="js_input_name" class="weui-cell weui-cell_active" id="js_cell">
+										<div class="weui-cell__hd">
+											<span class="weui-label">名称</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_name" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入名称" maxlength="16">
+											<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
+												<i class="weui-icon-clear"></i>
+											</button>
+										</div>
+									</label>
+                                    <div role="alert" id="alert_name" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_desc" class="weui-cell weui-cell_active">
+										<div class="weui-cell__hd">
+											<span class="weui-label">描述</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_desc" class="weui-input" type="text" placeholder="请输入详细描述">
+										</div>
+									</label>
+                                    <div role="alert" id="alert_desc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_expression" class="weui-cell weui-cell_active">
+										<div class="weui-cell__hd">
+											<span class="weui-label">策略表达式</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_expression" class="weui-input" type="text" placeholder="请输入运算符所需的参数个数">
+										</div>
+									</label>                                   
+                                     <div role="alert" id="alert_expression" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_sttype" class="weui-cell weui-cell_active">
+										<div class="weui-cell__hd">
+											<span class="weui-label">策略类型</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_sttype" class="weui-input" type="text" placeholder="请输入类型：私有/公共，只有管理员才能创建公共运算符">
+										</div>
+									</label>
+								</div>
+                                <div role="alert" id="alert_sttype" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
+							</div>
+						</div>
+					</div>
+					<div class="weui-form__ft">
+						<div class="weui-form__opr-area">
+							<a role="button" aria-disabled="true" disabled="" class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="commitBtn" wah-hotarea="click">确定</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style="display: none;padding-top: 32px;" role="tabpanel" id="panel2" aria-labelledby="tab2" class="weui-tab__panel weui-tab__panel_prvs">
+				<div class="weui-panel weui-panel_access">
+					<div class="weui-panel__bd">
+						{%for strategy in strategys%}
+            <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">ID:{{strategy.id}}</p>
+						<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">运算符:{{strategy.name}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{strategy.desc}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">策略表达式:{{strategy.expression}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">策略类型:{{strategy.sttype}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{strategy.createtime}}</p>
+						<div class="price" style="padding:5px 15px;text-align: right;">xxxx</div>
+						{%endfor%}
+					</div>
+					<div class="weui-panel__ft">
+						<a href="javascript:void(0);" class="weui-cell weui-cell_access weui-cell_link">
+							<div class="weui-cell__bd" style="text-align: center;">加载更多</div>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div style="display: none;" role="tabpanel" id="panel3" aria-labelledby="tab3" class="weui-tab__panel">Dolor magnam expedita ex beatae maiores assumenda Doloribus et totam numquam officiis beatae Sint eos saepe magnam error aut Doloremque necessitatibus eligendi quod fuga debitis. Error ad optio repellendus amet.</div>
+		</div>
+	</div>
+	<div class="page__ft j_bottom">
+		<div class="page_logo_wrp">
+			<a href="javascript:home()">
+				<img src="images/icon_footer_link.png">
+			</a>
+		</div>
+		<div class="weui-footer">
+			<div class="weui-footer__text">
+				<a class="weui-footer__text__meta" href="//beian.miit.gov.cn/">备案号：粤B2-20090059</a>
+				<a class="weui-footer__text__meta gongan_meta" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030502009285">
+					<img src="./images/pic_gongan.png">粤公网安备 44030502009285号</a>
+
+				<span class="weui-footer__text__meta">公司地址：深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</span>
+				<span class="weui-footer__text__meta">联系电话：4006 700 700</span>
+			</div>
+			<div class="weui-footer__text">
+				Copyright © 1998 - <span id="js_copyright_year"></span> Tencent All Rights Reserved.
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" class="navbar js_show">
+	$(function(){
+        //navbat选项设置
+		$('.weui-navbar__item').on('click', function () {
+		    $(this).attr('aria-selected','true').addClass('weui-bar__item_on');
+		    $(this).siblings('.weui-bar__item_on').removeClass('weui-bar__item_on').attr('aria-selected','false');
+		    var panelId = '#' + $(this).attr('aria-controls');
+		    $(panelId).css('display','block');
+		    $(panelId).siblings('.weui-tab__panel').css('display','none');
+		});
+
+
+        //新建页面设置
+        var $toptips = $('.weui-toptips');
+        var $toast = $('#js_toast');
+        var $input_name = $('#js_input_name');
+        var name = $input_name.val();
+        var $input_desc = $('#js_input_desc');
+        var desc = $input_desc.val();
+        var $input_expression = $('#js_input_expression');
+        var expression = $input_expression.val();
+        var $input_sttype = $('#js_input_sttype');
+        $input_sttype.val("private");//默认先强制private
+        var sttype = $input_sttype.val();
+        var $inputClear = $('#js_input_clear');
+        var $input_all = $('.weui-input');
+        var $cell = $('#js_cell');
+        var $currentInput = $('#js_current_input');
+
+        $input_all.on('input', function(){
+            var value = $(this).val();
+            var name = $input_name.val();
+            var desc = $input_desc.val();
+            var expression = $input_expression.val();
+            var sttype = $input_sttype.val();
+            if (name && desc && expression && sttype){//四个字段必须全部有值才可以提交
+                $('#commitBtn').removeClass('weui-btn_disabled');
+                //$('#commitBtn').removeAttr('disabled');
+                $('#commitBtn').attr('aria-disabled','false');
+            }else{
+                $('#commitBtn').addClass('weui-btn_disabled');
+                //$('#commitBtn').addAttr('disabled');
+                $('#commitBtn').attr('aria-disabled','true');
+            }
+
+            $div_alert = $(this).parent().parent().next();
+            if($(this)[0]== $input_name[0]){
+                if(value.length < 2){ //length 后面可以扩展一些校验条件
+                    $div_alert.attr('style',''); //告警显示
+                    $div_alert.html('错误提示：xxxxx');
+                }
+                else{
+                    $div_alert.attr('style','display:none;'); //告警显示
+                    $div_alert.html('');                    
+                }
+            }
+            else if($(this)[0]== $input_desc[0]){
+                if(value.length < 2){ //length 后面可以扩展一些校验条件
+                    $div_alert.attr('style',''); //告警显示
+                    $div_alert.html('错误提示：xxxxx');
+                }
+                else{
+                    $div_alert.attr('style','display:none;'); //告警显示
+                    $div_alert.html('');                    
+                } 
+            }
+            else if($(this)[0]== $input_expression[0]){
+                if(value.length < 2){ //length 后面可以扩展一些校验条件
+                    $div_alert.attr('style',''); //告警显示
+                    $div_alert.html('错误提示：xxxxx');
+                }
+                else{
+                    $div_alert.attr('style','display:none;'); //告警显示
+                    $div_alert.html('');                    
+                } 
+            }
+            else if($(this)[0]== $input_sttype[0]){
+                if(value.length < 2){ //length 后面可以扩展一些校验条件
+                    $div_alert.attr('style',''); //告警显示
+                    $div_alert.html('错误提示：xxxxx');
+                }
+                else{
+                    $div_alert.attr('style','display:none;'); //告警显示
+                    $div_alert.html('');                    
+                } 
+            }
+            else{
+                console.log("error input event!");
+            }
+
+        });
+        $('#commitBtn').unbind("click").click(function(){
+            //置灰时不提交
+            if ($(this).hasClass('weui-btn_disabled')) return;
+            var name = $input_name.val();
+            var desc = $input_desc.val();
+            var expression = $input_expression.val();
+            var sttype = $input_sttype.val();
+            data = JSON.stringify({"name":name,"desc":desc,"expression":expression,"sttype":sttype})
+            $.post('strategy/create',data,function (res) {
+                if(res=="nothing"){
+                    //$toptips.css('display','block');
+                    $toptips.html("服务器返回nothing");
+                    $toptips.fadeIn(100);
+                    setTimeout(function () {
+                        $toptips.fadeOut(100);
+                    }, 2000);
+                }
+                else{
+                    resObj = eval('(' + res + ')')
+                    console.log(resObj)
+                    if(resObj.result==false){
+                        $toptips.css('display','');
+                        $toptips.html(resObj.msg);
+                    }
+                    else{
+                        $toptips.css('display','none');
+                        $toptips.html('');
+                    }
+                }
+
+            })
+            
+        });
+    });
+    
+</script>
+
+<!--
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="page__bd">
+    <div class="weui-flex">
+        <div class="weui-flex__item"><div class="order_nav">全部</div></div>
+        <div class="weui-flex__item"><div class="order_nav">待付款</div></div>
+        <div class="weui-flex__item"><div class="order_nav">待收货</div></div>
+        <div class="weui-flex__item"><div class="order_nav">已完成</div></div>
+        <div class="weui-flex__item"><div class="order_nav">已取消</div></div>
+    </div>
+
+    <div class="weui-form">
+      <div class="weui-form__bd">
+        <div class="weui-form__text-area">
+          <h2 class="weui-form__title">输入框状态</h2>
+          <div class="weui-form__desc">可体验表单输入的反馈状态。显示报错信息有两种类型，一种是超过1个输入项的时候，用置顶tipsbar报错信息，告知错误原因，页面聚焦到对应的报错区域，内容标红色，另一种是在当前输入项位置报错，适用于只有1个输入项的时候，用户焦点主要是输入区域。</div>
+        </div>
+        <div class="weui-form__control-area">
+          <div class="weui-cells__group weui-cells__group_form">
+            <div class="weui-cells__title">表单报错：置顶tipsbar报错信息</div>
+            <div class="weui-cells">
+              <label for="js_input1" class="weui-cell weui-cell_active" id="js_cell">
+                <div class="weui-cell__hd"><span class="weui-label">卡号</span></div>
+                <div class="weui-cell__bd weui-flex">
+                    <input id="js_input1" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入16位数卡号" maxlength="16">
+                    <button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
+                      <i class="weui-icon-clear"></i>
+                    </button>
+                </div>
+              </label>
+              <label for="js_input2" class="weui-cell weui-cell_active">
+                <div class="weui-cell__hd"><span class="weui-label">持卡人</span></div>
+                <div class="weui-cell__bd weui-flex">
+                    <input id="js_input2" class="weui-input" type="text" placeholder="请输入持卡人姓名">
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="weui-cells__group weui-cells__group_form">
+            <div class="weui-cells__title">表单报错：当前项位置报错</div>
+            <div class="weui-cells">
+              <label for="js_current_input" class="weui-cell weui-cell_active">
+                <div class="weui-cell__hd"><span class="weui-label">金额</span></div>
+                <div class="weui-cell__bd weui-flex">
+                    <input id="js_current_input" class="weui-input" type="text" placeholder="请输入金额">
+                </div>
+              </label>
+            </div>
+            <div role="alert" id="js_current_tips" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">最多支持8位数</div>
+          </div>
+          <div class="weui-cells__group weui-cells__group_form">
+            <div class="weui-cells__title">表单只读、置灰</div>
+            <div class="weui-cells">
+              <label for="js_input3" class="weui-cell weui-cell_active weui-cell_readonly">
+                <div class="weui-cell__hd"><span class="weui-label">EMail</span></div>
+                <div class="weui-cell__bd">
+                    <input id="js_input3" class="weui-input" placeholder="请输入EMail" value="1234567" readonly="">
+                </div>
+              </label>
+              <label for="js_input4" class="weui-cell weui-cell_active weui-cell_disabled">
+                <div class="weui-cell__hd"><span class="weui-label">微信号</span></div>
+                <div class="weui-cell__bd">
+                    <input id="js_input4" class="weui-input" placeholder="请输入微信号" value="WeUI" disabled="">
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="weui-form__ft">
+        <div class="weui-form__opr-area">
+          <a role="button" aria-disabled="true" disabled="" class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="showTooltips" wah-hotarea="click">确定</a>
+        </div>
+      </div>
+    </div>
+    <div role="alert" id="js_toast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">已完成</p>
+        </div>
+    </div></div>
+          <script type="text/javascript" class="form_input_status js_show">
+            $(function(){
+              var $tooltips = $('.js_tooltips');
+              var $toast = $('#js_toast');
+              var $input = $('#js_input1');
+              var $inputClear = $('#js_input_clear');
+              var $cell = $('#js_cell');
+              var $currentInput = $('#js_current_input');
+        
+              $input.on('input', function(){
+                var $value = $input.val();
+                if ($cell.hasClass('weui-cell_warn')){
+                  $cell.removeClass('weui-cell_warn');
+                }
+                if ($value){
+                  $('#showTooltips').removeClass('weui-btn_disabled');
+                  $('#showTooltips').removeAttr('disabled');
+                  $('#showTooltips').attr('aria-disabled','false');
+                }else{
+                  $('#showTooltips').addClass('weui-btn_disabled');
+                  $('#showTooltips').addAttr('disabled');
+                  $('#showTooltips').attr('aria-disabled','true');
+                }
+              });
+              $currentInput.on('input', function(){
+                var $value = $currentInput.val();
+                if ($value){
+                  $('#js_current_tips').css('display','block');
+                }else{
+                  $('#js_current_tips').css('display','none');
+                }
+              });
+              $('#showTooltips').on('click', function(){
+                  if ($(this).hasClass('weui-btn_disabled')) return;
+        
+                  var $value = $input.val();
+                  if ($tooltips.css('display') != 'none') return;
+        
+                  // toptips的fixed, 如果有`animation`, `position: fixed`不生效
+                  $('.page.cell').removeClass('slideIn');
+        
+                  if($value.length < 16){
+                    $cell.addClass('weui-cell_warn');
+                    $tooltips.fadeIn(100);
+                    setTimeout(function () {
+                      $tooltips.fadeOut(100);
+                    }, 2000);
+                  }else{
+                    $toast.fadeIn(100);
+                    $toast.attr('aria-live','assertive');
+                    setTimeout(function () {
+                      $toast.fadeOut(100);
+                      $toast.attr('aria-live','off');
+                    }, 2000);
+                  }
+              });
+              $inputClear.on('click', function(){
+                $input.val('');
+              });
+            });</script> 
+    <div class="weui-panel weui-panel_access">       
+        <div class="weui-panel__bd">
+            {%for operator in operators%}
+                <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">订单号:{{operator.orderNumber}}</p>
+                {%for item in operator.operatoritem_set.all%}
+                    <a href="/orderdetail/{{order.id}}" class="weui-media-box weui-media-box_appmsg" style="background-color: #ebebeb;">
+                        <div class="weui-media-box__hd">
+                            <img class="weui-media-box__thumb" src="/media/{{item.thumb}}" alt="">
+                        </div>
+                        <div class="weui-media-box__bd">
+                            <h4 class="weui-media-box__title">{{item.product_name}}</h4>
+                            <p class="weui-media-box__desc">{{item.optionName}}</p>
+                        </div>
+                        <span class="weui-cell__ft"></span>
+                    </a>
+                {%endfor%}
+                <div class="price" style="padding:5px 15px;text-align: right;">共{{operator.orderitem_set.all|length}}件商品 合计:${{operator.totalMoney}}</div>
+            {%endfor%}
+        </div>
+        <div class="weui-panel__ft">
+            <a href="javascript:void(0);" class="weui-cell weui-cell_access weui-cell_link">
+                <div class="weui-cell__bd" style="text-align: center;">加载更多</div>
+            </a>    
+        </div>
+</div>
+{%load static%}
+{% endblock %}

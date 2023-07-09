@@ -20,7 +20,7 @@
 				<div class="weui-form">
 					<div class="weui-form__bd">
 						<div class="weui-form__text-area">
-							<h2 class="weui-form__title">创建新的运算符</h2>
+							<h2 class="weui-form__title">创建新的条件</h2>
 							<div class="weui-form__desc">xxxxxxxxxxxxx</div>
 						</div>
 						<div class="weui-form__control-area">
@@ -47,25 +47,34 @@
 										</div>
 									</label>
                                     <div role="alert" id="alert_desc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
-									<label for="js_input_argvnum" class="weui-cell weui-cell_active">
+									<label for="js_input_operatorid" class="weui-cell weui-cell_active">
 										<div class="weui-cell__hd">
-											<span class="weui-label">参数个数</span>
+											<span class="weui-label">引用运算符</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_argvnum" class="weui-input" type="text" placeholder="请输入运算符所需的参数个数">
+											<input id="js_input_operatorid" class="weui-input" type="text" placeholder="请输入引用的运算符ID">
 										</div>
 									</label>                                   
-                                     <div role="alert" id="alert_argvnum" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
-									<label for="js_input_oprtype" class="weui-cell weui-cell_active">
+                  <div role="alert" id="alert_operatorid" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+                  <label for="js_input_argvs" class="weui-cell weui-cell_active">
+                    <div class="weui-cell__hd">
+                        <span class="weui-label">所需参数</span>
+                    </div>
+                    <div class="weui-cell__bd weui-flex">
+                    <input id="js_input_argvs" class="weui-input" type="text" placeholder="请输入所需的参数id">
+                    </div>
+                    </label>                                   
+                    <div role="alert" id="alert_argvs" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_condtype" class="weui-cell weui-cell_active">
 										<div class="weui-cell__hd">
-											<span class="weui-label">类型</span>
+											<span class="weui-label">条件类型</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_oprtype" class="weui-input" type="text" placeholder="请输入类型：私有/公共，只有管理员才能创建公共运算符">
+											<input id="js_input_condtype" class="weui-input" type="text" placeholder="请输入类型：private/public，只有管理员才能创建公共条件">
 										</div>
 									</label>
 								</div>
-                                <div role="alert" id="alert_oprtype" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
+                                <div role="alert" id="alert_condtype" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
 							</div>
 						</div>
 					</div>
@@ -79,13 +88,16 @@
 			<div style="display: none;padding-top: 32px;" role="tabpanel" id="panel2" aria-labelledby="tab2" class="weui-tab__panel weui-tab__panel_prvs">
 				<div class="weui-panel weui-panel_access">
 					<div class="weui-panel__bd">
-						{%for operator in operators%}
-						<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">运算符:{{operator.name}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{operator.desc}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">类型:{{operator.oprtype}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">所属用户:{{operator.creatorid}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{operator.createtime}}</p>
-						<div class="price" style="padding:5px 15px;text-align: right;">共{{operator.operatoritem_set.all|length}}件商品 合计:${{operator.totalMoney}}</div>
+						{%for condition in conditions%}
+            <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">ID:{{condition.id}}</p>
+						<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">条件名:{{condition.name}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{condition.desc}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">类型:{{condition.condtype}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">引用的运算符:{{condition.operatorid}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">所需参数:{{condition.argvs}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">用户id:{{condition.creatorid}}</p>
+                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{condition.createtime}}</p>
+						<div class="price" style="padding:5px 15px;text-align: right;">xxxx</div>
 						{%endfor%}
 					</div>
 					<div class="weui-panel__ft">
@@ -138,11 +150,13 @@
         var name = $input_name.val();
         var $input_desc = $('#js_input_desc');
         var desc = $input_desc.val();
-        var $input_argvnum = $('#js_input_argvnum');
-        var argvnum = $input_argvnum.val();
-        var $input_oprtype = $('#js_input_oprtype');
-        $input_oprtype.val("private");//默认先强制private
-        var oprtype = $input_oprtype.val();
+        var $input_operatorid = $('#js_input_operatorid');
+        var operatorid = $input_operatorid.val();
+        var $input_argvs = $('#js_input_argvs');
+        var argvs = $input_argvs.val();
+        var $input_condtype = $('#js_input_condtype');
+        $input_condtype.val("private");//默认先强制private
+        var condtype = $input_condtype.val();
         var $inputClear = $('#js_input_clear');
         var $input_all = $('.weui-input');
         var $cell = $('#js_cell');
@@ -152,9 +166,10 @@
             var value = $(this).val();
             var name = $input_name.val();
             var desc = $input_desc.val();
-            var argvnum = $input_argvnum.val();
-            var oprtype = $input_oprtype.val();
-            if (name && desc && argvnum && oprtype){//四个字段必须全部有值才可以提交
+            var operatorid = $input_operatorid.val();
+            var argvs = $input_argvs.val();
+            var condtype = $input_condtype.val();
+            if (name && desc && operatorid && argvs && condtype){//字段必须全部有值才可以提交
                 $('#commitBtn').removeClass('weui-btn_disabled');
                 //$('#commitBtn').removeAttr('disabled');
                 $('#commitBtn').attr('aria-disabled','false');
@@ -185,7 +200,7 @@
                     $div_alert.html('');                    
                 } 
             }
-            else if($(this)[0]== $input_argvnum[0]){
+            else if($(this)[0]== $input_operatorid[0]){
                 if(value.length < 2){ //length 后面可以扩展一些校验条件
                     $div_alert.attr('style',''); //告警显示
                     $div_alert.html('错误提示：xxxxx');
@@ -195,7 +210,7 @@
                     $div_alert.html('');                    
                 } 
             }
-            else if($(this)[0]== $input_oprtype[0]){
+            else if($(this)[0]== $argvs[0]){
                 if(value.length < 2){ //length 后面可以扩展一些校验条件
                     $div_alert.attr('style',''); //告警显示
                     $div_alert.html('错误提示：xxxxx');
@@ -215,10 +230,11 @@
             if ($(this).hasClass('weui-btn_disabled')) return;
             var name = $input_name.val();
             var desc = $input_desc.val();
-            var argvnum = $input_argvnum.val();
-            var oprtype = $input_oprtype.val();
-            data = JSON.stringify({"name":name,"desc":desc,"argvnum":argvnum,"oprtype":oprtype})
-            $.post('operator/create',data,function (res) {
+            var operatorid = $input_operatorid.val();
+            var argvs = $input_argvs.val();
+            var condtype = $input_condtype.val();
+            data = JSON.stringify({"name":name,"desc":desc,"operatorid":operatorid,"argvs":argvs,"condtype":condtype})
+            $.post('condition/create',data,function (res) {
                 if(res=="nothing"){
                     //$toptips.css('display','block');
                     $toptips.html("服务器返回nothing");

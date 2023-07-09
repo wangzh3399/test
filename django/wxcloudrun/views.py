@@ -105,7 +105,6 @@ def strategyHome(request): #策略首页
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    #orders=[{'orderNumber':'999','id':'xxaa1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]},{'orderNumber':'0','id':'xx1','totalMoney':'9999999','orderitem_set':[{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu','optionName':'xxoo'},{'thumb':'media/products/thumb.jpg','product_name':'zhuzhu2','optionName':'xxoo2'}]}]
     models = [{'count':2,'model':[{'id':'001','name':'xx1','yield':'20%'},{'id':'002','name':'xx2','yield':'25%'}]},{'count':3,'model':[{'id':'003','name':'xx3','yield':'11%'},{'id':'004','name':'xx4','yield':'22%'},{'id':'005','name':'xx5','yield':'23%'}]}]
     return render(request,'prvsStrategy/home.html',{'models':models})
 def strategyNew(request): #新建策略 流水线页面  
@@ -121,42 +120,41 @@ def operatorManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operator = operators.objects.all()
-    #operators_ret= [{'name':'123','desc':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsOpr/operator.html',{'operators':operator})
+    operatorAll = operators.objects.all()
+    return render(request,'prvsOperator/operator.html',{'operators':operatorAll})
 def conditionManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsCond/condition.html',{'operators':operators})
+    conditionAll = conditions.objects.all()
+    return render(request,'prvsCond/condition.html',{'conditions':conditionAll})
 
 def strategyManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsStrategy/strategy.html',{'operators':operators})
+    strategyAll = strategys.objects.all()
+    return render(request,'prvsStrategy/strategy.html',{'strategys':strategyAll})
 def stockpoolManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsStockpool/stockpool.html',{'operators':operators})
+    stockpoolAll = stockpool.objects.all()
+    return render(request,'prvsStockpool/stockpool.html',{'stockpools':stockpoolAll})
     
 def noticeManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsNotice/notice.html',{'operators':operators})
+    noticeAll = noticeconfig.objects.all()
+    return render(request,'prvsNotice/notice.html',{'notices':noticeAll})
 
 def monitortaskManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsMonitortask/monitortask.html',{'operators':operators})
+    tasksAll = monitortask.objects.all()
+    return render(request,'prvsMonitortask/monitortask.html',{'tasks':tasksAll})
 
 def createoperator(request):
     user=getUser(request)
@@ -194,7 +192,7 @@ def createstockpool(request):
         return render(request,'refuse.html')
     resp = {'result':True,'msg':'ok'}
     data = json.loads(request.body)
-    stockpool.objects.create(name = data['name'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    stockpool.objects.create(name = data['name'],desc = data['desc'],stockpooltype = data['stockpooltype'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     #先手动在后台配置文件按照ini格式增加stock吧，name和section保持一致
     return HttpResponse(json.dumps(resp))  
 
@@ -204,7 +202,7 @@ def createnotice(request):
         return render(request,'refuse.html')
     resp = {'result':True,'msg':'ok'}
     data = json.loads(request.body)
-    stockpool.objects.create(creatorid = user.userid,method = data['method'],email = data['email'],phonenum = data['phonenum'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    noticeconfig.objects.create(name = data['name'],desc = data['desc'],creatorid = user.userid,method = data['method'],email = data['email'],phonenum = data['phonenum'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     #先手动在后台配置文件按照ini格式增加stock吧，name和section保持一致
     return HttpResponse(json.dumps(resp))  
 def createmonitortask(request):
@@ -214,7 +212,7 @@ def createmonitortask(request):
     resp = {'result':True,'msg':'ok'}
 
     data = json.loads(request.body)
-    strategys.objects.create(name = data['name'],desc = data['desc'],tasktype = 'private',strategyid = data['strategyid'],stockpoolid = data['stockpoolid'],creatorid = user.userid,noticeid = data['noticeid'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    monitortask.objects.create(name = data['name'],desc = data['desc'],tasktype = 'private',strategyid = data['strategyid'],stockpoolid = data['stockpoolid'],creatorid = user.userid,noticeid = data['noticeid'],createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     return HttpResponse(json.dumps(resp))  
 
 

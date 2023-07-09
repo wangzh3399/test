@@ -46,7 +46,7 @@ class operators(models.Model):
         verbose_name = "运算符表"  
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。    
-class conditons(models.Model):
+class conditions(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=16,blank=False,verbose_name="条件名") 
     desc = models.CharField(max_length=256,blank=False,verbose_name="条件描述")
@@ -64,22 +64,22 @@ class conditons(models.Model):
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。 
 class strategys(models.Model): 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=16,blank=False,verbose_name="策略名") #策略名
-    desc = models.CharField(max_length=256,blank=False,verbose_name="策略描述")
-    sttype = models.CharField(max_length=16,blank=False,verbose_name="策略类型")   #暂时没考虑好，可能后面可以用于可交易的或私有的。
-    expression = models.CharField(max_length=256,blank=False,verbose_name="策略表达式") 
-    ownderid = models.CharField(max_length=32,blank=False,verbose_name="拥有者id") #外键，CASCADE关联删除   PROTECT保护处理  SET_NULL置空处理  DO_NOTHING不处理
-    creatorid = models.CharField(max_length=32,blank=False,verbose_name="创建者id")   #随着策略交易，可能某些策略会属于不同的人。  通过策略拥有者和创建者一致性判断是否是购买的策略
-    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
-    owntime = models.CharField(max_length=20,blank=False,verbose_name="归属时间")  #策略归属于拥有者的时间
+    name = models.CharField(max_length=16,blank=True,verbose_name="策略名") #策略名
+    desc = models.CharField(max_length=256,blank=True,verbose_name="策略描述")
+    sttype = models.CharField(max_length=16,blank=True,verbose_name="策略类型")   #暂时没考虑好，可能后面可以用于可交易的或私有的。
+    expression = models.CharField(max_length=256,blank=True,verbose_name="策略表达式") 
+    ownderid = models.CharField(max_length=32,blank=True,verbose_name="拥有者id") #外键，CASCADE关联删除   PROTECT保护处理  SET_NULL置空处理  DO_NOTHING不处理
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="创建者id")   #随着策略交易，可能某些策略会属于不同的人。  通过策略拥有者和创建者一致性判断是否是购买的策略
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
+    owntime = models.CharField(max_length=20,blank=True,verbose_name="归属时间")  #策略归属于拥有者的时间
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间") #策略被修改时间，可以是创建者或者拥有者
-    validtime = models.CharField(max_length=20,blank=False,verbose_name="有效期") #策略可以以使用时间作为交易。
-    runstatus = models.CharField(max_length=16,blank=False,verbose_name="策略运行状态")  #创建状态、回测状态、发布状态、下架状态、生效中等
-    buyoutprice = models.IntegerField(blank=False,verbose_name="买断售价")  #买断：购买者可明文查看策略内容、编辑扩展等。
-    unitprice = models.IntegerField(blank=False,verbose_name="购买时间单价")  #时间单价以交易日按天计算 
-    protectlevel = models.IntegerField(blank=False,verbose_name="策略保护级别")  #购买者在买断后
-    linkid = models.IntegerField(blank=False,verbose_name="绑定到某个策略") #当策略有linkid时，处于维护状态，以link过去的策略id作为实际策略。
-    popular = models.IntegerField(blank=False,verbose_name="策略点赞热度")  #用户点赞热度。
+    validtime = models.CharField(max_length=20,blank=True,verbose_name="有效期") #策略可以以使用时间作为交易。
+    runstatus = models.CharField(max_length=16,blank=True,verbose_name="策略运行状态")  #创建状态、回测状态、发布状态、下架状态、生效中等
+    buyoutprice = models.IntegerField(blank=True,null=True,verbose_name="买断售价")  #买断：购买者可明文查看策略内容、编辑扩展等。
+    unitprice = models.IntegerField(blank=True,null=True,verbose_name="购买时间单价")  #时间单价以交易日按天计算 
+    protectlevel = models.IntegerField(blank=True,null=True,verbose_name="策略保护级别")  #购买者在买断后
+    linkid = models.IntegerField(blank=True,null=True,verbose_name="绑定到某个策略") #当策略有linkid时，处于维护状态，以link过去的策略id作为实际策略。
+    popular = models.IntegerField(blank=True,null=True,verbose_name="策略点赞热度")  #用户点赞热度。
     class Meta:
         # 设置表名
         db_table = "strategypool"
@@ -89,8 +89,10 @@ class strategys(models.Model):
 
 class stockpool(models.Model):#股票池表，用户可以自定义股票池，用于应用不同策略
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=16,blank=False,verbose_name="股票池名称") #策略名
-    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
+    name = models.CharField(max_length=16,blank=True,verbose_name="股票池名称") #策略名
+    desc = models.CharField(max_length=256,blank=True,verbose_name="股票池描述")
+    stockpooltype = models.CharField(max_length=16,blank=True,verbose_name="股票池类型") 
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="所属用户id")
     createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:
@@ -101,16 +103,16 @@ class stockpool(models.Model):#股票池表，用户可以自定义股票池，�
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 class monitortask(models.Model): #r任务绑定某一个股票池、策略池，就不能修改。为了统计收益率。
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=16,blank=False,verbose_name="任务名") 
-    desc = models.CharField(max_length=256,blank=False,verbose_name="任务描述")
-    tasktype = models.CharField(max_length=16,blank=False,verbose_name="任务类型")
-    strategyid = models.IntegerField(blank=False,verbose_name="策略id")
-    stockpoolid = models.IntegerField(blank=False,verbose_name="股票池id")
-    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
+    name = models.CharField(max_length=16,blank=True,verbose_name="任务名") 
+    desc = models.CharField(max_length=256,blank=True,verbose_name="任务描述")
+    tasktype = models.CharField(max_length=16,blank=True,verbose_name="任务类型") #后面可能有共享任务，这个字段先保留
+    strategyid = models.IntegerField(blank=True,null=True,verbose_name="策略id")
+    stockpoolid = models.IntegerField(blank=True,null=True,verbose_name="股票池id")
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="所属用户id")
     lastrun = models.CharField(max_length=20,blank=True,verbose_name="最后运行时间")
     runstatus = models.CharField(max_length=16,blank=True,verbose_name="运行状态")
-    noticeid = models.IntegerField(blank=False,verbose_name="通知配置方案id")
-    createtime = models.CharField(max_length=20,blank=False,verbose_name="创建时间")
+    noticeid = models.IntegerField(blank=True,null=True,verbose_name="通知配置方案id")
+    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
     class Meta:
         # 设置表名
         db_table = "monitortask"
@@ -119,8 +121,10 @@ class monitortask(models.Model): #r任务绑定某一个股票池、策略池，
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
 class noticeconfig(models.Model):   #收益率表
     id = models.AutoField(primary_key=True)
-    creatorid = models.CharField(max_length=32,blank=False,verbose_name="所属用户id")
-    method = models.CharField(max_length=32,blank=False,verbose_name="通知方案")    #email   wx   message
+    name = models.CharField(max_length=16,blank=True,verbose_name="通知方案名") 
+    desc = models.CharField(max_length=256,blank=True,verbose_name="任务描述")
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="所属用户id")
+    method = models.CharField(max_length=32,blank=True,verbose_name="通知方案")    #email   wx   message
     email = models.CharField(max_length=32,blank=True,verbose_name="email")    #email   wx   message
     phonenum = models.CharField(max_length=32,blank=True,verbose_name="手机号")    #email   wx   message
     createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
@@ -134,11 +138,11 @@ class noticeconfig(models.Model):   #收益率表
 
 class strategyyields(models.Model):   #收益率表
     id = models.AutoField(primary_key=True)
-    strategyid = models.IntegerField(blank=False,verbose_name="策略id")
-    stockpoolid = models.IntegerField(blank=False,verbose_name="绑定股票池id")
-    yields = models.DecimalField(max_digits=7,decimal_places=4,blank=False,verbose_name="收益率")
-    starttime = models.CharField(max_length=20,blank=False,verbose_name="起始时间")
-    endtime = models.CharField(max_length=20,blank=False,verbose_name="终止时间")
+    strategyid = models.IntegerField(blank=True,null=True,verbose_name="策略id")
+    stockpoolid = models.IntegerField(blank=True,null=True,verbose_name="绑定股票池id")
+    yields = models.DecimalField(max_digits=7,decimal_places=4,blank=True,verbose_name="收益率")
+    starttime = models.CharField(max_length=20,blank=True,verbose_name="起始时间")
+    endtime = models.CharField(max_length=20,blank=True,verbose_name="终止时间")
     class Meta:
         # 设置表名
         db_table = "strategyyields"
@@ -148,9 +152,9 @@ class strategyyields(models.Model):   #收益率表
 
 class strategyorder(models.Model): #策略买卖订单
     id = models.AutoField(primary_key=True)
-    strategyid = models.IntegerField(blank=False,verbose_name="策略id")
-    buyerid = models.CharField(max_length=32,blank=False,verbose_name="买方id")
-    sellerid = models.CharField(max_length=32,blank=False,verbose_name="卖方id")
+    strategyid = models.IntegerField(blank=True,null=True,verbose_name="策略id")
+    buyerid = models.CharField(max_length=32,blank=True,verbose_name="买方id")
+    sellerid = models.CharField(max_length=32,blank=True,verbose_name="卖方id")
     class Meta:
         # 设置表名
         db_table = "strategyorder"
