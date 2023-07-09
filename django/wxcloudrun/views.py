@@ -121,8 +121,9 @@ def operatorManage(request):
     user=getUser(request)
     if user == None:
         return render(request,'refuse.html')
-    operators = [{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
-    return render(request,'prvsOpr/operator.html',{'operators':operators})
+    operator = operators.objects.all()
+    #operators_ret= [{'name':'123','desc':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]},{'orderNumber':'123','totalMoney':'1234','operatoritem_set':[{'product_name':'xxx','optionName':'xxx'},{'product_name':'xxx2','optionName':'xxx2'}]}]
+    return render(request,'prvsOpr/operator.html',{'operators':operator})
 def conditionManage(request):
     user=getUser(request)
     if user == None:

@@ -1279,6 +1279,10 @@ i.weui-tabbar__icon,
   padding-top: 34px;
   padding-bottom: 0;
 }
+.weui-navbar  .weui-tab__panel {
+  padding-top: 34px;
+  padding-bottom: 0;
+}
 .weui-navbar__item {
   position: relative;
   display: block;
@@ -1325,6 +1329,14 @@ i.weui-tabbar__icon,
   -webkit-overflow-scrolling: touch;
 }
 .weui-tab__panel_strategy {
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: 34px;
+  padding-bottom: 50px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.weui-tab__panel_prvs {
   box-sizing: border-box;
   height: 100%;
   padding-top: 34px;
