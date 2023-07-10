@@ -116,12 +116,6 @@ def strategyNew(request): #新建策略 流水线页面
     stage = request.GET.get('stage','')
     resp = {'stage':stage,'strategyName':''}
     return render(request,'prvsStrategy/new.html',resp)
-def operatorManage(request):
-    user=getUser(request)
-    if user == None:
-        return render(request,'refuse.html')
-    operatorAll = operators.objects.all()
-    return render(request,'prvsOperator/operator.html',{'operators':operatorAll})
 def conditionManage(request):
     user=getUser(request)
     if user == None:
@@ -156,15 +150,6 @@ def monitortaskManage(request):
     tasksAll = monitortask.objects.all()
     return render(request,'prvsMonitortask/monitortask.html',{'tasks':tasksAll})
 
-def createoperator(request):
-    user=getUser(request)
-    if user == None:
-        return render(request,'refuse.html')
-    resp = {'result':True,'msg':'ok'}
-
-    data = json.loads(request.body)
-    operators.objects.create(name = data['name'],desc = data['desc'],oprtype = 'private',argvnum = data['argvnum'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    return HttpResponse(json.dumps(resp))
 
 def createcondition(request):
     user=getUser(request)
@@ -173,7 +158,7 @@ def createcondition(request):
     resp = {'result':True,'msg':'ok'}
 
     data = json.loads(request.body)
-    conditions.objects.create(name = data['name'],desc = data['desc'],condtype = 'private',operatorid = data['operatorid'],argvs = data['argvs'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    conditions.objects.create(name = data['name'],desc = data['desc'],condtype = 'private',argvsnum = data['argvsnum'],argvsdesc = data['argvsdesc'],retvalnum = data['retvalnum'],retvaldesc = data['retvaldesc'],creatorid = user.userid,createtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     return HttpResponse(json.dumps(resp))   
 
 def createstrategy(request):

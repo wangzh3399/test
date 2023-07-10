@@ -29,31 +29,18 @@ class usermanager(models.Model): #model的meta有
         db_table = "usermanager"
         verbose_name = "用户管理"  
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
-        abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
-class operators(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=16,blank=False,verbose_name="运算符")
-    desc = models.CharField(max_length=256,blank=True,verbose_name="运算符描述")
-    oprtype = models.CharField(max_length=16,blank=False,verbose_name="运算符类型")  #public公共的，private 私人定义的
-    argvnum = models.IntegerField(blank=False,verbose_name="参数数量")
-    creatorid = models.CharField(max_length=32,blank=True,verbose_name="用户id")
-    createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
-    changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
-    
-    class Meta:
-        # 设置表名
-        db_table = "operatorpool"
-        verbose_name = "运算符表"  
-        verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。    
 class conditions(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=16,blank=False,verbose_name="条件名") 
-    desc = models.CharField(max_length=256,blank=False,verbose_name="条件描述")
-    condtype = models.CharField(max_length=16,blank=False,verbose_name="类型")  #暂时没考虑好，可能后面可以用于可交易的或私有的。
-    operatorid = models.IntegerField(blank=False,verbose_name="所用运算符")   #operator[var[var][var]  var要么是stock的字段，要么是系统定义的一些标准库参数 或user自己定义的一些计算组合
-    argvs = models.CharField(max_length=256,blank=False,verbose_name="参数集合")
-    creatorid = models.CharField(max_length=32,blank=False,verbose_name="用户id")
+    name = models.CharField(max_length=256,blank=True,verbose_name="条件名")
+    funcname = models.CharField(max_length=256,blank=True,verbose_name="条件函数名")
+    desc = models.CharField(max_length=256,blank=True,verbose_name="条件描述")
+    condtype = models.CharField(max_length=16,blank=True,verbose_name="类型")  #暂时没考虑好，可能后面可以用于可交易的或私有的。
+    argvsnum = models.IntegerField(blank=True,null=True,verbose_name="参数个数")
+    argvsdesc = models.CharField(max_length=256,blank=True,verbose_name="参数描述") #[持续天数(限定条件说明),用于比较的固定值,xxxx]
+    retvalnum = models.IntegerField(blank=True,null=True,verbose_name="返回值个数")
+    retvaldesc = models.CharField(max_length=256,blank=True,verbose_name="参数描述") #[持续天数(限定条件说明),用于比较的固定值,xxxx]
+    creatorid = models.CharField(max_length=32,blank=True,verbose_name="用户id")
     createtime = models.CharField(max_length=20,blank=True,verbose_name="创建时间")
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:

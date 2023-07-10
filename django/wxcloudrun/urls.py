@@ -94,8 +94,6 @@ urlpatterns = [
     url(r'^^wxui(/)?$', views.index),
     url(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^myself$',views.myself),
-    url(r'^operator$',views.operatorManage),
-    url(r'^operator/create',views.createoperator),
     url(r'^condition$',views.conditionManage),
     url(r'^condition/create',views.createcondition),
     url(r'^strategy$',views.strategyManage),

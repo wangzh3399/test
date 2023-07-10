@@ -3,7 +3,7 @@
 {%load static%}
 <div class="page navbar js_show" tabindex="-1">
 	<div class="page__bd" style="height: 100%;">
-        <div role="alert" class="weui-toptips weui-toptips_warn js_tooltips" style="opacity: 0; display: none;">错误提示</div>
+		<div role="alert" class="weui-toptips weui-toptips_warn js_tooltips" style="opacity: 0; display: none;">错误提示</div>
 		<div class="weui-tab">
 			<div class="weui-navbar">
 				<div role="tab" aria-selected="true" aria-controls="panel1" id="tab1" class="weui-navbar__item weui-bar__item_on" wah-hotarea="click">
@@ -28,108 +28,131 @@
 								<div class="weui-cells">
 									<label for="js_input_name" class="weui-cell weui-cell_active" id="js_cell">
 										<div class="weui-cell__hd">
-											<span class="weui-label">名称</span>
+											<span class="weui-label">条件名称</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_name" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入名称" maxlength="16">
+											<input id="js_input_name" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入名称，格式，如：MA5上穿MA10" maxlength="16">
 											<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
 												<i class="weui-icon-clear"></i>
 											</button>
 										</div>
 									</label>
-                                    <div role="alert" id="alert_name" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<div role="alert" id="alert_name" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_funcname" class="weui-cell weui-cell_active" id="js_cell">
+										<div class="weui-cell__hd">
+											<span class="weui-label">函数名称</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_funcname" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入函数名称" maxlength="16">
+											<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
+												<i class="weui-icon-clear"></i>
+											</button>
+										</div>
+									</label>
+									<div role="alert" id="alert_funcname" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
 									<label for="js_input_desc" class="weui-cell weui-cell_active">
 										<div class="weui-cell__hd">
-											<span class="weui-label">描述</span>
+											<span class="weui-label">条件描述</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
 											<input id="js_input_desc" class="weui-input" type="text" placeholder="请输入详细描述">
 										</div>
 									</label>
-                                    <div role="alert" id="alert_desc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
-									<label for="js_input_operatorid" class="weui-cell weui-cell_active">
+									<div role="alert" id="alert_desc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_argvsnum" class="weui-cell weui-cell_active">
 										<div class="weui-cell__hd">
-											<span class="weui-label">引用运算符</span>
+											<span class="weui-label">参数个数</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_operatorid" class="weui-input" type="text" placeholder="请输入引用的运算符ID">
+											<input id="js_input_argvsnum" class="weui-input" type="text" placeholder="请输入引用的运算符ID">
 										</div>
-									</label>                                   
-                  <div role="alert" id="alert_operatorid" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
-                  <label for="js_input_argvs" class="weui-cell weui-cell_active">
-                    <div class="weui-cell__hd">
-                        <span class="weui-label">所需参数</span>
-                    </div>
-                    <div class="weui-cell__bd weui-flex">
-                    <input id="js_input_argvs" class="weui-input" type="text" placeholder="请输入所需的参数id">
-                    </div>
-                    </label>                                   
-                    <div role="alert" id="alert_argvs" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
-									<label for="js_input_condtype" class="weui-cell weui-cell_active">
+									</label>
+									<div role="alert" id="alert_argvsnum" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_argvsdesc" class="weui-cell weui-cell_active">
 										<div class="weui-cell__hd">
-											<span class="weui-label">条件类型</span>
+											<span class="weui-label">参数描述</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_condtype" class="weui-input" type="text" placeholder="请输入类型：private/public，只有管理员才能创建公共条件">
+											<input id="js_input_argvsdesc" class="weui-input" type="text" placeholder="请输入所需的参数id">
+										</div>
+									</label>
+									<div role="alert" id="alert_argvsdesc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn weui-cell_warn">错误错误错误错误错误错误错误错误错误错误</div>
+									<label for="js_input_retvalnum" class="weui-cell weui-cell_active">
+										<div class="weui-cell__hd">
+											<span class="weui-label">返回值个数</span>
+										</div>
+										<div class="weui-cell__bd weui-flex">
+											<input id="js_input_retvalnum" class="weui-input" type="text" placeholder="请输入类型：private/public，只有管理员才能创建公共条件">
 										</div>
 									</label>
 								</div>
-                                <div role="alert" id="alert_condtype" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
+								<div role="alert" id="alert_retvalnum" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
+								<label for="js_input_retvaldesc" class="weui-cell weui-cell_active">
+									<div class="weui-cell__hd">
+										<span class="weui-label">返回值描述</span>
+									</div>
+									<div class="weui-cell__bd weui-flex">
+										<input id="js_input_retvaldesc" class="weui-input" type="text" placeholder="请输入类型：private/public，只有管理员才能创建公共条件">
+									</div>
+								</label>
 							</div>
-						</div>
-					</div>
-					<div class="weui-form__ft">
-						<div class="weui-form__opr-area">
-							<a role="button" aria-disabled="true" disabled="" class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="commitBtn" wah-hotarea="click">确定</a>
+							<div role="alert" id="alert_retvaldesc" style="display: none;" class="weui-cells__tips weui-cells__tips_warn">xxxxx</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div style="display: none;padding-top: 32px;" role="tabpanel" id="panel2" aria-labelledby="tab2" class="weui-tab__panel weui-tab__panel_prvs">
-				<div class="weui-panel weui-panel_access">
-					<div class="weui-panel__bd">
-						{%for condition in conditions%}
-            <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">ID:{{condition.id}}</p>
-						<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">条件名:{{condition.name}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{condition.desc}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">类型:{{condition.condtype}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">引用的运算符:{{condition.operatorid}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">所需参数:{{condition.argvs}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">用户id:{{condition.creatorid}}</p>
-                        <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{condition.createtime}}</p>
-						<div class="price" style="padding:5px 15px;text-align: right;">xxxx</div>
-						{%endfor%}
-					</div>
-					<div class="weui-panel__ft">
-						<a href="javascript:void(0);" class="weui-cell weui-cell_access weui-cell_link">
-							<div class="weui-cell__bd" style="text-align: center;">加载更多</div>
-						</a>
+				<div class="weui-form__ft">
+					<div class="weui-form__opr-area">
+						<a role="button" aria-disabled="true" disabled="" class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="commitBtn" wah-hotarea="click">确定</a>
 					</div>
 				</div>
 			</div>
-			<div style="display: none;" role="tabpanel" id="panel3" aria-labelledby="tab3" class="weui-tab__panel">Dolor magnam expedita ex beatae maiores assumenda Doloribus et totam numquam officiis beatae Sint eos saepe magnam error aut Doloremque necessitatibus eligendi quod fuga debitis. Error ad optio repellendus amet.</div>
+		<div style="display: none;padding-top: 32px;" role="tabpanel" id="panel2" aria-labelledby="tab2" class="weui-tab__panel weui-tab__panel_prvs">
+			<div class="weui-panel weui-panel_access">
+				<div class="weui-panel__bd">
+					{%for condition in conditions%}
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">ID:{{condition.id}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">条件名:{{condition.name}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{condition.desc}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">类型:{{condition.retvalnum}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">参数个数:{{condition.argvs}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">参数描述:{{condition.argvsdesc}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">返回值个数:{{condition.retvalnum}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">返回值描述:{{condition.retvaldesc}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">用户id:{{condition.creatorid}}</p>
+					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{condition.createtime}}</p>
+					<div class="price" style="padding:5px 15px;text-align: right;">xxxx</div>
+					{%endfor%}
+				</div>
+				<div class="weui-panel__ft">
+					<a href="javascript:void(0);" class="weui-cell weui-cell_access weui-cell_link">
+						<div class="weui-cell__bd" style="text-align: center;">加载更多</div>
+					</a>
+				</div>
+			</div>
 		</div>
+		<div style="display: none;" role="tabpanel" id="panel3" aria-labelledby="tab3" class="weui-tab__panel">Dolor magnam expedita ex beatae maiores assumenda Doloribus et totam numquam officiis beatae Sint eos saepe magnam error aut Doloremque necessitatibus eligendi quod fuga debitis. Error ad optio repellendus amet.</div>
 	</div>
-	<div class="page__ft j_bottom">
-		<div class="page_logo_wrp">
-			<a href="javascript:home()">
-				<img src="images/icon_footer_link.png">
-			</a>
-		</div>
-		<div class="weui-footer">
-			<div class="weui-footer__text">
-				<a class="weui-footer__text__meta" href="//beian.miit.gov.cn/">备案号：粤B2-20090059</a>
-				<a class="weui-footer__text__meta gongan_meta" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030502009285">
-					<img src="./images/pic_gongan.png">粤公网安备 44030502009285号</a>
+</div>
+<div class="page__ft j_bottom">
+	<div class="page_logo_wrp">
+		<a href="javascript:home()">
+			<img src="images/icon_footer_link.png">
+		</a>
+	</div>
+	<div class="weui-footer">
+		<div class="weui-footer__text">
+			<a class="weui-footer__text__meta" href="//beian.miit.gov.cn/">备案号：粤B2-20090059</a>
+			<a class="weui-footer__text__meta gongan_meta" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030502009285">
+				<img src="./images/pic_gongan.png">粤公网安备 44030502009285号</a>
 
-				<span class="weui-footer__text__meta">公司地址：深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</span>
-				<span class="weui-footer__text__meta">联系电话：4006 700 700</span>
-			</div>
-			<div class="weui-footer__text">
-				Copyright © 1998 - <span id="js_copyright_year"></span> Tencent All Rights Reserved.
-			</div>
+			<span class="weui-footer__text__meta">公司地址：深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</span>
+			<span class="weui-footer__text__meta">联系电话：4006 700 700</span>
+		</div>
+		<div class="weui-footer__text">
+			Copyright © 1998 - <span id="js_copyright_year"></span> Tencent All Rights Reserved.
 		</div>
 	</div>
+</div>
 </div>
 <script type="text/javascript" class="navbar js_show">
 	$(function(){
@@ -150,13 +173,14 @@
         var name = $input_name.val();
         var $input_desc = $('#js_input_desc');
         var desc = $input_desc.val();
-        var $input_operatorid = $('#js_input_operatorid');
-        var operatorid = $input_operatorid.val();
-        var $input_argvs = $('#js_input_argvs');
-        var argvs = $input_argvs.val();
-        var $input_condtype = $('#js_input_condtype');
-        $input_condtype.val("private");//默认先强制private
-        var condtype = $input_condtype.val();
+        var $input_argvsnum = $('#js_input_argvsnum');
+        var argvsnum = $input_argvsnum.val();
+        var $input_argvsdesc = $('#js_input_argvsdesc');
+        var argvsdesc = $input_argvsdesc.val();
+        var $input_retvalnum = $('#js_input_retvalnum');
+        var retvalnum = $input_retvalnum.val();
+        var $input_retvaldesc = $('#js_input_retvaldesc');
+        var retvaldesc= $input_retvaldesc.val();
         var $inputClear = $('#js_input_clear');
         var $input_all = $('.weui-input');
         var $cell = $('#js_cell');
@@ -166,10 +190,11 @@
             var value = $(this).val();
             var name = $input_name.val();
             var desc = $input_desc.val();
-            var operatorid = $input_operatorid.val();
-            var argvs = $input_argvs.val();
-            var condtype = $input_condtype.val();
-            if (name && desc && operatorid && argvs && condtype){//字段必须全部有值才可以提交
+            var argvsnum = $input_argvsnum.val();
+            var argvsdesc = $input_argvsdesc.val();
+            var retvalnum = $input_retvalnum.val();
+            var retvaldesc= $input_retvaldesc.val();
+            if (name && desc && argvsnum && argvsdesc && retvalnum && retvaldesc){//字段必须全部有值才可以提交
                 $('#commitBtn').removeClass('weui-btn_disabled');
                 //$('#commitBtn').removeAttr('disabled');
                 $('#commitBtn').attr('aria-disabled','false');
@@ -200,7 +225,7 @@
                     $div_alert.html('');                    
                 } 
             }
-            else if($(this)[0]== $input_operatorid[0]){
+            else if($(this)[0]== $input_argvsnum[0]){
                 if(value.length < 2){ //length 后面可以扩展一些校验条件
                     $div_alert.attr('style',''); //告警显示
                     $div_alert.html('错误提示：xxxxx');
@@ -210,7 +235,7 @@
                     $div_alert.html('');                    
                 } 
             }
-            else if($(this)[0]== $argvs[0]){
+            else if($(this)[0]== $argvsdesc[0]){
                 if(value.length < 2){ //length 后面可以扩展一些校验条件
                     $div_alert.attr('style',''); //告警显示
                     $div_alert.html('错误提示：xxxxx');
@@ -230,10 +255,11 @@
             if ($(this).hasClass('weui-btn_disabled')) return;
             var name = $input_name.val();
             var desc = $input_desc.val();
-            var operatorid = $input_operatorid.val();
-            var argvs = $input_argvs.val();
-            var condtype = $input_condtype.val();
-            data = JSON.stringify({"name":name,"desc":desc,"operatorid":operatorid,"argvs":argvs,"condtype":condtype})
+            var argvsnum = $input_argvsnum.val();
+            var argvsdesc = $input_argvsdesc.val();
+            var retvalnum = $input_retvalnum.val();
+            var retvaldesc= $input_retvaldesc.val();
+            data = JSON.stringify({"name":name,"desc":desc,"argvsnum":argvsnum,"argvsdesc":argvsdesc,"retvalnum":retvalnum,"retvaldesc":retvaldesc,"condtype":"private"})
             $.post('condition/create',data,function (res) {
                 if(res=="nothing"){
                     //$toptips.css('display','block');
