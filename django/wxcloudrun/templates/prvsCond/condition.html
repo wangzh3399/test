@@ -1,4 +1,4 @@
-{% extends "menubase.html" %}
+{% extends "prvsBase/Menubase.html" %}
 {% block panel %}
 {%load static%}
 <div class="page navbar js_show" tabindex="-1">
@@ -31,7 +31,7 @@
 											<span class="weui-label">条件名称</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_name" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入名称，格式，如：MA5上穿MA10" maxlength="16">
+											<input id="js_input_name" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入名称，格式，如：MA5上穿MA10" maxlength="32">
 											<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
 												<i class="weui-icon-clear"></i>
 											</button>
@@ -43,7 +43,7 @@
 											<span class="weui-label">函数名称</span>
 										</div>
 										<div class="weui-cell__bd weui-flex">
-											<input id="js_input_funcname" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入函数名称" maxlength="16">
+											<input id="js_input_funcname" class="weui-input" type="text" pattern="[0-9]*" placeholder="请输入函数名称" maxlength="32">
 											<button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear" wah-hotarea="click">
 												<i class="weui-icon-clear"></i>
 											</button>
@@ -112,6 +112,7 @@
 					{%for condition in conditions%}
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">ID:{{condition.id}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">条件名:{{condition.name}}</p>
+          <p style="padding:10px 15px 5px;font-size:13px;color:#999999;">函数名:{{condition.funcname}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">描述:{{condition.desc}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">类型:{{condition.retvalnum}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">参数个数:{{condition.argvs}}</p>
@@ -120,7 +121,7 @@
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">返回值描述:{{condition.retvaldesc}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">用户id:{{condition.creatorid}}</p>
 					<p style="padding:10px 15px 5px;font-size:13px;color:#999999;">创建时间:{{condition.createtime}}</p>
-					<div class="price" style="padding:5px 15px;text-align: right;">xxxx</div>
+					<div class="delBtn" style="padding:5px 15px;text-align: right;"><a id="recordDelBtn" recordid="{{condition.id}}" conditionname="{{condition.name}}">删除</a></div>
 					{%endfor%}
 				</div>
 				<div class="weui-panel__ft">
@@ -154,7 +155,46 @@
 	</div>
 </div>
 </div>
-<script type="text/javascript" class="navbar js_show">
+<script type="text/javascript">
+  function bindDelBtn(){
+    $("#recordDelBtn").unbind("click").click(function(e){
+        $.confirm("确认删除["+$(e.target).attr("conditionname")+"]吗?", "确认删除?", function() {
+            data = JSON.stringify({"opr":"delete","id":$(e.target).attr("recordid")})
+            $.post('condition/delete',data,function (res) {
+                if(res=="nothing"){
+                    //$toptips.css('display','block');
+                    $toptips.html("服务器返回nothing");
+                    $toptips.fadeIn(100);
+                    setTimeout(function () {
+                        $toptips.fadeOut(100);
+                    }, 2000);
+                }
+                else{
+                    resObj = eval('(' + res + ')')
+                    console.log(resObj)
+                    if(resObj.result==false){
+                        $toptips.html("删除失败"+resObj.msg);
+                        $toptips.fadeIn(100);
+                        setTimeout(function () {
+                            $toptips.fadeOut(100);
+                        }, 2000);
+                    }
+                    else{
+                        $toptips.html("删除成功,请手动刷新页面");
+                        $toptips.fadeIn(100);
+                        setTimeout(function () {
+                            $toptips.fadeOut(100);
+                        }, 2000);
+                    }
+                }
+
+            })
+        }, function() {
+                    //取消操作
+        });
+    });
+  }
+  bindDelBtn();
 	$(function(){
         //navbat选项设置
 		$('.weui-navbar__item').on('click', function () {

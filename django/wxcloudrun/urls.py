@@ -96,6 +96,7 @@ urlpatterns = [
     url(r'^myself$',views.myself),
     url(r'^condition$',views.conditionManage),
     url(r'^condition/create',views.createcondition),
+    url(r'^condition/delete',views.deletecondition),
     url(r'^strategy$',views.strategyManage),
     url(r'^strategy/create',views.createstrategy),
     url(r'^stockpool$',views.stockpoolManage),

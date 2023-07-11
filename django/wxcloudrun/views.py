@@ -201,6 +201,15 @@ def createmonitortask(request):
     return HttpResponse(json.dumps(resp))  
 
 
+def deletecondition(request):
+    user=getUser(request)
+    if user == None:
+        return render(request,'refuse.html')
+    resp = {'result':True,'msg':'ok'}
+    data = json.loads(request.body)
+    condition = conditions.objects.get(id = data['id'])
+    condition.delete()
+    return HttpResponse(json.dumps(resp))  
 
 def strategyNewFilterShow(request):   #新建初筛指标页面
     user=getUser(request)

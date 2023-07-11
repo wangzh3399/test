@@ -45,7 +45,7 @@ class conditions(models.Model):
     changetime = models.DateTimeField(auto_now = True,verbose_name="变更时间")
     class Meta:
         # 设置表名
-        db_table = "conditonpool"
+        db_table = "conditions"
         verbose_name = "条件表"  
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。 
@@ -69,7 +69,7 @@ class strategys(models.Model):
     popular = models.IntegerField(blank=True,null=True,verbose_name="策略点赞热度")  #用户点赞热度。
     class Meta:
         # 设置表名
-        db_table = "strategypool"
+        db_table = "strategys"
         verbose_name = "用户策略"  
         verbose_name_plural = verbose_name  #这个选项是指定，模型的复数形式
         abstract = False    #定义当前的模型是不是一个抽象类,抽象类不建数据库表，用于继承。
